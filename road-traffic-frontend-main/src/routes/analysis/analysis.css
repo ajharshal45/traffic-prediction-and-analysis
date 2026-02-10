@@ -1,0 +1,25 @@
+
+.analysisPage {
+    height: 100vh; /* Full viewport height */
+    overflow-y: scroll; /* Enable vertical scrolling */
+    padding: 20px;
+    box-sizing: border-box; /* Ensure padding is included in the width and height */
+  }
+  
+  .scrollable {
+    height: 100%;
+  }
+  
+  .scrollable::-webkit-scrollbar {
+    width: 10px; /* Width of the scrollbar */
+  }
+  
+  .scrollable::-webkit-scrollbar-thumb {
+    background-color: #ccc; /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Round the corners of the scrollbar thumb */
+  }
+  
+  .scrollable::-webkit-scrollbar-track {
+    background-color: #f4f4f4; /* Background color of the scrollbar track */
+  }
+  

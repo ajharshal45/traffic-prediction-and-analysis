@@ -1,0 +1,146 @@
+.event-container {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  padding: 20px;
+}
+
+.event-map-container {
+  flex: 1;
+  height: 500px;
+}
+
+.event-map {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.event-form-container {
+  flex: 1;
+  max-width: 600px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  background-color: #f9f9f9;
+  font-family: "Arial", sans-serif;
+}
+
+/* Form heading */
+.event-form-container h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #2d3436;
+}
+
+/* Form styling */
+.event-form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Individual form group */
+.form-group {
+  margin-bottom: 15px;
+}
+
+/* Labels */
+.form-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+  color: #636e72;
+}
+
+/* Input fields */
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 15px;
+  color: #333;
+  background-color: #fff;
+}
+
+/* Placeholder text styling */
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #b2bec3;
+}
+
+/* Submit button */
+.submit-btn {
+  padding: 10px;
+  background-color: #d63031;
+  color: #fff;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* Submit button hover effect */
+.submit-btn:hover {
+  background-color: #ff7675;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .event-container {
+    flex-direction: column;
+    align-items: stretch; /* Ensure children take full width */
+  }
+   
+  .event-map-container, 
+  .event-form-container {
+    flex: none; /* Override previous flex settings */
+    width: 100%; /* Ensure full width */
+    max-width: none; /* Remove max-width constraint */
+  }
+
+  .event-map-container {
+    order: -1; /* Bring map to the top */
+    height: 300px;
+  }
+
+  /* FIX: Ensure Leaflet Map + Draw Controls appear above all elements */
+  .leaflet-container {
+    z-index: 999 !important;
+  }
+  
+  .leaflet-draw { 
+    z-index: 1000 !important;
+  }
+  
+  .event-map-container {
+    position: relative;
+    z-index: 998 !important;
+  }
+  
+  /* Ensure map receives mouse interactions */
+  .event-map {
+    pointer-events: auto !important;
+  }
+  .event-map-container {
+    border: 5px solid red !important;
+    z-index: 9999 !important;
+    position: relative !important;
+  }
+
+  .leaflet-draw {
+    z-index: 10000 !important;
+  }
+
+ .leaflet-draw-toolbar {
+    z-index: 10001 !important;
+  }
+
+
+
+}

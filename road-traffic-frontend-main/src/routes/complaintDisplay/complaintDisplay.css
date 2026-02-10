@@ -1,0 +1,26 @@
+.complaint-display {
+    padding: 20px;
+  }
+
+  
+  .search-bar {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+    font-size: 16px;
+  }
+  
+  
+  .complaint-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Centers the cards */
+  }
+  
+  .complaint-grid .complaint-card {
+    flex: 1 1 calc(33.33% - 20px); /* Adjusts card width for 3 cards per row */
+    margin: 10px;
+  }
+  

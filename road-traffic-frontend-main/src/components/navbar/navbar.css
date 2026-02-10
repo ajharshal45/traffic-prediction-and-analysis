@@ -1,0 +1,102 @@
+nav {
+  height: 100px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+nav a {
+  transition: all 0.4s ease;
+}
+
+nav a:hover {
+  transform: scale(1.08); 
+}
+
+nav .left {
+  flex: 3;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+nav .left .logo {
+  font-weight: bold;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+nav .left .logo img {
+  width: 28px;
+}
+
+
+
+nav .right {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  background-color: #fcf5f3;
+  height: 100%;
+}
+
+nav .right a {
+  padding: 12px 24px;
+  margin: 20px;
+}
+
+nav .right .user {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+}
+
+nav .right .user img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 20px;
+}
+
+
+nav .right .user .profile {
+  padding: 12px 24px;
+  background-color: #fece51;
+  cursor: pointer;
+  border: none;
+  position: relative;
+}
+
+
+nav .right .register {
+  background-color: #fece51;
+}
+
+
+
+
+
+nav .right .logout {
+  background-color: #fece51;
+  color: black;
+  padding: 12px 24px;
+  margin: 20px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.4s ease;
+}
+
+
+nav .right .logout:hover {
+  transform: scale(1.08); 
+}
+
+nav .left a:hover {
+  background-color: transparent !important; 
+}
+
+

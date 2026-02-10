@@ -1,0 +1,49 @@
+{
+  "name": "road-traffic-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@react-google-maps/api": "^2.20.3",
+    "axios": "^1.7.7",
+    "calendar": "^0.1.1",
+    "chart.js": "^4.4.7",
+    "dompurify": "^3.1.7",
+    "leaflet": "^1.9.4",
+    "leaflet-extra-markers": "^1.2.2",
+    "leaflet-geosearch": "^4.0.0",
+    "leaflet-routing-machine": "^3.2.12",
+    "outscraper": "^2.0.4",
+    "react": "^18.3.1",
+    "react-calendar": "^5.1.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.3.1",
+    "react-leaflet": "^4.2.1",
+    "react-leaflet-draw": "^0.20.4",
+    "react-quill": "^2.0.0",
+    "react-router-dom": "^6.26.2",
+    "react-select": "^5.9.0",
+    "sass": "^1.79.4",
+    "select": "^1.1.2",
+    "timeago.js": "^4.0.2",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^9.9.0",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+    "eslint-plugin-react-refresh": "^0.4.9",
+    "globals": "^15.9.0",
+    "vite": "^5.4.1"
+  }
+}
