@@ -16,11 +16,11 @@ const LineScoreDate = () => {
   const roads = ['Kondhwa-Hinjewadi', 'Swargate-Katraj', 'Hinjewadi-Swargate'];
   const timeRanges = [
     '00-02', '02-04', '04-06', '06-08', '08-10', '10-12',
-    '12-14', '14-16', '16-18', '18-20', '20-22', '22-00',
+    '12-14', '14-16', '16-18', '18-20', '20-22', '22-24',
   ];
 
   const festivals = [
-    "New Year's Day", "Diwali/Deepavali", "Ganesh Chaturthi/Vinayaka Chaturthi", "New Year's Eve, Christmas", 
+    "New Year's Day", "Diwali/Deepavali", "Ganesh Chaturthi/Vinayaka Chaturthi", "New Year's Eve, Christmas",
     "Shivaji Jayanti", "Janmashtami", "Republic Day", "Independence Day"
   ];
 
@@ -30,13 +30,13 @@ const LineScoreDate = () => {
     let dates = [];
 
     for (const year of lastFourYears) {
-      const data = await fetchFestivals(year, countryCode);      
+      const data = await fetchFestivals(year, countryCode);
       const festivalData = data.filter((f) => f.name === festival);
       dates = [...dates, ...festivalData.map((f) => f.date)];
     }
 
     console.log(dates);
-    
+
 
     setFestivalDates(dates);
     setLoading(false);

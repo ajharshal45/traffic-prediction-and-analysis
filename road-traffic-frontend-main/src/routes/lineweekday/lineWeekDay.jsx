@@ -21,7 +21,7 @@ const timeRanges = [
   { value: "16-18", label: "16-18" },
   { value: "18-20", label: "18-20" },
   { value: "20-22", label: "20-22" },
-  { value: "22-00", label: "22-00" },
+  { value: "22-24", label: "22-24" },
 ];
 const days = [
   { value: 0, label: "Sunday" },
@@ -57,7 +57,7 @@ const LineWeekDay = () => {
         },
       });
       console.log(response);
-      
+
 
       if (!response.data || response.data.length === 0) {
         setMessage("No data is available for the selected options.");
@@ -67,32 +67,32 @@ const LineWeekDay = () => {
       }
 
       const data = response.data.map((entry) => ({
-        date: entry.date,        
+        date: entry.date,
         score: entry.score,
       }));
       console.log(data);
-      
+
 
       // Analyze the trend of scores
-    let isIncreasing = true;
-    let isDecreasing = true;
+      let isIncreasing = true;
+      let isDecreasing = true;
 
-    for (let i = 1; i < data.length; i++) {
-      if (data[i].score <= data[i - 1].score) {
-        isIncreasing = false;
+      for (let i = 1; i < data.length; i++) {
+        if (data[i].score <= data[i - 1].score) {
+          isIncreasing = false;
+        }
+        if (data[i].score >= data[i - 1].score) {
+          isDecreasing = false;
+        }
       }
-      if (data[i].score >= data[i - 1].score) {
-        isDecreasing = false;
-      }
-    }
 
-    if (isIncreasing) {
-      setAnalysis("Traffic seems to be increasing week by week.");
-    } else if (isDecreasing) {
-      setAnalysis("Traffic seems to be decreasing week by week.");
-    } else {
-      setAnalysis(""); // Leave empty for zig-zag or mixed trends
-    }
+      if (isIncreasing) {
+        setAnalysis("Traffic seems to be increasing week by week.");
+      } else if (isDecreasing) {
+        setAnalysis("Traffic seems to be decreasing week by week.");
+      } else {
+        setAnalysis(""); // Leave empty for zig-zag or mixed trends
+      }
 
 
       setChartData({
@@ -169,7 +169,7 @@ const LineWeekDay = () => {
               width={800}
             />
             <p>
-                {analysis}
+              {analysis}
             </p>
           </div>
         ) : (

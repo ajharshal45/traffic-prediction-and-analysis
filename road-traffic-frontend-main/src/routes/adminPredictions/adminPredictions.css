@@ -1,0 +1,496 @@
+.predictions-container {
+  padding: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: "Lato", sans-serif;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+}
+
+/* Header */
+.predictions-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 25px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0px 8px 15px rgba(99, 102, 241, 0.25);
+}
+
+.predictions-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.predictions-header p {
+  margin: 10px 0 0;
+  opacity: 0.9;
+  font-size: 1rem;
+}
+
+/* KPI Cards */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.kpi-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #6366f1;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  opacity: 0.08;
+}
+
+.kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.kpi-card.accuracy {
+  border-left-color: #22c55e;
+}
+
+.kpi-card.accuracy::after {
+  background: #22c55e;
+}
+
+.kpi-card.total {
+  border-left-color: #6366f1;
+}
+
+.kpi-card.total::after {
+  background: #6366f1;
+}
+
+.kpi-card.verified {
+  border-left-color: #3b82f6;
+}
+
+.kpi-card.verified::after {
+  background: #3b82f6;
+}
+
+.kpi-card.unverified {
+  border-left-color: #f59e0b;
+}
+
+.kpi-card.unverified::after {
+  background: #f59e0b;
+}
+
+.kpi-label {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.kpi-value {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.1;
+}
+
+.kpi-sub {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-top: 6px;
+}
+
+/* Accuracy Bar */
+.accuracy-bar-container {
+  margin-top: 12px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.accuracy-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.8s ease;
+}
+
+.accuracy-bar-fill.high {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+.accuracy-bar-fill.medium {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.accuracy-bar-fill.low {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+/* Controls Row */
+.predictions-controls {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.pred-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pred-control-group label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.85rem;
+}
+
+.pred-control-group select {
+  padding: 10px 15px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  min-width: 180px;
+  background: white;
+  font-family: "Lato", sans-serif;
+  cursor: pointer;
+}
+
+.pred-control-group select:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+/* Period Buttons */
+.pred-period-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.pred-period-btn {
+  padding: 10px 20px;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-family: "Lato", sans-serif;
+}
+
+.pred-period-btn:hover {
+  border-color: #6366f1;
+  background: #eef2ff;
+}
+
+.pred-period-btn.active {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  border-color: #6366f1;
+}
+
+/* Chart Sections */
+.pred-section {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 25px;
+  border: 1px solid #e5e7eb;
+}
+
+.pred-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pred-section-header h2 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.3rem;
+  padding-bottom: 8px;
+  border-bottom: 3px solid #6366f1;
+}
+
+.pred-section-header .hint {
+  color: #6b7280;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.pred-chart-container {
+  height: 320px;
+  position: relative;
+}
+
+/* Route Comparison Grid */
+.route-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.route-card {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 20px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.route-card:hover {
+  border-color: #6366f1;
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 16px rgba(99, 102, 241, 0.15);
+}
+
+.route-card.selected {
+  border-color: #6366f1;
+  background: #eef2ff;
+  box-shadow: 0px 6px 16px rgba(99, 102, 241, 0.2);
+}
+
+.route-card-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 12px;
+}
+
+.route-card-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.route-stat {
+  text-align: center;
+  flex: 1;
+}
+
+.route-stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.route-stat-value.good {
+  color: #22c55e;
+}
+
+.route-stat-value.ok {
+  color: #f59e0b;
+}
+
+.route-stat-value.bad {
+  color: #ef4444;
+}
+
+.route-stat-value.neutral {
+  color: #6366f1;
+}
+
+.route-stat-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* Time Slot Breakdown Table */
+.slot-breakdown-section {
+  animation: slideIn 0.3s ease;
+}
+
+.slot-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.slot-table th,
+.slot-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.slot-table th {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  font-weight: 600;
+  color: white;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.slot-table th:first-child {
+  border-radius: 8px 0 0 0;
+}
+
+.slot-table th:last-child {
+  border-radius: 0 8px 0 0;
+}
+
+.slot-table tr:hover {
+  background: #eef2ff;
+}
+
+.slot-accuracy-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.slot-bar-bg {
+  flex: 1;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.slot-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.slot-bar-fill.high {
+  background: #22c55e;
+}
+
+.slot-bar-fill.medium {
+  background: #f59e0b;
+}
+
+.slot-bar-fill.low {
+  background: #ef4444;
+}
+
+.slot-accuracy-value {
+  font-weight: 600;
+  min-width: 45px;
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+/* Loading & Empty States */
+.pred-loading {
+  text-align: center;
+  padding: 50px;
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+.pred-loading .spinner {
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pred-empty {
+  text-align: center;
+  padding: 40px;
+  color: #9ca3af;
+  font-size: 1rem;
+}
+
+/* Back button */
+.pred-back-btn {
+  padding: 8px 16px;
+  background: none;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #6b7280;
+  transition: all 0.3s ease;
+  font-family: "Lato", sans-serif;
+  margin-bottom: 15px;
+}
+
+.pred-back-btn:hover {
+  border-color: #6366f1;
+  color: #6366f1;
+  background: #eef2ff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .predictions-container {
+    padding: 15px;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .kpi-value {
+    font-size: 1.6rem;
+  }
+
+  .predictions-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .route-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pred-period-buttons {
+    flex-wrap: wrap;
+  }
+}

@@ -27,8 +27,13 @@ const TrafficPrediction = () => {
     const [potholes, setPotholes] = useState(0); // ✅ ADDED
     const [complaints, setComplaints] = useState(0); // ✅ ADDED
     const [festival, setFestival] = useState(null);
+    const [weather, setWeather] = useState(null);
+    const [metroStations, setMetroStations] = useState(0);
     const [baseDuration, setBaseDuration] = useState(0); // Google's time at zero traffic in seconds
     const [estimatedTime, setEstimatedTime] = useState(0); // Estimated time with traffic in seconds
+    const [suggestions, setSuggestions] = useState([]); // Smart time suggestions
+    const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+    const [expandedSlot, setExpandedSlot] = useState(null); // Which suggestion card is expanded
 
     const isScriptLoaded = useRef(false);
     const isMapInitialized = useRef(false);
@@ -292,7 +297,7 @@ const TrafficPrediction = () => {
         { value: "16-18", label: "16-18" },
         { value: "18-20", label: "18-20" },
         { value: "20-22", label: "20-22" },
-        { value: "22-00", label: "22-00" },
+        { value: "22-24", label: "22-24" },
     ];
 
     // --- MAIN PREDICTION FUNCTION (UPDATED SCORING LOGIC) ---
@@ -308,27 +313,29 @@ const TrafficPrediction = () => {
             return;
         }
 
-        // CRITICAL HEURISTIC: Define the max score your system can reasonably output.
-        // Used for normalization. Must be tested/refined on your backend data.
-        const MAX_BACKEND_SCORE_HEURISTIC = 350; // Increased for better score distribution
+        // Block past date/time predictions
+        const [slotStart] = timeSlot.split('-').map(Number);
+        const selectedDateTime = new Date(date);
+        selectedDateTime.setHours(slotStart, 0, 0, 0);
+        if (selectedDateTime < new Date()) {
+            alert("Cannot predict traffic for past dates/times. Please select a future date and time.");
+            return;
+        }
 
         try {
             // --- PART A: PREPARE DATA ---
             const sourcePart = sourceAddress.split(' ')[0].replace(',', '').trim();
             const destPart = destinationAddress.split(' ')[0].replace(',', '').trim();
             const pathId = `${sourcePart}-${destPart}`;
-            const [hour] = timeSlot.split('-');
-            const departureDate = new Date(date);
-            departureDate.setHours(parseInt(hour), 0, 0);
 
-            // --- PART B: GET GOOGLE'S SCORE (Baseline/Live) ---
+            // --- PART B: GET GOOGLE ROUTE FOR MAP RENDERING (JS SDK) ---
+            // Still needed for directionsRenderer.setDirections() to draw the route on the map
             const directionsService = new window.google.maps.DirectionsService();
             const googleResult = await new Promise((resolve, reject) => {
                 directionsService.route({
                     origin: sourceCoords,
                     destination: destinationCoords,
                     travelMode: window.google.maps.TravelMode.DRIVING,
-                    drivingOptions: { departureTime: departureDate }
                 }, (response, status) => {
                     if (status === 'OK') resolve(response);
                     else reject(new Error(`Directions request failed: ${status}`));
@@ -339,26 +346,18 @@ const TrafficPrediction = () => {
                 directionsRenderer.setDirections(googleResult);
             }
 
-            const leg = googleResult.routes[0].legs[0];
-            const duration_normal = leg.duration.value;
-            const duration_traffic = leg.duration_in_traffic.value;
-
-            // Store the base duration (Google's time at zero traffic)
-            setBaseDuration(duration_normal);
-
-            // Calculate Google's Score (Percentage increase in travel time)
-            let googleScore = ((duration_traffic - duration_normal) / duration_normal) * 100;
-            if (googleScore < 0) googleScore = 0;
-
-            // --- PART C: GET YOUR BACKEND SCORES (Contextual) ---
+            // Extract route points for backend
             const path = googleResult.routes[0].overview_path;
             const points = path.map(point => ({ lat: point.lat(), lng: point.lng() }));
 
+            // --- PART C: CALL BACKEND (scores + Google REST API traffic) ---
             const dataToSend = {
                 timeSlot: timeSlot,
                 date: date,
                 pathId: pathId,
-                routePoints: points
+                routePoints: points,
+                sourceCoords: sourceCoords,
+                destinationCoords: destinationCoords
             };
 
             const response = await apiRequest.post(
@@ -366,21 +365,15 @@ const TrafficPrediction = () => {
                 dataToSend
             );
 
-            const yourHistoryScore = response.data.yourHistoryScore;
-            const yourObstacleScore = response.data.yourObstacleScore;
+            // --- PART D: USE BACKEND'S FINAL SCORE ---
+            // Backend now handles: Google REST API call, 30/70 weighting, normalization
+            const finalScore = response.data.finalScore;
+            const durationNormal = response.data.durationNormal;      // Google's average baseline
+            const durationTraffic = response.data.durationTraffic;    // Google's actual predicted time (matches Google Maps)
 
-            // --- PART D: CALCULATE FINAL WEIGHTED SCORE (NORMALIZED) ---
-
-            // 1. Combine your two raw scores
-            const yourCombinedRawScore = yourHistoryScore + yourObstacleScore;
-
-            // 2. CRITICAL FIX: Normalize the combined score to a 0-100 scale
-            let normalizedYourScore = (yourCombinedRawScore / MAX_BACKEND_SCORE_HEURISTIC) * 100;
-            if (normalizedYourScore > 100) normalizedYourScore = 100;
-
-            // 3. Calculate the final 30/70 score using the normalized value
-            // The two components are now on the same scale, making the weighted average valid.
-            const finalScore = (0.3 * googleScore) + (0.7 * normalizedYourScore);
+            // Use durationTraffic as base — this is what Google Maps shows the user
+            const actualBase = durationTraffic || durationNormal;
+            setBaseDuration(actualBase);
 
             // Display the results and update counts
             setMessage(true);
@@ -391,11 +384,43 @@ const TrafficPrediction = () => {
             setHotspots(response.data.hotspotCount);
             setPotholes(response.data.potholeCount || 0);
             setComplaints(response.data.complaintCount || 0);
-            setFestival(response.data.festival || null); // ✅ Set Festival State
+            setFestival(response.data.festival || null);
+            setWeather(response.data.weather || null);
+            setMetroStations(response.data.metroStationCount || 0);
 
-            // Calculate estimated time: baseTime + (baseTime * trafficScore / 100)
-            const estimatedTimeInSeconds = baseDuration + (baseDuration * finalScore / 100);
+            // Calculate estimated time using local variable (not stale state)
+            const estimatedTimeInSeconds = actualBase + (actualBase * finalScore / 100);
             setEstimatedTime(estimatedTimeInSeconds);
+
+            console.log("------------------------------------------------");
+            console.log(`\ud83c\udfc1 Backend Final Score: ${finalScore.toFixed(2)}%`);
+            console.log(`\ud83d\ude97 Google Score (REST): ${response.data.googleScore.toFixed(2)}%`);
+            console.log(`\ud83d\udcca Backend Obstacle:    ${response.data.yourObstacleScore.toFixed(2)}`);
+            console.log(`\ud83d\udcdc Backend History:     ${response.data.yourHistoryScore.toFixed(2)}`);
+            console.log(`\u23f1\ufe0f  Base Duration:      ${(actualBase / 60).toFixed(1)} min`);
+            console.log(`\u23f3 Estimated Time:     ${(estimatedTimeInSeconds / 60).toFixed(1)} min`);
+            console.log("------------------------------------------------");
+
+            // --- PART E: FETCH SMART TIME SUGGESTIONS ---
+            setSuggestions([]);
+            setExpandedSlot(null);
+            setLoadingSuggestions(true);
+            try {
+                const sugRes = await apiRequest.post('/path-info/suggestions', {
+                    timeSlot: timeSlot,
+                    date: date,
+                    pathId: pathId,
+                    routePoints: points,
+                    sourceCoords: sourceCoords,
+                    destinationCoords: destinationCoords,
+                    selectedScore: finalScore,
+                });
+                setSuggestions(sugRes.data.suggestions || []);
+            } catch (sugErr) {
+                console.error("Time suggestions error:", sugErr);
+            } finally {
+                setLoadingSuggestions(false);
+            }
 
         } catch (error) {
             console.error("Error fetching prediction:", error);
@@ -490,11 +515,11 @@ const TrafficPrediction = () => {
                             {console.log(score)}
                             {/* Traffic Message */}
                             <span>
-                                {score <= 15 && "🚦 Traffic on the selected route seems will be VERY LOW "}
-                                {score >= 16 && score <= 29 && "🟢 Traffic on the selected route will be LOW "}
-                                {score >= 30 && score <= 59 && "🟠 Traffic on the selected route will be MEDIUM "}
-                                {score >= 60 && score <= 79 && "🔴 Traffic on the selected route seems will be HIGH "}
-                                {score >= 80 && "🚨 Traffic on the selected route seems will be VERY HIGH "}
+                                {score <= 15 && "Traffic on the selected route seems will be VERY LOW "}
+                                {score >= 16 && score <= 29 && "Traffic on the selected route will be LOW "}
+                                {score >= 30 && score <= 59 && "Traffic on the selected route will be MEDIUM "}
+                                {score >= 60 && score <= 79 && "Traffic on the selected route seems will be HIGH "}
+                                {score >= 80 && "Traffic on the selected route seems will be VERY HIGH "}
                             </span>
 
                             <span style={{
@@ -513,26 +538,216 @@ const TrafficPrediction = () => {
                             </span>
                         </p>
 
-                        <h3>Traffic Predicted based on:</h3>
-                        <ul>
-                            <li>Constructions: {constructions}</li>
-                            <li>Diversions: {diversions}</li>
-                            <li>Hotspots: {hotspots}</li>
-                            <li>Events: {event}</li>
-                            <li>Potholes: {potholes}</li>
-                            <li>Complaints: {complaints}</li>
-                            <li style={{
-                                color: festival ? '#d35400' : '#555',
-                                fontWeight: festival ? 'bold' : 'normal'
-                            }}>
-                                {festival ? (
-                                    <>🪔 Festival: {festival.festivalName} (Impact: +{festival.impact})</>
-                                ) : (
-                                    <>Festival: None</>
-                                )}
-                            </li>
-                        </ul>
+                        <h3>Factors affecting traffic:</h3>
+                        <div className="factors-list">
+                            {constructions > 0 && (
+                                <div className="factor-item factor-negative">
+                                    <span>{constructions} active construction{constructions > 1 ? 's' : ''} found on this route, causing slowdowns</span>
+                                </div>
+                            )}
+                            {diversions > 0 && (
+                                <div className="factor-item factor-negative">
+                                    <span>{diversions} road diversion{diversions > 1 ? 's' : ''} in effect, rerouting traffic nearby</span>
+                                </div>
+                            )}
+                            {event > 0 && (
+                                <div className="factor-item factor-negative">
+                                    <span>{event} event{event > 1 ? 's' : ''} happening near this route, expect more crowd</span>
+                                </div>
+                            )}
+                            {hotspots > 0 && (
+                                <div className="factor-item factor-warn">
+                                    <span>Route passes through {hotspots} known congestion hotspot{hotspots > 1 ? 's' : ''}</span>
+                                </div>
+                            )}
+                            {metroStations > 0 && (
+                                <div className="factor-item factor-warn">
+                                    <span>{metroStations} metro station{metroStations > 1 ? 's' : ''} nearby — auto/cab crowding expected</span>
+                                </div>
+                            )}
+                            {potholes > 0 && (
+                                <div className="factor-item factor-warn">
+                                    <span>{potholes} reported pothole{potholes > 1 ? 's' : ''} on route, may slow down traffic</span>
+                                </div>
+                            )}
+                            {complaints > 0 && (
+                                <div className="factor-item factor-warn">
+                                    <span>{complaints} unresolved traffic complaint{complaints > 1 ? 's' : ''} reported in this area</span>
+                                </div>
+                            )}
+                            {weather && weather.condition !== 'Clear' && (
+                                <div className="factor-item factor-warn">
+                                    <span>Weather: {weather.description} ({weather.temp}°C) — may affect driving conditions</span>
+                                </div>
+                            )}
+                            {weather && weather.condition === 'Clear' && (
+                                <div className="factor-item factor-positive">
+                                    <span>Clear weather ({weather.temp}°C) — good driving conditions</span>
+                                </div>
+                            )}
+                            {festival && (
+                                <div className="factor-item factor-negative">
+                                    <span>{festival.festivalName} — holiday traffic expected across the city</span>
+                                </div>
+                            )}
+                            {constructions === 0 && diversions === 0 && event === 0 && hotspots === 0 && potholes === 0 && complaints === 0 && !festival && metroStations === 0 && (
+                                <div className="factor-item factor-positive">
+                                    <span>No obstructions detected on this route</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
+                </div>
+            )}
+
+            {/* Smart Time Suggestions */}
+            {message && (
+                <div className="suggestions-section">
+                    <h3 className="suggestions-title">Better Time Slots</h3>
+                    <p className="suggestions-subtitle">Nearby time slots with lower traffic than your selection ({score.toFixed(1)}%)</p>
+
+                    {loadingSuggestions && <p className="loading">Analyzing nearby time slots...</p>}
+
+                    {!loadingSuggestions && suggestions.length === 0 && (
+                        <p className="no-suggestions">Your selected time slot already has the best score among nearby slots.</p>
+                    )}
+
+                    {!loadingSuggestions && suggestions.length > 0 && (
+                        <div className="suggestions-grid">
+                            {suggestions.map((s) => (
+                                <div key={s.timeSlot}>
+                                    <div
+                                        className={`suggestion-card suggestion-${s.level}${expandedSlot === s.timeSlot ? ' suggestion-expanded' : ''}`}
+                                        onClick={() => setExpandedSlot(expandedSlot === s.timeSlot ? null : s.timeSlot)}
+                                    >
+                                        {s.isBest && <span className="suggestion-badge badge-best">Best</span>}
+
+                                        <div className="suggestion-time">{s.timeSlot}</div>
+                                        <div className="suggestion-score">{s.score.toFixed(1)}%</div>
+                                        <div className="suggestion-label">
+                                            {s.level === 'very-low' && 'Very Low'}
+                                            {s.level === 'low' && 'Low'}
+                                            {s.level === 'medium' && 'Medium'}
+                                            {s.level === 'high' && 'High'}
+                                            {s.level === 'very-high' && 'Very High'}
+                                        </div>
+                                        <div className="suggestion-hint">Click for details</div>
+                                    </div>
+
+                                    {expandedSlot === s.timeSlot && s.breakdown && (() => {
+                                        const b = s.breakdown;
+                                        const timePeriod = (() => {
+                                            const h = parseInt(s.timeSlot.split('-')[0]);
+                                            if (h >= 0 && h < 6) return 'Night';
+                                            if (h >= 6 && h < 8) return 'Early Morning';
+                                            if (h >= 8 && h < 11) return 'Morning Rush';
+                                            if (h >= 11 && h < 16) return 'Midday';
+                                            if (h >= 16 && h < 20) return 'Evening Rush';
+                                            return 'Late Evening';
+                                        })();
+                                        const selectedHour = parseInt(timeSlot.split('-')[0]);
+                                        const selectedPeriod = (() => {
+                                            if (selectedHour >= 0 && selectedHour < 6) return 'Night';
+                                            if (selectedHour >= 6 && selectedHour < 8) return 'Early Morning';
+                                            if (selectedHour >= 8 && selectedHour < 11) return 'Morning Rush';
+                                            if (selectedHour >= 11 && selectedHour < 16) return 'Midday';
+                                            if (selectedHour >= 16 && selectedHour < 20) return 'Evening Rush';
+                                            return 'Late Evening';
+                                        })();
+                                        const scoreDiff = (score - s.score).toFixed(1);
+                                        return (
+                                            <div className="suggestion-breakdown">
+                                                <h4>Why {s.timeSlot} is better (−{scoreDiff}% less traffic)</h4>
+
+                                                {/* Reason: time-of-day difference */}
+                                                {timePeriod !== selectedPeriod && (
+                                                    <div className="factor-item factor-positive">
+                                                        <span>This slot falls in <b>{timePeriod}</b> instead of <b>{selectedPeriod}</b>, so traffic impact is lower</span>
+                                                    </div>
+                                                )}
+                                                {timePeriod === selectedPeriod && (
+                                                    <div className="factor-item factor-warn">
+                                                        <span>Same traffic period ({timePeriod}), but Google data shows slightly less congestion</span>
+                                                    </div>
+                                                )}
+
+                                                {/* Reason: Google traffic difference */}
+                                                {b.googleScore < (score * 0.3 / 0.7) && (
+                                                    <div className="factor-item factor-positive">
+                                                        <span>Google Maps predicts less real-time congestion at this time ({b.googleScore.toFixed(1)}%)</span>
+                                                    </div>
+                                                )}
+
+                                                {b.durationTraffic > 0 && (
+                                                    <div className="factor-item factor-positive">
+                                                        <span>Estimated travel time: {formatTime(b.durationTraffic)}</span>
+                                                    </div>
+                                                )}
+
+                                                {/* Show active factors on this slot */}
+                                                <h4 style={{ marginTop: '10px' }}>Factors on this slot:</h4>
+                                                {b.constructionCount > 0 && (
+                                                    <div className="factor-item factor-negative">
+                                                        <span>{b.constructionCount} active construction{b.constructionCount > 1 ? 's' : ''} on route</span>
+                                                    </div>
+                                                )}
+                                                {b.diversionCount > 0 && (
+                                                    <div className="factor-item factor-negative">
+                                                        <span>{b.diversionCount} road diversion{b.diversionCount > 1 ? 's' : ''} in effect</span>
+                                                    </div>
+                                                )}
+                                                {b.eventCount > 0 && (
+                                                    <div className="factor-item factor-negative">
+                                                        <span>{b.eventCount} event{b.eventCount > 1 ? 's' : ''} happening nearby</span>
+                                                    </div>
+                                                )}
+                                                {b.hotspotCount > 0 && (
+                                                    <div className="factor-item factor-warn">
+                                                        <span>Passes through {b.hotspotCount} congestion hotspot{b.hotspotCount > 1 ? 's' : ''}</span>
+                                                    </div>
+                                                )}
+                                                {b.metroStationCount > 0 && (
+                                                    <div className="factor-item factor-warn">
+                                                        <span>{b.metroStationCount} metro station{b.metroStationCount > 1 ? 's' : ''} nearby</span>
+                                                    </div>
+                                                )}
+                                                {b.potholeCount > 0 && (
+                                                    <div className="factor-item factor-warn">
+                                                        <span>{b.potholeCount} reported pothole{b.potholeCount > 1 ? 's' : ''}</span>
+                                                    </div>
+                                                )}
+                                                {b.complaintCount > 0 && (
+                                                    <div className="factor-item factor-warn">
+                                                        <span>{b.complaintCount} unresolved complaint{b.complaintCount > 1 ? 's' : ''}</span>
+                                                    </div>
+                                                )}
+                                                {b.weatherCondition && b.weatherCondition !== 'Clear' && b.weatherCondition !== 'N/A' && (
+                                                    <div className="factor-item factor-warn">
+                                                        <span>{b.weatherDescription || b.weatherCondition} ({b.weatherTemp}°C)</span>
+                                                    </div>
+                                                )}
+                                                {b.weatherCondition === 'Clear' && (
+                                                    <div className="factor-item factor-positive">
+                                                        <span>Clear weather ({b.weatherTemp}°C) — good driving conditions</span>
+                                                    </div>
+                                                )}
+                                                {b.festival && b.festival !== 'None' && (
+                                                    <div className="factor-item factor-negative">
+                                                        <span>{b.festival} — holiday traffic expected</span>
+                                                    </div>
+                                                )}
+                                                {b.constructionCount === 0 && b.diversionCount === 0 && b.eventCount === 0 && b.hotspotCount === 0 && b.potholeCount === 0 && b.complaintCount === 0 && b.metroStationCount === 0 && (b.festival === 'None' || !b.festival) && (
+                                                    <div className="factor-item factor-positive">
+                                                        <span>No obstructions detected on this route</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
 

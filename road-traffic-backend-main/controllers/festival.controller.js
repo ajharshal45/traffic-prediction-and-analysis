@@ -29,7 +29,7 @@ const MEDIUM_IMPACT = [
     "ramzan id",
     "independence day",
     "republic day",
-    "holi" // ✅ Moved to Medium Impact
+    "holi" 
 ];
 
 const LOW_IMPACT = [

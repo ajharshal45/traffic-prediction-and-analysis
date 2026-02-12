@@ -1,4 +1,5 @@
 import PathInfo from '../models/pathinfo.model.js';
+import PredictionLog from '../models/predictionLog.model.js';
 
 /**
  * Original Pune routes from database (existed before Nov 15, 2025)
@@ -275,6 +276,43 @@ const generateRealisticScore = (timeSlot, pathId) => {
 };
 
 /**
+ * Backfill actual scores into PredictionLog entries when real data arrives.
+ * Finds unverified predictions matching this route + date + timeSlot,
+ * sets actualScore, calculates accuracy, and marks as verified.
+ */
+const backfillPredictionLogs = async (pathId, dateObj, timeSlot, realScore) => {
+  try {
+    // Find all unverified predictions for this exact route + date + time
+    const unverifiedLogs = await PredictionLog.find({
+      pathId,
+      timeRange: timeSlot,
+      predictedDate: dateObj,
+      isVerified: false,
+    });
+
+    if (unverifiedLogs.length === 0) return;
+
+    for (const log of unverifiedLogs) {
+      const accuracy = Math.max(0, 100 - Math.abs(log.predictedScore - realScore));
+      await PredictionLog.updateOne(
+        { _id: log._id },
+        {
+          $set: {
+            actualScore: realScore,
+            accuracy: Math.round(accuracy * 100) / 100,
+            isVerified: true,
+          }
+        }
+      );
+    }
+
+    console.log(`   📝 Backfilled ${unverifiedLogs.length} prediction log(s) for ${pathId} | ${timeSlot} | Actual: ${realScore.toFixed(1)}`);
+  } catch (err) {
+    console.error(`   ⚠️ Prediction backfill error for ${pathId}:`, err.message);
+  }
+};
+
+/**
  * Collect traffic data for all monitored routes
  * @param {string} date - Date in YYYY-MM-DD format
  * @param {string} timeSlot - Time slot (e.g., '08-10', '14-16')
@@ -327,6 +365,9 @@ export const collectTrafficData = async (date, timeSlot) => {
         
         recordsUpdated++;
         console.log(`   Updated: ${route.pathId} | Score: ${existingRecord.score.toFixed(1)} -> ${newScore.toFixed(1)} | Level: ${newLevel}`);
+
+        // Backfill any unverified prediction logs with the real score
+        await backfillPredictionLogs(route.pathId, dateObj, timeSlot, newScore);
       } else {
         // Create new record with breakdown
         const newPathInfo = new PathInfo({
@@ -341,6 +382,9 @@ export const collectTrafficData = async (date, timeSlot) => {
         await newPathInfo.save();
         recordsSaved++;
         console.log(`   Saved: ${route.pathId} | Score: ${score.toFixed(1)} | Level: ${level}`);
+
+        // Backfill any unverified prediction logs with the real score
+        await backfillPredictionLogs(route.pathId, dateObj, timeSlot, score);
       }
 
       routesProcessed++;

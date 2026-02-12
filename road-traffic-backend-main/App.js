@@ -19,6 +19,7 @@ import hotelRoute from "./routes/hotel.route.js"
 import PathInfoRoute from "./routes/pathinfo.route.js";
 import trafficStatusRoute from "./routes/trafficstatus.route.js";
 import analyticsRoute from "./routes/analytics.route.js";
+import predictionLogRoute from "./routes/predictionLog.route.js";
 import { startScheduler } from "./services/scheduler.service.js";
 
 import cookieParser from "cookie-parser";
@@ -91,3 +92,4 @@ app.use("/api/school", schoolRoute);
 app.use("/api/path-info",PathInfoRoute);
 app.use("/api/traffic-status",trafficStatusRoute);
 app.use("/api/analytics", analyticsRoute);
+app.use("/api/prediction-logs", predictionLogRoute);

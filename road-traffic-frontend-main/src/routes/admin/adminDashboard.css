@@ -1,4 +1,4 @@
-.btn-container{
+.btn-container {
     display: flex;
     flex-direction: column;
     padding: 30px;
@@ -24,4 +24,12 @@
 .btn:hover {
     transform: scale(1.08);
     background-color: #ffdc73;
+}
+
+.btn-predictions {
+    background-color: #6366f1;
+}
+
+.btn-predictions:hover {
+    background-color: #818cf8;
 }

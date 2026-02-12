@@ -12,7 +12,7 @@ import {
 
 // 2. Import the prediction algorithm from its new, SEPARATE controller
 // This fixes the "export named 'predictTraffic' not found" error
-import { predictTraffic } from '../controllers/predictTraffic.controller.js';
+import { predictTraffic, getTimeSuggestions } from '../controllers/predictTraffic.controller.js';
 
 const router = express.Router();
 
@@ -21,5 +21,6 @@ router.get('/getCalendarData', getCalendarData);
 router.get('/getFestivalData', getFestivalData);
 router.get('/getLastFourWeek', getLastFourWeekDayData);
 router.post('/predictTraffic', predictTraffic);
+router.post('/suggestions', getTimeSuggestions);
 
 export default router;

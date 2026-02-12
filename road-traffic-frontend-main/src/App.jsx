@@ -10,6 +10,7 @@ import Redeem from "./routes/redeem/redeem";
 import Event from "./routes/event/event";
 import AdminDashboard from "./routes/admin/adminDashboard";
 import AdminAnalytics from "./routes/adminAnalytics/adminAnalytics";
+import AdminPredictions from "./routes/adminPredictions/adminPredictions";
 import PotholeDisplay from "./routes/potholeDisplay/potholeDisplay";
 import ComplaintDisplay from "./routes/complaintDisplay/complaintDisplay";
 import UserDisplay from "./routes/userDisplay/userDisplay";
@@ -180,6 +181,10 @@ function App() {
         {
           path: "analytics", // Analytics Dashboard
           element: <AdminAnalytics />,
+        },
+        {
+          path: "predictions", // Prediction Accuracy Dashboard
+          element: <AdminPredictions />,
         },
         {
           path: "potholes", // PotholeDisplay
