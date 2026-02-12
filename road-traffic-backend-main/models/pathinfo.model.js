@@ -70,7 +70,7 @@ const pathInfoSchema = new mongoose.Schema({
     required: false
   }
 }, {
-  timestamps: true, 
+  timestamps: false, 
 });
 
 const PathInfo = mongoose.model('PathInfo', pathInfoSchema);
