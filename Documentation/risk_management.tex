@@ -1,0 +1,373 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{colortbl}
+\usepackage{longtable}
+
+% ── Colours ───────────────────────────────────────────────
+\definecolor{headblue}{HTML}{1A5276}
+\definecolor{highRisk}{HTML}{E74C3C}
+\definecolor{medRisk}{HTML}{F39C12}
+\definecolor{lowRisk}{HTML}{27AE60}
+\definecolor{rowgray}{HTML}{F2F3F4}
+
+% ── Section styling ───────────────────────────────────────
+\titleformat{\section}
+  {\Large\bfseries\color{headblue}}
+  {\thesection.}{0.5em}{}[\vspace{2pt}\titlerule]
+\titleformat{\subsection}
+  {\large\bfseries\color{headblue!80}}
+  {\thesubsection}{0.5em}{}
+
+% ── Header / Footer ──────────────────────────────────────
+\pagestyle{fancy}
+\setlength{\headheight}{14.5pt}
+\addtolength{\topmargin}{-2.5pt}
+\fancyhf{}
+\lhead{\small\textit{Risk Management --- Traffic Prediction System}}
+\rhead{\small\textit{Group E-16}}
+\cfoot{\thepage}
+
+\begin{document}
+
+% ═══════════════════════════════════════════════════════════
+% TITLE PAGE
+% ═══════════════════════════════════════════════════════════
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+{\Huge\bfseries\color{headblue} Software Risk Management\\[12pt]}
+{\LARGE Risk Identification \& Mitigation Strategies\\[8pt]}
+{\large Traffic Prediction and Analysis System\\[20pt]}
+\rule{0.6\textwidth}{1pt}\\[20pt]
+
+{\large\textbf{Assignment No. 9}}\\[30pt]
+
+\begin{tabular}{ll}
+\textbf{Group:} & E-16 \\[4pt]
+\textbf{Members:} & Harshal Jaiswal \\
+ & Pranav Jagtap \\
+ & Suyash Jobanputra \\
+ & Shreyash Jobanputra \\
+\end{tabular}
+
+\vfill
+{\small Department of Computer Engineering\\
+\today}
+\end{titlepage}
+
+% ═══════════════════════════════════════════════════════════
+\section{Problem Statement}
+% ═══════════════════════════════════════════════════════════
+Identify potential risks and prepare mitigation strategies for the \textbf{Traffic Prediction and Analysis System} --- a software development project. The exercise involves categorizing risks by type, assessing their probability and impact, constructing a risk matrix, and defining proactive mitigation and contingency plans for each identified risk.
+
+% ═══════════════════════════════════════════════════════════
+\section{Introduction}
+% ═══════════════════════════════════════════════════════════
+Risk management is a systematic process of identifying, analyzing, and responding to uncertainties that may adversely affect a software project's scope, schedule, cost, or quality. In the context of the \textbf{Traffic Prediction and Analysis System} --- a MERN Stack web application that integrates multiple third-party APIs, a MobileNet machine learning model, GPS-based data collection, and a citizen gamification engine --- risk management is especially critical due to the system's reliance on external services and real-time data processing.
+
+The risk management process for this project follows four key steps:
+\begin{enumerate}[noitemsep, label=\roman*)]
+    \item \textbf{Risk Identification} --- Enumerate all potential risks across technical, project, and external dimensions.
+    \item \textbf{Risk Analysis} --- Assess each risk's probability of occurrence and severity of impact.
+    \item \textbf{Risk Prioritization} --- Plot risks on a risk matrix to classify them as High, Medium, or Low priority.
+    \item \textbf{Risk Mitigation \& Contingency} --- Define proactive strategies to prevent risks and reactive plans to handle them if they occur.
+\end{enumerate}
+
+% ═══════════════════════════════════════════════════════════
+\section{Risk Identification}
+% ═══════════════════════════════════════════════════════════
+
+Risks for the Traffic Prediction and Analysis System are categorized into three groups: Technical, Project/Organizational, and Business/External.
+
+\subsection{Technical Risks}
+
+\begin{center}
+\begin{tabular}{c l}
+\toprule
+\textbf{ID} & \textbf{Risk Description} \\
+\midrule
+TR-1 & Third-party API failure or rate-limit exceeded (Google Maps, OpenWeatherMap, Calendarific) \\
+TR-2 & MobileNet ML model produces inaccurate pothole detection (false positives/negatives) \\
+TR-3 & Performance degradation under concurrent prediction requests \\
+TR-4 & MongoDB data loss or corruption during development \\
+TR-5 & Integration failure between frontend React.js and backend Node.js APIs \\
+TR-6 & Cloudinary image upload service outage or cost escalation \\
+TR-7 & Browser compatibility issues with Google Maps JavaScript API \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Project / Organizational Risks}
+
+\begin{center}
+\begin{tabular}{c l}
+\toprule
+\textbf{ID} & \textbf{Risk Description} \\
+\midrule
+PR-1 & Schedule slippage due to underestimated task complexity \\
+PR-2 & Reduced team availability during university examination periods \\
+PR-3 & Scope creep (uncontrolled addition of features beyond original requirements) \\
+PR-4 & Unclear API contract between frontend and backend causing rework \\
+PR-5 & Loss of codebase due to lack of version control discipline \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Business / External Risks}
+
+\begin{center}
+\begin{tabular}{c l}
+\toprule
+\textbf{ID} & \textbf{Risk Description} \\
+\midrule
+BR-1 & Low citizen participation in pothole/complaint reporting (low adoption) \\
+BR-2 & Malicious/fraudulent data submissions by unverified citizen reporters \\
+BR-3 & Data privacy concerns from GPS-based traffic and location data collection \\
+BR-4 & API pricing model changes by Google, OpenWeatherMap, or Calendarific \\
+BR-5 & Inaccurate historical traffic data for newly registered routes \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ═══════════════════════════════════════════════════════════
+\section{Risk Analysis}
+% ═══════════════════════════════════════════════════════════
+
+Each risk is evaluated on two dimensions:
+\begin{itemize}[noitemsep]
+    \item \textbf{Probability (P):} Likelihood of the risk occurring --- rated 1 (Very Low) to 5 (Very High).
+    \item \textbf{Impact (I):} Severity of consequences if the risk occurs --- rated 1 (Negligible) to 5 (Catastrophic).
+    \item \textbf{Risk Score (RS):} $\text{RS} = P \times I$ --- used to classify the risk level.
+\end{itemize}
+
+\bigskip
+\begin{center}
+\small
+\begin{tabular}{c l c c c l}
+\toprule
+\textbf{ID} & \textbf{Risk} & \textbf{P (1--5)} & \textbf{I (1--5)} & \textbf{RS} & \textbf{Level} \\
+\midrule
+\rowcolor{highRisk!20}
+TR-1 & API Rate Limit / Failure & 4 & 5 & 20 & \textbf{\color{highRisk}High} \\
+\rowcolor{medRisk!20}
+TR-2 & ML Model Inaccuracy & 3 & 4 & 12 & \textbf{\color{medRisk}Medium} \\
+\rowcolor{medRisk!20}
+TR-3 & Performance Degradation & 3 & 4 & 12 & \textbf{\color{medRisk}Medium} \\
+\rowcolor{medRisk!20}
+TR-4 & Database Data Loss & 2 & 5 & 10 & \textbf{\color{medRisk}Medium} \\
+\rowcolor{highRisk!20}
+TR-5 & API Integration Failure & 4 & 4 & 16 & \textbf{\color{highRisk}High} \\
+\rowcolor{lowRisk!20}
+TR-6 & Cloudinary Service Outage & 2 & 3 & 6 & \textbf{\color{lowRisk}Low} \\
+\rowcolor{lowRisk!20}
+TR-7 & Browser Compatibility & 2 & 2 & 4 & \textbf{\color{lowRisk}Low} \\
+\rowcolor{highRisk!20}
+PR-1 & Schedule Slippage & 4 & 4 & 16 & \textbf{\color{highRisk}High} \\
+\rowcolor{highRisk!20}
+PR-2 & Team Unavailability (Exams) & 5 & 3 & 15 & \textbf{\color{highRisk}High} \\
+\rowcolor{medRisk!20}
+PR-3 & Scope Creep & 3 & 4 & 12 & \textbf{\color{medRisk}Medium} \\
+\rowcolor{medRisk!20}
+PR-4 & Unclear API Contract & 3 & 3 & 9 & \textbf{\color{medRisk}Medium} \\
+\rowcolor{lowRisk!20}
+PR-5 & Version Control Failure & 2 & 5 & 10 & \textbf{\color{medRisk}Medium} \\
+\rowcolor{medRisk!20}
+BR-1 & Low Citizen Adoption & 3 & 3 & 9 & \textbf{\color{medRisk}Medium} \\
+\rowcolor{highRisk!20}
+BR-2 & Fraudulent Data Submissions & 4 & 4 & 16 & \textbf{\color{highRisk}High} \\
+\rowcolor{medRisk!20}
+BR-3 & Data Privacy Concerns & 3 & 4 & 12 & \textbf{\color{medRisk}Medium} \\
+\rowcolor{medRisk!20}
+BR-4 & API Pricing Changes & 2 & 4 & 8 & \textbf{\color{medRisk}Medium} \\
+\rowcolor{lowRisk!20}
+BR-5 & Incomplete Historical Data & 3 & 2 & 6 & \textbf{\color{lowRisk}Low} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ═══════════════════════════════════════════════════════════
+\section{Risk Matrix}
+% ═══════════════════════════════════════════════════════════
+
+The risk matrix below plots each risk by Probability (rows) and Impact (columns). $\text{RS} = P \times I$: values $\geq 15$ are \textcolor{highRisk}{\textbf{High}}, $8$--$14$ are \textcolor{medRisk}{\textbf{Medium}}, and $\leq 7$ are \textcolor{lowRisk}{\textbf{Low}}.
+
+\bigskip
+\begin{center}
+\renewcommand{\arraystretch}{1.6}
+\begin{tabular}{c | >{\centering\arraybackslash}m{2.8cm} | >{\centering\arraybackslash}m{2.8cm} | >{\centering\arraybackslash}m{2.8cm} | >{\centering\arraybackslash}m{2.8cm}}
+ & \textbf{Low Impact (1--2)} & \textbf{Medium Impact (3)} & \textbf{High Impact (4)} & \textbf{Critical Impact (5)} \\
+\hline
+\textbf{Very High P (5)} & \cellcolor{medRisk!30} & \cellcolor{highRisk!30} PR-2 & \cellcolor{highRisk!30} & \cellcolor{highRisk!30} \\
+\hline
+\textbf{High P (4)} & \cellcolor{medRisk!30} & \cellcolor{highRisk!30} & \cellcolor{highRisk!30} TR-1, TR-5, BR-2, PR-1 & \cellcolor{highRisk!30} \\
+\hline
+\textbf{Medium P (3)} & \cellcolor{lowRisk!30} BR-5 & \cellcolor{medRisk!30} BR-1, PR-4 & \cellcolor{medRisk!30} TR-2, TR-3, PR-3, BR-3 & \cellcolor{medRisk!30} \\
+\hline
+\textbf{Low P (2)} & \cellcolor{lowRisk!30} TR-7 & \cellcolor{lowRisk!30} TR-6 & \cellcolor{medRisk!30} BR-4 & \cellcolor{medRisk!30} TR-4, PR-5 \\
+\hline
+\textbf{Very Low P (1)} & \cellcolor{lowRisk!30} & \cellcolor{lowRisk!30} & \cellcolor{lowRisk!30} & \cellcolor{lowRisk!30} \\
+\hline
+\end{tabular}
+\end{center}
+
+\bigskip
+\noindent\textbf{Legend:}
+\textcolor{highRisk}{$\blacksquare$}~\textbf{High Risk} (RS $\geq$ 15)~\quad
+\textcolor{medRisk}{$\blacksquare$}~\textbf{Medium Risk} (RS 8--14)~\quad
+\textcolor{lowRisk}{$\blacksquare$}~\textbf{Low Risk} (RS $\leq$ 7)
+
+% ═══════════════════════════════════════════════════════════
+\section{Risk Mitigation Strategies}
+% ═══════════════════════════════════════════════════════════
+
+\subsection{High-Priority Risks (RS $\geq$ 15)}
+
+\subsubsection*{TR-1: API Rate Limit / Failure (RS = 20)}
+\textbf{Probability:} High (4) \quad \textbf{Impact:} Critical (5)
+
+\textbf{Proactive Mitigation:}
+\begin{itemize}[noitemsep]
+    \item Implement server-side response caching (15-minute TTL) for Google Maps and OpenWeatherMap API responses to reduce call frequency.
+    \item Use the Outscraper API as a paid fallback for Google Maps data.
+    \item Monitor daily API usage against quota limits with automated alerts at 80\% threshold.
+\end{itemize}
+
+\textbf{Contingency Plan:}
+If an API fails completely, the system defaults to last-cached data for predictions. The affected data factor is excluded from the weighted traffic score calculation and the user is notified via a banner: ``\textit{Live [API Name] data temporarily unavailable. Showing cached data.}''
+
+\bigskip
+\subsubsection*{TR-5: API Integration Failure (RS = 16)}
+\textbf{Probability:} High (4) \quad \textbf{Impact:} High (4)
+
+\textbf{Proactive Mitigation:}
+\begin{itemize}[noitemsep]
+    \item Maintain a shared OpenAPI-style API specification document (Swagger/Postman collection) agreed upon by both frontend and backend developers before coding begins.
+    \item Implement contract testing using mock API servers during frontend development.
+    \item Schedule weekly integration commits to detect mismatches early.
+\end{itemize}
+
+\textbf{Contingency Plan:}
+Roll back to the last stable API version and conduct a focused sprint to resolve the contract mismatch before resuming feature development.
+
+\bigskip
+\subsubsection*{PR-1: Schedule Slippage (RS = 16)}
+\textbf{Probability:} High (4) \quad \textbf{Impact:} High (4)
+
+\textbf{Proactive Mitigation:}
+\begin{itemize}[noitemsep]
+    \item Build a 5-week buffer into the 20-week project schedule beyond the 15-week critical path.
+    \item Use aggressive time-boxing: each task has a fixed deadline; incomplete features are de-scoped rather than delayed.
+    \item Conduct weekly progress reviews against the Gantt chart milestones.
+\end{itemize}
+
+\textbf{Contingency Plan:}
+Identify and defer non-critical features (e.g., gamification leaderboard, advanced analytics) to Phase 2. Prioritize core prediction engine and authentication delivery.
+
+\bigskip
+\subsubsection*{PR-2: Team Unavailability During Exams (RS = 15)}
+\textbf{Probability:} Very High (5) \quad \textbf{Impact:} Medium (3)
+
+\textbf{Proactive Mitigation:}
+\begin{itemize}[noitemsep]
+    \item Map university exam schedule against the project timeline and schedule low-effort tasks (documentation, testing) during examination periods.
+    \item Front-load complex development tasks (T4: Backend, T6: Integration) before the exam window.
+    \item Assign flexible non-critical tasks (T3: Database Design) with 2-week float to exam periods.
+\end{itemize}
+
+\textbf{Contingency Plan:}
+Utilize the 5-week schedule buffer for recovery. The team lead coordinates a catch-up sprint the week after exams conclude.
+
+\bigskip
+\subsubsection*{BR-2: Fraudulent Data Submissions (RS = 16)}
+\textbf{Probability:} High (4) \quad \textbf{Impact:} High (4)
+
+\textbf{Proactive Mitigation:}
+\begin{itemize}[noitemsep]
+    \item Implement MobileNet ML validation with a confidence threshold of $\geq 0.85$ for pothole image verification before accepting a report.
+    \item Require user authentication (JWT) for all complaint/report submissions.
+    \item Apply rate limiting per user account (maximum 5 reports per day).
+    \item Implement admin review workflow for flagged submissions before they affect the traffic score.
+\end{itemize}
+
+\textbf{Contingency Plan:}
+Introduce a temporary manual review queue for all submitted reports if the automated detection confidence drops below acceptable levels. Blacklist accounts with a high rejection rate.
+
+\subsection{Medium-Priority Risks (RS 8--14)}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{c X X}
+\toprule
+\textbf{ID} & \textbf{Mitigation Strategy} & \textbf{Contingency Plan} \\
+\midrule
+TR-2 & Set MobileNet confidence threshold $\geq 0.85$. Augment training data with diverse pothole images. & Label uncertain detections as ``Pending Review'' and route to admin queue. \\[6pt]
+TR-3 & Implement MongoDB indexes on all query fields. Use Node.js clustering for multi-core utilization. Apply 15-min caching for prediction results. & Scale horizontally on Render cloud; reduce prediction frequency during peak load. \\[6pt]
+TR-4 & Enable automated daily MongoDB Atlas backups. Use Git for schema migrations. & Restore from the most recent backup. Replay missed transactions from application logs. \\[6pt]
+PR-3 & Enforce a formal Change Control Board (CCB) process; any new feature requires written approval from the team lead and project guide. & Defer all unplanned features to a clearly labeled Phase 2 backlog. \\[6pt]
+PR-4 & Maintain a Postman API collection as the single source of truth. API contracts frozen before development begins. & 2-day joint debugging sprint between frontend and backend developers to resolve the mismatch. \\[6pt]
+BR-1 & Launch with pre-seeded complaint data for demo routes; run a campus awareness campaign to drive initial adoption. & Operate system with admin-curated data until organic citizen participation grows. \\[6pt]
+BR-3 & Anonymize GPS coordinates before storage. Publish a clear privacy policy. Do not store personally identifiable raw location data. Add consent prompts. & Halt location-based features and consult legal/academic advisor for guidance. \\[6pt]
+BR-4 & Stay within free-tier API limits where possible. Cache aggressively. Monitor cost dashboards weekly. & Switch to lower-cost API alternatives (OpenStreetMap instead of Google Maps if budget exceeded). \\[6pt]
+PR-5 & Enforce mandatory Git commits via pull requests on a shared repository. Each member must push daily. Protect the main branch from direct pushes. & Recover from the most recent GitHub remote commit. Use VS Code Timeline for local recovery. \\[6pt]
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Low-Priority Risks (RS $\leq$ 7)}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{c X X}
+\toprule
+\textbf{ID} & \textbf{Mitigation Strategy} & \textbf{Contingency Plan} \\
+\midrule
+TR-6 & Use Cloudinary free tier with local disk as fallback for image storage during development. & Store images on the server filesystem temporarily until Cloudinary is restored. \\[6pt]
+TR-7 & Develop and test on Google Chrome (primary). Use CSS autoprefixer to handle cross-browser styling. & Document known limitations. Flag unsupported browsers with a compatibility notice. \\[6pt]
+BR-5 & Use the Outscraper API backfill script to supplement missing historical traffic data for new routes. & Substitute city-average traffic score as a fallback when route-specific history is unavailable. \\[6pt]
+\bottomrule
+\end{tabularx}
+\end{center}
+
+% ═══════════════════════════════════════════════════════════
+\section{Risk Monitoring Plan}
+% ═══════════════════════════════════════════════════════════
+
+Risk monitoring is conducted throughout the project lifecycle (January -- April 2026) using the following mechanisms:
+
+\begin{center}
+\begin{tabularx}{\textwidth}{l X l}
+\toprule
+\textbf{Activity} & \textbf{Description} & \textbf{Frequency} \\
+\midrule
+Weekly Risk Review & Team reviews the risk register against project progress and Gantt milestones. & Weekly \\[4pt]
+API Usage Monitoring & Automated alert at 80\% of daily API quota for Google Maps and OpenWeatherMap. & Daily (automated) \\[4pt]
+Integration Smoke Tests & Run a full frontend--backend API smoke test after every major commit to the main branch. & Per major commit \\[4pt]
+Attendance Tracking & Track team member availability relative to the project task schedule. & Weekly \\[4pt]
+Data Integrity Checks & Run automated scripts to validate MongoDB data consistency and check for anomalous complaint entries. & Twice weekly \\[4pt]
+Risk Register Update & Update probability, impact, and status of each risk as the project evolves. & Bi-weekly \\[4pt]
+\bottomrule
+\end{tabularx}
+\end{center}
+
+% ═══════════════════════════════════════════════════════════
+\section{Conclusion}
+% ═══════════════════════════════════════════════════════════
+This assignment identified 17 potential risks across technical, project, and business/external categories for the Traffic Prediction and Analysis System. Risk analysis revealed five high-priority risks (RS $\geq$ 15): API failure (TR-1, RS=20), integration failure (TR-5, RS=16), schedule slippage (PR-1, RS=16), fraudulent data submissions (BR-2, RS=16), and team unavailability during exams (PR-2, RS=15).
+
+Proactive mitigation strategies --- including response caching, shared API specifications, time-boxed scheduling, ML-based fraud detection, and mandatory version control practices --- address the root causes of these risks. Contingency plans ensure continuity of development even if a risk materializes.
+
+By maintaining a living risk register and conducting weekly reviews against the project timeline, the development team can respond to emerging risks in a structured and timely manner, ensuring the successful delivery of the Traffic Prediction and Analysis System within the planned 15-week development window.
+
+\end{document}

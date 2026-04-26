@@ -1,0 +1,188 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{graphicx}
+
+% ── Colours ───────────────────────────────────────────────
+\definecolor{headblue}{HTML}{1A5276}
+\definecolor{jirablue}{HTML}{0052CC}
+\definecolor{trellablue}{HTML}{0079BF}
+\definecolor{rowgray}{HTML}{F2F3F4}
+
+% ── Section styling ───────────────────────────────────────
+\titleformat{\section}
+  {\Large\bfseries\color{headblue}}
+  {\thesection.}{0.5em}{}[\vspace{2pt}\titlerule]
+\titleformat{\subsection}
+  {\large\bfseries\color{headblue!80}}
+  {\thesubsection}{0.5em}{}
+
+% ── Header / Footer ──────────────────────────────────────
+\pagestyle{fancy}
+\setlength{\headheight}{14.5pt}
+\addtolength{\topmargin}{-2.5pt}
+\fancyhf{}
+\lhead{\small\textit{Project Management Tools --- Traffic Prediction System}}
+\rhead{\small\textit{Group E-16}}
+\cfoot{\thepage}
+
+\begin{document}
+
+% ═══════════════════════════════════════════════════════════
+% TITLE PAGE
+% ═══════════════════════════════════════════════════════════
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+{\Huge\bfseries\color{headblue} Software Project Tracking\\[12pt]}
+{\LARGE Hands-on with Trello and JIRA\\[8pt]}
+{\large Traffic Prediction and Analysis System\\[20pt]}
+\rule{0.6\textwidth}{1pt}\\[20pt]
+
+{\large\textbf{Assignment No. 10}}\\[30pt]
+
+\begin{tabular}{ll}
+\textbf{Group:} & E-16 \\[4pt]
+\textbf{Members:} & Harshal Jaiswal \\
+ & Pranav Jagtap \\
+ & Suyash Jobanputra \\
+ & Shreyash Jobanputra \\
+\end{tabular}
+
+\vfill
+{\small Department of Computer Engineering\\
+\today}
+\end{titlepage}
+
+% ═══════════════════════════════════════════════════════════
+\section{Problem Statement}
+% ═══════════════════════════════════════════════════════════
+Hands-on with Project Management Tools: Practice project tracking, task assignment, and progress monitoring using Trello and JIRA on a simulated project.
+
+% ═══════════════════════════════════════════════════════════
+\section{Introduction}
+% ═══════════════════════════════════════════════════════════
+Modern software development requires robust tools to manage complexities, coordinate team members, and ensure timely delivery. Agile project management relies heavily on tracking systems to maintain visibility over tasks, bugs, and sprints.
+
+In this assignment, we demonstrate task assignment and progress monitoring for the \textbf{Traffic Prediction and Analysis System}. We simulate a development lifecycle using two industry-standard tools:
+\begin{enumerate}
+    \item \textbf{JIRA (Scrum Approach):} Used for managing structured two-week sprints, handling complex backend development, and tracking machine learning integrations.
+    \item \textbf{Trello (Kanban Approach):} Used for visualizing and managing the daily workflow of UI components and frontend React.js development.
+\end{enumerate}
+
+% ═══════════════════════════════════════════════════════════
+\section{JIRA Implementation (Scrum Framework)}
+% ═══════════════════════════════════════════════════════════
+Jira Software by Atlassian is utilized to manage the backend, database, and API integrations of the Traffic Prediction System. Our team employs a Scrum methodology with defined Epic structures and 2-week Sprint cycles.
+
+\subsection{Project Setup \& Hierarchy}
+\begin{itemize}
+    \item \textbf{Project Name:} Traffic Prediction Backend (TPB)
+    \item \textbf{Epics:} Large bodies of work broken down into individual specific stories.
+    \begin{itemize}
+        \item \textit{Epic 1:} Traffic Prediction Engine (ML + APIs)
+        \item \textit{Epic 2:} MongoDB Schema Setup and Optimization
+        \item \textit{Epic 3:} Gamification \& Citizen Reporting Module
+    \end{itemize}
+\end{itemize}
+
+\subsection{Sprint 1 Planning (Simulated)}
+\textbf{Sprint Goal:} Complete core authentication, MongoDB setup, and integrate the Google Maps API for historical data.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l l X l}
+\toprule
+\textbf{Issue Key} & \textbf{Type} & \textbf{Summary} & \textbf{Assignee} \\
+\midrule
+TPB-101 & Story & Implement JWT User Authentication endpoints & Harshal J. \\
+TPB-102 & Story & Set up MongoDB Schemas (Users, PathInfo) & Pranav J. \\
+TPB-103 & Story & Integrate Google Maps Directions API & Suyash J. \\
+TPB-104 & Task & Write unit tests for authentication logic & Shreyash J. \\
+TPB-105 & Bug & Fix token expiration error on login & Harshal J. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Jira Workflow States}
+Issues in the active sprint board follow a strict status flow:
+\textbf{To Do} $\rightarrow$ \textbf{In Progress} $\rightarrow$ \textbf{Under Review} (Requires PR approval) $\rightarrow$ \textbf{Done}.
+
+\vspace{1cm}
+\begin{center}
+% ==========================================
+% PLACEHOLDER FOR STUDENT SCREENSHOT 1
+% ==========================================
+\fbox{\begin{minipage}{0.8\textwidth}
+\centering
+\vspace{2cm}
+\textit{[ Insert Jira Sprint Board Screenshot Here ]}\\
+\vspace{0.5cm}
+\scriptsize \textbf{Instructions:} Create a free Jira project, add the 5 tasks listed above to an active sprint, move a few to "In Progress", and paste the screenshot here.
+\vspace{2cm}
+\end{minipage}}
+\end{center}
+\vspace{1cm}
+
+% ═══════════════════════════════════════════════════════════
+\section{Trello Implementation (Kanban Framework)}
+% ═══════════════════════════════════════════════════════════
+Trello is utilized for the frontend UI/UX development (React.js) of the system. The Kanban board provides a highly visual, continuous flow model perfect for managing styling, responsive design tweaks, and frontend component creation.
+
+\subsection{Board Layout (Lists)}
+Our Trello board represents a continuous delivery pipeline:
+\begin{enumerate}
+    \item \textbf{Features Backlog:} All planned UI components (e.g., Map View, Leaderboard).
+    \item \textbf{Up Next:} Priority components to be picked up this week.
+    \item \textbf{In Progress (Doing):} Components actively being coded.
+    \item \textbf{Testing/QA:} Components deployed to the staging environment for review.
+    \item \textbf{Done:} Successfully merged and deployed to production.
+\end{enumerate}
+
+\subsection{Detailed Card Simulation}
+Each Trello card contains specific checklists and tags.
+
+\textbf{Card Title:} \textit{Build Route Selection Map Interface}
+\begin{itemize}[noitemsep]
+    \item \textbf{Assignee:} Pranav Jagtap
+    \item \textbf{Labels:} \textcolor{blue}{[Frontend]}, \textcolor{red}{[High Priority]}, \textcolor{orange}{[Needs API]}
+    \item \textbf{Checklist (Definition of Done):}
+    \begin{itemize}[label=$\square$]
+        \item Render Google Map centered on city bounds
+        \item Add Source and Destination input fields
+        \item Plot polyline for the selected route
+        \item Ensure mobile responsiveness
+    \end{itemize}
+\end{itemize}
+
+\vspace{1cm}
+\begin{center}
+% ==========================================
+% PLACEHOLDER FOR STUDENT SCREENSHOT 2
+% ==========================================
+\fbox{\begin{minipage}{0.8\textwidth}
+\centering
+\vspace{2cm}
+\textit{[ Insert Trello Kanban Board Screenshot Here ]}\\
+\vspace{0.5cm}
+\scriptsize \textbf{Instructions:} Create a free Trello board with the 5 lists mentioned above. Add a few cards (like "Map Interface", "Login UI", "Dashboard"), assign them, and add labels. Paste the screenshot here.
+\vspace{2cm}
+\end{minipage}}
+\end{center}
+\vspace{1cm}
+
+% ═══════════════════════════════════════════════════════════
+\section{Conclusion}
+% ═══════════════════════════════════════════════════════════
+Through this exercise, we successfully simulated task assignment and progress tracking for the \textbf{Traffic Prediction and Analysis System}. By leveraging \textbf{JIRA} for backend/integration Sprints and \textbf{Trello} for continuous frontend flow, the development process remains structured, transparent, and collaborative. JIRA provided the rigid estimation and story point tracking necessary for complex backend logic, while Trello offered the lightweight flexibility required for rapid UI prototyping.
+
+\end{document}

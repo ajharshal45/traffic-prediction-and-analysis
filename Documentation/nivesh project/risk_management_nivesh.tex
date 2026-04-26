@@ -1,0 +1,391 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{colortbl}
+\usepackage{longtable}
+
+% ── Colours ───────────────────────────────────────────────
+\definecolor{headblue}{HTML}{1A5276}
+\definecolor{highRisk}{HTML}{E74C3C}
+\definecolor{medRisk}{HTML}{F39C12}
+\definecolor{lowRisk}{HTML}{27AE60}
+\definecolor{rowgray}{HTML}{F2F3F4}
+
+% ── Section styling ───────────────────────────────────────
+\titleformat{\section}
+  {\Large\bfseries\color{headblue}}
+  {\thesection.}{0.5em}{}[\vspace{2pt}\titlerule]
+\titleformat{\subsection}
+  {\large\bfseries\color{headblue!80}}
+  {\thesubsection}{0.5em}{}
+
+% ── Header / Footer ──────────────────────────────────────
+\pagestyle{fancy}
+\setlength{\headheight}{14.5pt}
+\addtolength{\topmargin}{-2.5pt}
+\fancyhf{}
+\lhead{\small\textit{Risk Management --- CA Firm System}}
+\rhead{\small\textit{Group E-17}}
+\cfoot{\thepage}
+
+\begin{document}
+
+% ═══════════════════════════════════════════════════════════
+% TITLE PAGE
+% ═══════════════════════════════════════════════════════════
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+{\Huge\bfseries\color{headblue} Software Risk Management\\[12pt]}
+{\LARGE Risk Identification \& Mitigation Strategies\\[8pt]}
+{\large CA Firm Attendance and Article Management System\\[20pt]}
+\rule{0.6\textwidth}{1pt}\\[20pt]
+
+{\large\textbf{Assignment No. 9}}\\[30pt]
+
+\begin{tabular}{ll}
+\textbf{Group:} & E-17 \\[4pt]
+\textbf{Members:} & Nivesh Jain \\
+ & Harsh Nayak \\
+ & Rachit Ingole \\
+ & Hasan Rupawalla \\
+\end{tabular}
+
+\vfill
+{\small Department of Computer Engineering\\
+\today}
+\end{titlepage}
+
+% ═══════════════════════════════════════════════════════════
+\section{Problem Statement}
+% ═══════════════════════════════════════════════════════════
+Identify potential risks and prepare mitigation strategies for the \textbf{CA Firm Attendance and Article Management System} --- a software development project. The exercise involves categorizing risks by type, assessing their probability and impact, constructing a risk matrix, and defining proactive mitigation and contingency plans for each identified risk.
+
+% ═══════════════════════════════════════════════════════════
+\section{Introduction}
+% ═══════════════════════════════════════════════════════════
+Risk management is a systematic process of identifying, analyzing, and responding to uncertainties that may adversely affect a software project's scope, schedule, cost, or quality. For the \textbf{CA Firm Attendance and Article Management System} --- a web platform built on React.js, Node.js/Express, and MySQL that digitizes article trainee management through biometric face recognition, GPS-based geofencing, task assignment, and automated reporting --- risk management is critical given the sensitive biometric data involved, real-time camera/GPS dependencies, and role-specific access requirements.
+
+The risk management process for this project follows four steps:
+\begin{enumerate}[noitemsep, label=\roman*)]
+    \item \textbf{Risk Identification} --- Enumerate all potential risks across technical, project, and external dimensions.
+    \item \textbf{Risk Analysis} --- Assess each risk's probability and impact on a 1--5 scale.
+    \item \textbf{Risk Prioritization} --- Classify as High, Medium, or Low using a risk matrix.
+    \item \textbf{Risk Mitigation \& Contingency} --- Define proactive and reactive response strategies.
+\end{enumerate}
+
+% ═══════════════════════════════════════════════════════════
+\section{Risk Identification}
+% ═══════════════════════════════════════════════════════════
+
+\subsection{Technical Risks}
+
+\begin{center}
+\begin{tabular}{c l}
+\toprule
+\textbf{ID} & \textbf{Risk Description} \\
+\midrule
+TR-1 & Face recognition fails due to low lighting, camera angle, or face occlusion \\
+TR-2 & GPS/Geolocation inaccuracy causes incorrect attendance denial (drift beyond 100m geofence) \\
+TR-3 & HTTPS requirement for camera/GPS not met, blocking attendance marking entirely \\
+TR-4 & MySQL database performance degradation under concurrent attendance/report queries \\
+TR-5 & JWT token compromise leading to unauthorized access \\
+TR-6 & Email notification delivery failure via Nodemailer (SMTP outage) \\
+TR-7 & Browser compatibility issues with face-api.js or Geolocation API \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Project / Organizational Risks}
+
+\begin{center}
+\begin{tabular}{c l}
+\toprule
+\textbf{ID} & \textbf{Risk Description} \\
+\midrule
+PR-1 & Schedule slippage due to complexity of biometric integration \\
+PR-2 & Team unavailability during university examination periods \\
+PR-3 & Scope creep (e.g., adding AI performance analysis in Phase 1 instead of Phase 2) \\
+PR-4 & Unclear database schema changes causing backend-frontend rework \\
+PR-5 & Insufficient testing of attendance flow leading to production bugs \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Business / External Risks}
+
+\begin{center}
+\begin{tabular}{c l}
+\toprule
+\textbf{ID} & \textbf{Risk Description} \\
+\midrule
+BR-1 & Biometric data (face descriptors) privacy/legal compliance risk (IT Act, PDPB India) \\
+BR-2 & Article trainee attempts to spoof attendance using a photo instead of live face \\
+BR-3 & SPCM sponsor changes requirements mid-project \\
+BR-4 & Low sponsor/stakeholder engagement leading to delayed UAT sign-off \\
+BR-5 & Firebase Cloud Messaging service disruption affecting push notifications \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ═══════════════════════════════════════════════════════════
+\section{Risk Analysis}
+% ═══════════════════════════════════════════════════════════
+
+\textbf{Risk Score (RS)} $= P \times I$, where $P$ = Probability (1--5) and $I$ = Impact (1--5).
+
+\bigskip
+\begin{center}
+\small
+\begin{tabular}{c l c c c l}
+\toprule
+\textbf{ID} & \textbf{Risk} & \textbf{P (1--5)} & \textbf{I (1--5)} & \textbf{RS} & \textbf{Level} \\
+\midrule
+\rowcolor{highRisk!20}
+TR-1 & Face Recognition Failure & 4 & 4 & 16 & \textbf{\color{highRisk}High} \\
+\rowcolor{highRisk!20}
+TR-2 & GPS Inaccuracy / Drift & 4 & 4 & 16 & \textbf{\color{highRisk}High} \\
+\rowcolor{highRisk!20}
+TR-3 & HTTPS Not Configured & 3 & 5 & 15 & \textbf{\color{highRisk}High} \\
+\rowcolor{medRisk!20}
+TR-4 & Database Performance & 3 & 4 & 12 & \textbf{\color{medRisk}Medium} \\
+\rowcolor{medRisk!20}
+TR-5 & JWT Token Compromise & 2 & 5 & 10 & \textbf{\color{medRisk}Medium} \\
+\rowcolor{lowRisk!20}
+TR-6 & Email Delivery Failure & 2 & 3 & 6 & \textbf{\color{lowRisk}Low} \\
+\rowcolor{lowRisk!20}
+TR-7 & Browser Compatibility & 2 & 2 & 4 & \textbf{\color{lowRisk}Low} \\
+\rowcolor{highRisk!20}
+PR-1 & Schedule Slippage & 4 & 4 & 16 & \textbf{\color{highRisk}High} \\
+\rowcolor{highRisk!20}
+PR-2 & Team Unavailability & 5 & 3 & 15 & \textbf{\color{highRisk}High} \\
+\rowcolor{medRisk!20}
+PR-3 & Scope Creep & 3 & 3 & 9 & \textbf{\color{medRisk}Medium} \\
+\rowcolor{medRisk!20}
+PR-4 & DB Schema Instability & 3 & 3 & 9 & \textbf{\color{medRisk}Medium} \\
+\rowcolor{medRisk!20}
+PR-5 & Insufficient Testing & 3 & 4 & 12 & \textbf{\color{medRisk}Medium} \\
+\rowcolor{highRisk!20}
+BR-1 & Biometric Data Privacy & 3 & 5 & 15 & \textbf{\color{highRisk}High} \\
+\rowcolor{highRisk!20}
+BR-2 & Attendance Spoofing & 4 & 4 & 16 & \textbf{\color{highRisk}High} \\
+\rowcolor{medRisk!20}
+BR-3 & Sponsor Requirement Changes & 3 & 4 & 12 & \textbf{\color{medRisk}Medium} \\
+\rowcolor{medRisk!20}
+BR-4 & Delayed UAT Sign-off & 3 & 3 & 9 & \textbf{\color{medRisk}Medium} \\
+\rowcolor{lowRisk!20}
+BR-5 & FCM Service Disruption & 2 & 2 & 4 & \textbf{\color{lowRisk}Low} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ═══════════════════════════════════════════════════════════
+\section{Risk Matrix}
+% ═══════════════════════════════════════════════════════════
+
+$\text{RS} = P \times I$: \textcolor{highRisk}{\textbf{High}} $\geq 15$, \textcolor{medRisk}{\textbf{Medium}} $8$--$14$, \textcolor{lowRisk}{\textbf{Low}} $\leq 7$.
+
+\bigskip
+\begin{center}
+\renewcommand{\arraystretch}{1.6}
+\begin{tabular}{c | >{\centering\arraybackslash}m{2.8cm} | >{\centering\arraybackslash}m{2.8cm} | >{\centering\arraybackslash}m{2.8cm} | >{\centering\arraybackslash}m{2.8cm}}
+ & \textbf{Low Impact (1--2)} & \textbf{Medium Impact (3)} & \textbf{High Impact (4)} & \textbf{Critical Impact (5)} \\
+\hline
+\textbf{Very High P (5)} & \cellcolor{medRisk!30} & \cellcolor{highRisk!30} PR-2 & \cellcolor{highRisk!30} & \cellcolor{highRisk!30} \\
+\hline
+\textbf{High P (4)} & \cellcolor{medRisk!30} & \cellcolor{highRisk!30} & \cellcolor{highRisk!30} TR-1, TR-2, PR-1, BR-2 & \cellcolor{highRisk!30} \\
+\hline
+\textbf{Medium P (3)} & \cellcolor{lowRisk!30} & \cellcolor{medRisk!30} PR-3, PR-4, BR-4 & \cellcolor{medRisk!30} TR-4, PR-5, BR-3 & \cellcolor{highRisk!30} TR-3, BR-1 \\
+\hline
+\textbf{Low P (2)} & \cellcolor{lowRisk!30} TR-7 & \cellcolor{lowRisk!30} TR-6 & \cellcolor{lowRisk!30} & \cellcolor{medRisk!30} TR-5 \\
+\hline
+\textbf{Very Low P (1)} & \cellcolor{lowRisk!30} BR-5 & \cellcolor{lowRisk!30} & \cellcolor{lowRisk!30} & \cellcolor{lowRisk!30} \\
+\hline
+\end{tabular}
+\end{center}
+
+\bigskip
+\noindent\textbf{Legend:}
+\textcolor{highRisk}{$\blacksquare$}~\textbf{High Risk} (RS $\geq$ 15)~\quad
+\textcolor{medRisk}{$\blacksquare$}~\textbf{Medium Risk} (RS 8--14)~\quad
+\textcolor{lowRisk}{$\blacksquare$}~\textbf{Low Risk} (RS $\leq$ 7)
+
+% ═══════════════════════════════════════════════════════════
+\section{Risk Mitigation Strategies}
+% ═══════════════════════════════════════════════════════════
+
+\subsection{High-Priority Risks (RS $\geq$ 15)}
+
+\subsubsection*{TR-1: Face Recognition Failure (RS = 16)}
+\textbf{Probability:} High (4) \quad \textbf{Impact:} High (4)
+
+\textbf{Proactive Mitigation:}
+\begin{itemize}[noitemsep]
+    \item Set a minimum Euclidean distance threshold of 0.6 (face-api.js) tuned during testing on diverse face samples.
+    \item Provide a well-lit environment guidance message and re-capture prompt before denying attendance.
+    \item Register multiple face samples per article trainee (front, slight left, slight right angles) during onboarding.
+    \item Require a minimum camera resolution of 720p for face recognition to function.
+\end{itemize}
+
+\textbf{Contingency Plan:}
+If face recognition fails three consecutive times for a verified user, Admin can manually mark attendance with a supervisor override code. Log all override cases for audit purposes.
+
+\bigskip
+\subsubsection*{TR-2: GPS Inaccuracy / Drift (RS = 16)}
+\textbf{Probability:} High (4) \quad \textbf{Impact:} High (4)
+
+\textbf{Proactive Mitigation:}
+\begin{itemize}[noitemsep]
+    \item Make the geofencing radius configurable by Admin (default: 100m). This allows SPCM to adjust if the office building causes consistent GPS drift.
+    \item Wait for GPS accuracy $< 50$m before using the coordinate (reject coordinates with high uncertainty).
+    \item Use the Browser Geolocation API's \texttt{enableHighAccuracy: true} option for better precision.
+\end{itemize}
+
+\textbf{Contingency Plan:}
+Admin can configure an expanded geofence radius (up to 300m) if consistent false denials are reported. Persistent GPS failures are logged and reviewable for manual approval.
+
+\bigskip
+\subsubsection*{TR-3: HTTPS Not Configured (RS = 15)}
+\textbf{Probability:} Medium (3) \quad \textbf{Impact:} Critical (5)
+
+\textbf{Proactive Mitigation:}
+\begin{itemize}[noitemsep]
+    \item Make HTTPS mandatory from day one of deployment (Render.com and Vercel both enforce HTTPS by default).
+    \item During development, use \texttt{localhost} (which browsers treat as a secure context) for camera and GPS testing.
+    \item Include HTTPS configuration in the deployment checklist; block production release without it.
+\end{itemize}
+
+\textbf{Contingency Plan:}
+If HTTPS cannot be configured on a custom domain immediately, use the platform's default HTTPS subdomain (e.g., \texttt{*.render.com}) as the production URL until the SSL certificate is issued.
+
+\bigskip
+\subsubsection*{PR-1: Schedule Slippage (RS = 16)}
+\textbf{Probability:} High (4) \quad \textbf{Impact:} High (4)
+
+\textbf{Proactive Mitigation:}
+\begin{itemize}[noitemsep]
+    \item Allocate 1.5 weeks' buffer at the deployment/documentation phase in the 14-week Gantt plan.
+    \item Run T4 (Backend) and T6 (Frontend core) in parallel to compress the schedule.
+    \item Lock feature scope at the SRS level; any new feature requires written approval from the project guide.
+\end{itemize}
+
+\textbf{Contingency Plan:}
+De-prioritize Phase 2 features (AI performance analysis, React Native mobile app). Deliver the core web system on time and document deferred features in the TBD list.
+
+\bigskip
+\subsubsection*{PR-2: Team Unavailability During Exams (RS = 15)}
+\textbf{Probability:} Very High (5) \quad \textbf{Impact:} Medium (3)
+
+\textbf{Proactive Mitigation:}
+\begin{itemize}[noitemsep]
+    \item Schedule low-effort tasks (documentation, DB schema, testing scripts) during examination weeks.
+    \item Front-load high-complexity tasks (biometric integration, backend APIs) before exam season begins.
+    \item Non-critical tasks T3, T6 carry 1--2 weeks of float specifically reserved for schedule flexibility.
+\end{itemize}
+
+\textbf{Contingency Plan:}
+Use the 1.5-week buffer in T10 (Deployment \& Documentation) for post-exam catch-up. The team lead coordinates a 3-day intensive sprint after exams conclude.
+
+\bigskip
+\subsubsection*{BR-1: Biometric Data Privacy Risk (RS = 15)}
+\textbf{Probability:} Medium (3) \quad \textbf{Impact:} Critical (5)
+
+\textbf{Proactive Mitigation:}
+\begin{itemize}[noitemsep]
+    \item Store only face descriptor vectors (numerical arrays), never raw face images, in the database.
+    \item Encrypt face descriptor data at rest using AES-256 encryption in MySQL.
+    \item Display an explicit biometric data consent notice to each article trainee during onboarding.
+    \item Provide a data deletion workflow: when an article account is deactivated, all biometric data is purged.
+\end{itemize}
+
+\textbf{Contingency Plan:}
+If a privacy complaint is raised, immediately suspend biometric attendance and revert to a manual check-in log while a legal/compliance review is conducted with SPCM.
+
+\bigskip
+\subsubsection*{BR-2: Attendance Spoofing via Photo (RS = 16)}
+\textbf{Probability:} High (4) \quad \textbf{Impact:} High (4)
+
+\textbf{Proactive Mitigation:}
+\begin{itemize}[noitemsep]
+    \item Use face-api.js's live detection capability (blinking/motion detection) to distinguish a live face from a static photo.
+    \item Apply a confidence threshold of $\leq 0.6$ Euclidean distance (tight matching) to reject lower-quality matches typical of printed photos.
+    \item Combine dual-factor verification: face match \textbf{AND} GPS geofence --- a photo presented from outside the office will still fail the GPS check.
+\end{itemize}
+
+\textbf{Contingency Plan:}
+Log all attendance attempts with the face confidence score and GPS coordinates. Admin can investigate anomalous patterns (e.g., very high confidence score from outside the office geofence).
+
+\subsection{Medium-Priority Risks (RS 8--14)}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{c X X}
+\toprule
+\textbf{ID} & \textbf{Mitigation Strategy} & \textbf{Contingency Plan} \\
+\midrule
+TR-4 & Add MySQL indexes on \texttt{article\_id}, \texttt{date} in attendance/task tables. Use Sequelize query optimization. Limit report date ranges via the API. & Scale the MySQL instance vertically on the cloud host. Introduce server-side pagination for large queries. \\[6pt]
+TR-5 & Use short-lived JWT tokens (1-hour access, 24-hour refresh). Store tokens in HttpOnly cookies. Implement token blacklist on logout. & Force all users offline, rotate the JWT secret, and issue new tokens. \\[6pt]
+PR-3 & Enforce Change Control: any feature beyond the SRS requires project guide approval. Maintain a frozen scope document. & Move unapproved features to a Phase 2 backlog. Do not add to current sprint. \\[6pt]
+PR-4 & Version-control the MySQL schema with migration scripts. Communicate schema changes in team chat before applying. & Run database migration rollback scripts. Revert to the last stable schema version. \\[6pt]
+PR-5 & Write unit tests for all API endpoints before integration. Conduct a dedicated 2-week QA phase (T9) for the full attendance flow. & Extend the QA phase by pulling 2 days from the documentation buffer to address critical bugs. \\[6pt]
+BR-3 & Conduct bi-weekly requirement review calls with SPCM to validate all features. Maintain a signed SRS as the formal contract. & Implement a formal Change Request (CR) process; any new sponsor requirement after SRS sign-off incurs a documented scope extension. \\[6pt]
+BR-4 & Send the finished system demo to SPCM 1 week before final submission for early UAT feedback. & Schedule a structured UAT walkthrough session with SPCM in the last week of the project to get sign-off. \\[6pt]
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Low-Priority Risks (RS $\leq$ 7)}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{c X X}
+\toprule
+\textbf{ID} & \textbf{Mitigation Strategy} & \textbf{Contingency Plan} \\
+\midrule
+TR-6 & Configure Nodemailer with a reliable free SMTP service (Gmail App Password). Include retry logic for failed sends. & Log failed notifications in the database; display in-app notification as fallback if email delivery fails. \\[6pt]
+TR-7 & Develop and test primarily on Google Chrome (required for camera/GPS). Use CSS autoprefixer for cross-browser styles. & Display a ``please use Google Chrome'' banner for users on unsupported browsers. \\[6pt]
+BR-5 & Use Firebase Admin SDK with exponential backoff for push notification retries. & Fall back to in-app notifications (displayed on next login) and email as primary notification channels if FCM is down. \\[6pt]
+\bottomrule
+\end{tabularx}
+\end{center}
+
+% ═══════════════════════════════════════════════════════════
+\section{Risk Monitoring Plan}
+% ═══════════════════════════════════════════════════════════
+
+\begin{center}
+\begin{tabularx}{\textwidth}{l X l}
+\toprule
+\textbf{Activity} & \textbf{Description} & \textbf{Frequency} \\
+\midrule
+Weekly Risk Review & Team reviews risk register against project progress and Gantt milestones. & Weekly \\[4pt]
+Biometric Test Runs & Run face recognition and GPS attendance tests on real devices in the office environment. & Before each sprint release \\[4pt]
+Security Audit & Review JWT implementation, bcrypt rounds, and API endpoint authorization coverage. & Bi-weekly \\[4pt]
+Attendance Log Audit & Admin reviews automated flagging of anomalous attendance records (high confidence score despite GPS outside geofence). & Twice weekly \\[4pt]
+Sponsor Check-in & Meeting with SPCM representative to validate delivered features against requirements. & Bi-weekly \\[4pt]
+Risk Register Update & Update risk probability and status as project context evolves (e.g., reduce PR-2 probability after exam period ends). & Bi-weekly \\[4pt]
+\bottomrule
+\end{tabularx}
+\end{center}
+
+% ═══════════════════════════════════════════════════════════
+\section{Conclusion}
+% ═══════════════════════════════════════════════════════════
+This assignment identified 17 potential risks across technical, project, and business/external categories for the CA Firm Attendance and Article Management System. Risk analysis identified seven high-priority risks (RS $\geq$ 15): face recognition failure (TR-1), GPS inaccuracy (TR-2), missing HTTPS configuration (TR-3), schedule slippage (PR-1), team unavailability (PR-2), biometric data privacy (BR-1), and attendance spoofing (BR-2).
+
+The mitigation strategies leverage the system's own dual-factor verification architecture (face {\footnotesize AND} GPS) as a built-in anti-spoofing measure, while data privacy risks are mitigated through descriptor-only storage, encryption at rest, and explicit consent workflows. Project risks are addressed through Agile time-boxing, task parallelization, and a formally frozen SRS signed by SPCM.
+
+The structured risk monitoring plan --- featuring weekly team reviews, bi-weekly sponsor check-ins, and automated attendance log auditing --- ensures risks are detected and responded to early, supporting on-time delivery of the system within the 14-week development window.
+
+\end{document}

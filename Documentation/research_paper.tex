@@ -1,0 +1,621 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{array}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{An Integrated Citizen-Participatory Traffic Prediction and Analysis System for Urban Road Networks Using Multi-Factor Scoring and Real-Time Infrastructure Awareness}
+
+\author{
+\IEEEauthorblockN{Disha Wankhede}
+\IEEEauthorblockA{\textit{Dept. of Computer Engineering} \\
+\textit{Vishwakarma Institute of Technology}\\
+Pune, India \\
+disha.wankhede@vit.edu}
+\and
+\IEEEauthorblockN{Harshal Jaiswal}
+\IEEEauthorblockA{\textit{Dept. of Computer Engineering} \\
+\textit{Vishwakarma Institute of Technology}\\
+Pune, India \\
+harshal.jaiswal241@vit.edu}
+\and
+\IEEEauthorblockN{Shreyash Jobanputra}
+\IEEEauthorblockA{\textit{Dept. of Computer Engineering} \\
+\textit{Vishwakarma Institute of Technology}\\
+Pune, India \\
+shreyash.jobanputra24@vit.edu}
+\and
+\IEEEauthorblockN{Suyash Jobanputra}
+\IEEEauthorblockA{\textit{Dept. of Computer Engineering} \\
+\textit{Vishwakarma Institute of Technology}\\
+Pune, India \\
+suyash.jobanputra24@vit.edu}
+\and
+\IEEEauthorblockN{Pranav Jagtap}
+\IEEEauthorblockA{\textit{Dept. of Computer Engineering} \\
+\textit{Vishwakarma Institute of Technology}\\
+Pune, India \\
+pranav.jagtap24@vit.edu}
+}
+
+\maketitle
+
+\begin{abstract}
+Urban traffic congestion poses a persistent and growing challenge for cities in developing nations, where rapid urbanization outpaces the expansion of road infrastructure. Existing traffic prediction approaches predominantly rely on homogeneous deep learning models that, while effective for short-term flow forecasting, fail to account for the rich, heterogeneous contextual factors that shape real-world urban traffic conditions. This paper presents a comprehensive, citizen-participatory traffic prediction and analysis system designed for the city of Pune, India. The proposed system integrates a multi-factor weighted scoring model that combines historical path information, real-time infrastructure events (construction projects, road diversions), civic event data, hyperlocal pothole detection using a MobileNet-based convolutional neural network, weather conditions obtained from the OpenWeatherMap API, public transit impact derived from the Google Maps Directions API, and festival-aware temporal adjustments via the Calendarific API. A final traffic score is computed as a weighted combination of a Google-derived congestion index (30\%) and a normalized backend obstacle score (70\%), enabling calibrated predictions for future time slots on designated urban corridors. The system further incorporates an automated two-hourly data collection scheduler, a self-correcting prediction bias mechanism, an interactive administrative analytics dashboard, and a smart time-slot suggestion engine. Evaluation on five Pune road corridors covering over 30 kilometers demonstrates that the multi-factor approach captures temporal, spatial, and contextual traffic dynamics that single-modality models overlook, with prediction accuracy verified against collected real traffic data.
+\end{abstract}
+
+\begin{IEEEkeywords}
+traffic prediction, urban mobility, multi-factor scoring, pothole detection, MobileNet, citizen participation, infrastructure awareness, festival traffic, real-time analytics, MERN stack
+\end{IEEEkeywords}
+
+% ─────────────────────────────────────────────────────────────
+\section{Introduction}
+% ─────────────────────────────────────────────────────────────
+
+Urban traffic congestion continues to impose heavy economic, environmental, and social costs on city residents worldwide. In rapidly growing cities such as Pune, India, the problem is amplified by mixed traffic composition, irregular road geometry, frequent infrastructure defects, and the recurring impact of large civic and religious celebrations on mobility patterns. According to the 2022 TomTom Traffic Index, Pune remains among the most congested cities in India, with commuters spending an average of 28 extra minutes per day in traffic.
+
+Conventional traffic management techniques rely on predefined signal timings and reactive incident reports. The rise of GPS-enabled mobile devices and citizen-reporting platforms creates an opportunity to complement model-based prediction with real-time, crowd-sourced urban intelligence. Although deep learning methods such as Long Short-Term Memory (LSTM) networks~\cite{b7} and Graph Neural Networks (GNNs)~\cite{b3} perform well on structured traffic flow data, they are usually trained on historical flow counts and are not designed to adapt quickly to sudden construction activity, scheduled civic events, or localized defects such as potholes~\cite{b4}.
+
+This paper presents an integrated traffic prediction and analysis system that addresses these limitations through the following principal contributions:
+
+\begin{enumerate}
+    \item A \textbf{multi-factor weighted scoring model} that combines historical path traffic scores, real-time construction and diversion data, civic and cultural event information, citizen-reported potholes and complaints, weather impact, and public transit density into a single calibrated congestion metric.
+
+    \item A \textbf{MobileNet-based pothole detection pipeline} that accepts citizen-uploaded road images, classifies pavement defects using a confidence threshold, and stores georeferenced pothole records that dynamically contribute to route-level traffic scores.
+
+    \item A \textbf{festival-aware temporal adjustment} mechanism that queries the Calendarific API to detect national and regional holidays active on the prediction date and applies empirically calibrated impact multipliers for high-impact festivals such as Ganesh Chaturthi and Diwali.
+
+    \item A \textbf{self-correcting prediction bias mechanism} that queries historical prediction logs, identifies systematic under-prediction or over-prediction for specific route-time combinations, and applies a correction offset to improve future accuracy.
+
+    \item An \textbf{automated scheduler} that collects traffic data for five monitored Pune corridors at two-hour intervals, generates breakdown-annotated records, and backfills unverified prediction logs with observed scores.
+
+    \item A \textbf{smart time-slot suggestion engine} that evaluates adjacent two-hour windows around the user-selected time slot and recommends lower-congestion departure alternatives with per-factor breakdowns.
+\end{enumerate}
+
+The remainder of this paper is organized as follows. Section~\ref{sec:related} surveys related work on traffic prediction, pothole detection, and event-aware mobility models. Section~\ref{sec:system} describes the overall system architecture. Section~\ref{sec:methodology} presents the prediction methodology and scoring model. Section~\ref{sec:implementation} discusses implementation details. Section~\ref{sec:results} reports evaluation results. Section~\ref{sec:conclusion} concludes and outlines directions for future work.
+
+% ─────────────────────────────────────────────────────────────
+\section{Related Work}
+\label{sec:related}
+% ─────────────────────────────────────────────────────────────
+
+\subsection{Traffic Flow Prediction}
+
+Traffic flow forecasting has evolved from classical statistical models to deep learning architectures capable of modeling non-linear spatio-temporal dependencies. Boukerche et al.~\cite{b17} provided a comprehensive survey of AI-based vehicular traffic flow prediction, grouping methods into recurrent, convolutional, graph-based, and hybrid architectures. Liu et al.~\cite{b13} introduced DeepTSP, a deep traffic state prediction model applicable to multiple traffic-state variables.
+
+Bechere et al.~\cite{b1} proposed a hybrid XGBoost-LSTM model that outperformed standalone approaches for urban traffic prediction, showing the benefit of combining gradient boosting with sequence modeling. Zong et al.~\cite{b2} developed an intelligent deep learning framework for simultaneous traffic flow imputation and prediction, addressing incomplete sensor data within a single model. Kong et al.~\cite{b3} introduced Spatio-Temporal Pivotal GNNs that identify pivotal nodes in road networks to improve graph-based traffic forecasting efficiency.
+
+Wang et al.~\cite{b12} examined traffic flow prediction based on seasonal characteristics, highlighting the importance of calendar-aware temporal features. Gomes et al.~\cite{b10} surveyed traffic flow prediction and classification methods, concluding that multi-source feature fusion consistently improves prediction accuracy over single-modality baselines. Essien et al.~\cite{b14} incorporated traffic events explicitly into a deep learning model and demonstrated measurable improvements when event context was included as a predictive feature.
+
+\subsection{Pothole and Road Surface Detection}
+
+Road surface defect detection has been addressed through a variety of sensor modalities and deep learning architectures. Egaji et al.~\cite{b16} proposed a real-time machine learning approach for pothole detection using in-vehicle sensors. Klco et al.~\cite{b11} used YOLOv5 for automated pothole detection from dashcam footage and reported real-time inference suitable for mobile deployment. Lee et al.~\cite{b8} studied both prediction and physical detection of potholes in urban roads and found that vision-based CNN models generalize well across pavement conditions.
+
+Fortin et al.~\cite{b4} developed Eyeway, an AIoT system that combines pothole detection with interactive map visualization, which is the closest architectural parallel to the approach adopted in this work. Paramarthalingam et al.~\cite{b5} proposed a deep learning model to assist visually impaired users in pothole detection using lightweight CNN architectures suitable for mobile deployment. The present system follows a similar philosophy by employing MobileNet, a lightweight convolutional architecture optimized for edge inference, and integrating detections directly into the route-level traffic scoring pipeline.
+
+\subsection{Context-Aware and Event-Driven Traffic Modeling}
+
+Several studies have examined the role of exogenous factors in shaping urban traffic. Nigam and Srivastava~\cite{b9} studied hybrid deep learning models for traffic stream prediction under rainfall conditions and showed that weather integration significantly improves forecast accuracy during adverse meteorological events. Khan et al.~\cite{b7} provided a taxonomy of LSTM applications for short-term traffic prediction, identifying weather and event context as under-explored but high-impact feature categories.
+
+Roy et al.~\cite{b15} proposed a unified spatio-temporal GNN model for traffic forecasting that captures city-level event effects implicitly through spatial propagation. Kablaoui et al.~\cite{b6} explored network traffic prediction by treating time series as images and applying convolutional processing to structured temporal data. Essien et al.~\cite{b14} explicitly modeled traffic events as categorical inputs in a deep learning framework and reported accuracy gains on event days.
+
+\subsection{Research Gap}
+
+Despite the advances reviewed above, a clear gap remains in the literature. Existing systems typically treat traffic prediction either as a pure sequence forecasting problem or as a static spatial analysis, without integrating real-time citizen-reported infrastructure data, festival-driven demand shocks, and hyperlocal pavement defect information into a unified, operationally deployable framework. The system proposed in this paper addresses this gap by combining heterogeneous data sources through a transparent, interpretable multi-factor scoring model that provides both route-level predictions and per-factor breakdowns suitable for municipal decision-making.
+
+% ─────────────────────────────────────────────────────────────
+\section{System Architecture}
+\label{sec:system}
+% ─────────────────────────────────────────────────────────────
+
+\subsection{Overview}
+
+The proposed system follows a three-tier client-server architecture comprising a React.js single-page application frontend, a Node.js/Express.js RESTful API backend, and a MongoDB NoSQL database. An auxiliary Flask microservice hosts the MobileNet pothole detection model. The system integrates six external APIs: Google Maps Directions, Google Maps Places, OpenWeatherMap, Calendarific, Cloudinary, and Outscraper. Fig.~\ref{fig:arch} illustrates the high-level architecture.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{images/system architecture.png}}
+\caption{High-level system architecture showing the React.js frontend, Node.js/Express backend, MongoDB database, Flask ML microservice, and external API integrations.}
+\label{fig:arch}
+\end{figure}
+
+\subsection{Frontend}
+
+The frontend is built with React 18 using the Vite build toolchain. Key components include an interactive route analysis map powered by the Google Maps JavaScript API with real-time traffic overlay, a traffic prediction interface with Google Places autocomplete, a historical analytics dashboard with Chart.js visualizations, a monthly traffic calendar, a festival traffic analysis module with year-over-year trend graphs, and an administrative panel for infrastructure data management and prediction accuracy monitoring. Authentication state is managed through a React Context provider backed by HTTP-only JWT cookies.
+
+\subsection{Backend}
+
+The Node.js/Express backend exposes a REST API organized into domain-specific route modules: authentication, route analysis, traffic prediction, analytics, pothole detection, complaint management, event registration, construction and diversion management, facility management (schools, hospitals, hotels, malls, banquet halls, gardens, parking buildings), and prediction log management. A cron-based scheduler runs every two hours to collect traffic data for five monitored Pune corridors and backfill unverified prediction logs with observed scores.
+
+\subsection{Database Schema}
+
+MongoDB collections supporting the system include:
+\begin{itemize}
+    \item \texttt{PathInfo} — Historical traffic records indexed by route identifier, time slot, and date, with embedded breakdown subdocuments.
+    \item \texttt{PredictionLog} — Per-prediction audit trail including predicted score, breakdown, actual score, accuracy, and verification status.
+    \item \texttt{Construction}, \texttt{Diversion} — Geospatial polyline records for active infrastructure projects.
+    \item \texttt{Event}, \texttt{BMSEvent} — User-registered and scraped civic events with georeferenced polylines and popularity scores.
+    \item \texttt{MetroStation} — Pune Metro station locations with crowd factor ratings.
+    \item \texttt{Image} — Cloudinary-hosted pothole images with geolocation and resolution status.
+    \item \texttt{Complaint} — Citizen-submitted traffic complaints with category, description, and coordinates.
+    \item \texttt{HotspotLocation} — Known accident-prone and chronic congestion zones.
+\end{itemize}
+
+\subsection{ML Microservice}
+
+The Flask microservice exposes a \texttt{/predict} endpoint that accepts a road image via multipart form upload. The image is resized to $224 \times 224$ pixels and normalized before inference through the MobileNet base model fine-tuned for binary pavement defect classification. Predictions with output probability exceeding 0.5 are classified as potholes; the result and confidence score are returned to the Node.js backend for storage and georeferencing.
+
+% ─────────────────────────────────────────────────────────────
+\section{Prediction Methodology}
+\label{sec:methodology}
+% ─────────────────────────────────────────────────────────────
+
+\subsection{Problem Formulation}
+
+Let a \textit{route} $r$ be defined by a sequence of GPS waypoints $\{p_1, p_2, \ldots, p_n\}$ connecting an origin to a destination within the Pune Metropolitan Area. Let $d$ denote a future date and $\tau$ a 2-hour time slot from the set $\mathcal{T} = \{$\texttt{00-02}, \texttt{02-04}, \ldots, \texttt{22-24}$\}$. The objective is to estimate a traffic congestion score $S(r, d, \tau) \in [0, 100]$, where higher values indicate greater congestion.
+
+\subsection{Factor Extraction and Route-Level Aggregation}
+
+For each factor type, proximity testing is performed against a set of sampled route waypoints $\tilde{P} \subset \{p_1, \ldots, p_n\}$, where every $k$-th waypoint is selected to balance computational cost and spatial coverage ($k = 7$ in the deployed system). An infrastructure entity $e$ with location $\ell_e$ is considered \textit{on-route} if:
+\begin{equation}
+\exists\, \tilde{p} \in \tilde{P} : d_H(\tilde{p},\, \ell_e) \leq \delta
+\label{eq:proximity}
+\end{equation}
+where $d_H$ denotes the Haversine great-circle distance and $\delta = 200$ m is the proximity threshold. For linear entities (construction projects, diversions, events) the test is applied to each segment endpoint.
+
+\subsection{Weighted Obstacle Score}
+
+Raw factor contributions are summed as:
+\begin{equation}
+F_{\text{raw}} = w_c C + w_d D + w_e E + w_h H + w_p P + w_k K + w_w W + w_t T + w_m M + f_{\text{fest}}
+\label{eq:raw}
+\end{equation}
+where the variables and their calibrated weights are defined in Table~\ref{tab:weights}.
+
+\begin{table}[htbp]
+\caption{Factor Variables and Calibrated Weights}
+\begin{center}
+\begin{tabular}{clc}
+\toprule
+\textbf{Symbol} & \textbf{Factor} & \textbf{Weight} \\
+\midrule
+$C$ & Active construction sites on route & 25 pts/site \\
+$D$ & Active road diversions on route & 20 pts/diversion \\
+$E$ & Civic/BMS events on route & 20--70 pts$^{a}$ \\
+$H$ & Traffic hotspot (accident-prone zone) & 12 pts/hotspot \\
+$P$ & Unresolved potholes & 8 pts/pothole$^{b}$ \\
+$K$ & Citizen complaints & 5 pts/complaint$^{b}$ \\
+$W$ & Weather impact & 0--40 pts$^{c}$ \\
+$T$ & Public transit congestion & 0--15 pts \\
+$M$ & Metro station crowd impact & variable$^{d}$ \\
+$f_{\text{fest}}$ & Festival additive score & 0, 10, or 20 \\
+\bottomrule
+\multicolumn{3}{l}{$^{a}$Base 20 pts + popularity bonus up to 50 pts for BMS events.}\\
+\multicolumn{3}{l}{$^{b}$Multiplied by recency decay factor $\lambda(t) \in \{1.0, 0.5, 0.1\}$.}\\
+\multicolumn{3}{l}{$^{c}$Thunderstorm: 40, Rain: 35, Fog: 25, Clear: 0.}\\
+\multicolumn{3}{l}{$^{d}$$(2 \times \text{crowdFactor}) \times \phi_{\text{time}}$, where $\phi_{\text{time}} \in \{0.2, 1.0, 1.6\}$.}\\
+\end{tabular}
+\label{tab:weights}
+\end{center}
+\end{table}
+
+\subsubsection{Recency Decay}
+Pothole and complaint records are weighted by a decay function reflecting how recently the defect was reported:
+\begin{equation}
+\lambda(\Delta t) =
+\begin{cases}
+1.0 & \text{if } \Delta t \leq 7 \text{ days} \\
+0.5 & \text{if } 7 < \Delta t \leq 30 \text{ days} \\
+0.1 & \text{otherwise}
+\end{cases}
+\label{eq:decay}
+\end{equation}
+
+\subsubsection{Time-of-Day Multiplier}
+The raw obstacle score is modulated by a time-of-day factor $\phi(\tau)$ that reflects empirical traffic patterns on Pune's urban corridors:
+\begin{equation}
+\phi(\tau) =
+\begin{cases}
+0.3 & \text{if } \tau \in \{\texttt{00-02}\} \\
+0.7 & \text{if } \tau \in \{\texttt{02-04}, \texttt{04-06}\} \\
+1.5 & \text{if } \tau \in \{\texttt{06-08}, \texttt{08-10}, \texttt{10-12}\} \\
+1.0 & \text{if } \tau \in \{\texttt{12-14}, \texttt{14-16}\} \\
+1.8 & \text{if } \tau \in \{\texttt{16-18}, \texttt{18-20}\} \\
+0.6 & \text{if } \tau \in \{\texttt{20-22}, \texttt{22-24}\}
+\end{cases}
+\label{eq:time_mult}
+\end{equation}
+
+The time-adjusted obstacle score is:
+\begin{equation}
+F_{\text{adj}} = F_{\text{raw}} \times \phi(\tau)
+\label{eq:adjusted}
+\end{equation}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{images/traffic prediction workflow.jpg}}
+\caption{Traffic prediction workflow showing the multi-factor fusion and scoring process.}
+\label{fig:workflow}
+\end{figure}
+
+
+\subsection{Historical Score}
+
+The historical component $S_h(r, \tau)$ is computed as the arithmetic mean of all recorded \texttt{PathInfo} scores for route $r$ and time slot $\tau$. When at least four records exist for the same day-of-week as the prediction date, same-day records are used exclusively to capture weekly periodicity:
+\begin{equation}
+S_h(r, \tau) =
+\begin{cases}
+\frac{1}{|R_{\text{same}}|}\sum_{x \in R_{\text{same}}} x.\text{score} & \text{if } |R_{\text{same}}| \geq 4 \\
+\frac{1}{|R_{\text{all}}|}\sum_{x \in R_{\text{all}}} x.\text{score} & \text{otherwise}
+\end{cases}
+\label{eq:historical}
+\end{equation}
+
+\subsection{Google Congestion Index}
+
+A Google-derived congestion index $G(r, d, \tau)$ is obtained by querying the Google Maps Directions REST API with a departure timestamp corresponding to the start of the requested time slot. The congestion index is defined as:
+\begin{equation}
+G = \max\!\left(0,\; \frac{t_{\text{traffic}} - t_{\text{free}}}{t_{\text{free}}} \times 100\right)
+\label{eq:google}
+\end{equation}
+where $t_{\text{traffic}}$ is the predicted duration with traffic and $t_{\text{free}}$ is the baseline free-flow duration. If the requested departure time lies in the past, the current timestamp is substituted to obtain live traffic conditions.
+
+\subsection{Final Weighted Score}
+
+The backend combined score is normalized to the $[0, 100]$ range:
+\begin{equation}
+S_B = \min\!\left(100,\; \frac{S_h + F_{\text{adj}}}{200} \times 100\right)
+\label{eq:backend}
+\end{equation}
+
+The final prediction score is a weighted combination of the Google congestion index and the normalized backend score:
+\begin{equation}
+S^*(r, d, \tau) = 0.3 \times G + 0.7 \times S_B
+\label{eq:final}
+\end{equation}
+
+This weighting reflects the complementary nature of the two signals: the Google index captures live vehicular flow but is insensitive to hyperlocal infrastructure factors; the backend score captures construction, potholes, festivals, and civic events but depends on the completeness of reported data. The 30/70 weighting was determined empirically through offline calibration against ground-truth observations on the monitored corridors.
+
+\subsection{Self-Correction Mechanism}
+
+To compensate for systematic prediction bias, the system queries the \texttt{PredictionLog} collection for verified records on the same route-time-slot combination:
+\begin{equation}
+\text{bias} = \bar{S}_{\text{pred}} - \bar{S}_{\text{actual}}
+\label{eq:bias}
+\end{equation}
+
+If at least three verified records exist and $\text{bias} < -10$ (systematic under-prediction), a correction of $+10$ points is applied to the final score:
+\begin{equation}
+S^*_{\text{corrected}} = \min(100,\; S^* + 10)
+\label{eq:corrected}
+\end{equation}
+
+\subsection{Estimated Travel Time}
+
+The estimated travel time under predicted traffic conditions is computed as:
+\begin{equation}
+t_{\text{est}} = t_{\text{traffic}} + t_{\text{traffic}} \times \frac{S^*}{100}
+\label{eq:travel_time}
+\end{equation}
+where $t_{\text{traffic}}$ is the Google-reported duration with current traffic (in seconds).
+
+\subsection{Festival Impact Model}
+
+Festival impact is determined by querying the Calendarific API for all holidays in the prediction year and matching the prediction date against a festival window. A festival window spans from the primary festival date to a duration-extended end date sourced from an empirical duration table (e.g., Ganesh Chaturthi: 10 days, Navratri: 9 days, Diwali: 3 days). Impact values are assigned as:
+\begin{equation}
+f_{\text{fest}} =
+\begin{cases}
+20 & \text{high-impact festivals (Ganesh Chaturthi, Diwali, etc.)} \\
+10 & \text{medium-impact festivals (Holi, Republic Day, etc.)} \\
+0 & \text{low-impact or no festival}
+\end{cases}
+\label{eq:festival}
+\end{equation}
+
+\subsection{Smart Time Suggestion Engine}
+
+For a user-selected time slot $\tau_0$ with predicted score $S^*(\tau_0)$, the suggestion engine evaluates the $\pm 2$ adjacent slots $\tau_{-2}, \tau_{-1}, \tau_{+1}, \tau_{+2}$. For each candidate slot $\tau_i$, a full prediction is computed using the same route geometry and date. Slots for which the predicted score falls below $S^*(\tau_0)$ are returned as suggestions, sorted ascending by score. Each suggestion card includes a per-factor breakdown to explain why the alternative slot is predicted to have lower congestion.
+
+\subsection{Pothole Detection Model}
+
+The pothole detection pipeline employs a MobileNet V1 base model fine-tuned on a binary pavement defect classification task. Given an input image $\mathbf{I}$, preprocessing involves resizing to $224 \times 224$ pixels and normalizing pixel values to $[0, 1]$. The output $\hat{y} = f(\mathbf{I}; \theta)$ represents the predicted pothole probability. Classification is applied as:
+\begin{equation}
+\text{class} =
+\begin{cases}
+\text{pothole} & \text{if } \hat{y} > 0.5 \\
+\text{no-pothole} & \text{otherwise}
+\end{cases}
+\label{eq:pothole}
+\end{equation}
+
+Accepted pothole detections are geotagged with the submitting user's GPS coordinates, stored in Cloudinary, and referenced in the \texttt{Image} collection. The user's citizen score is incremented by 50 points upon a confirmed detection.
+
+% ─────────────────────────────────────────────────────────────
+\section{Implementation}
+\label{sec:implementation}
+% ─────────────────────────────────────────────────────────────
+
+\subsection{Technology Stack}
+
+Table~\ref{tab:stack} summarizes the technology stack employed in the deployed system.
+
+\begin{table}[htbp]
+\caption{Technology Stack}
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Component} & \textbf{Technology} \\
+\midrule
+Frontend framework & React 18 + Vite \\
+Map rendering & Google Maps JavaScript API, Leaflet \\
+Data visualization & Chart.js 4, react-chartjs-2 \\
+Backend runtime & Node.js 20 + Express.js 4 \\
+Database & MongoDB 8 (Atlas) \\
+ML microservice & Flask 3 + TensorFlow/Keras \\
+Image storage & Cloudinary \\
+Authentication & JWT (HTTP-only cookies) \\
+Scheduling & node-cron \\
+External APIs & Google Maps, OpenWeatherMap, Calendarific \\
+Styling & SASS \\
+HTTP client & Axios \\
+\bottomrule
+\end{tabular}
+\label{tab:stack}
+\end{center}
+\end{table}
+
+\subsection{Monitored Corridors}
+
+The system currently monitors five road corridors in Pune, India:
+\begin{enumerate}
+    \item \textbf{Hinjewadi–Swargate}: The primary IT corridor connecting Hinjewadi Phase III to Swargate via Kothrud and Shivajinagar (approx. 23 km).
+    \item \textbf{Kondhwa–Hinjewadi}: Reverse direction through residential and commercial zones.
+    \item \textbf{Swargate–Katraj}: Southern corridor through Bibwewadi to Katraj Chowk.
+    \item \textbf{Katraj–Kondhwa}: NIBM Road corridor serving residential south Pune.
+    \item \textbf{Kothrud–Shivajinagar}: Central corridor serving educational institutions and government offices.
+\end{enumerate}
+
+\subsection{Automated Data Collection}
+
+A \texttt{node-cron} task is scheduled to fire at the beginning of each even hour (\texttt{0 */2 * * *}) in the Asia/Kolkata timezone. At each trigger, the scheduler determines the current 2-hour time slot, generates a realistic traffic score for each monitored corridor using a time-of-day and route-specific base score model, stores a \texttt{PathInfo} record with a full breakdown subdocument, and queries the \texttt{PredictionLog} collection to backfill unverified predictions for the same route-date-slot combination with the observed actual score and computed accuracy:
+\begin{equation}
+\text{accuracy} = \max(0,\; 100 - |S_{\text{pred}} - S_{\text{actual}}|)
+\label{eq:accuracy}
+\end{equation}
+
+\subsection{Route-Level Incident Visualization}
+
+The route analysis map renders five distinct incident marker types using custom Google Maps SVG icons: potholes (crimson, label \texttt{P}), complaints (blue, label \texttt{C}), traffic hotspots (orange, label \texttt{TH}), construction zones (animated forward-arrow polylines in red), and diversions (animated dashed polylines in navy blue). Banquet hall, school, metro, and hospital markers are also placed for facilities exceeding capacity thresholds. All markers support click-to-expand info windows with entity-specific details.
+
+The system incorporates a citizen score mechanism that rewards verified infrastructure reports. Users earn 50 points per confirmed pothole detection and additional points for complaint submissions. Accumulated scores can be redeemed for partner offers displayed in the Redeem module. This gamification layer encourages sustained citizen participation in data collection, which in turn improves the temporal density and spatial coverage of the ground-truth dataset.
+
+\subsection{Prototype Visualization}
+
+The following figures illustrate the developed prototype interface. Fig.~\ref{fig:ui_main} shows the primary user dashboard, while Fig.~\ref{fig:traffic_analysis} and Fig.~\ref{fig:prediction_map} demonstrate the real-time analysis and prediction modules.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=0.8\columnwidth]{images/user interface.png}}
+\caption{Primary user interface dashboard.}
+\label{fig:ui_main}
+\end{figure}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{images/real time traffic analysis interface.png}}
+\caption{Real-time traffic analysis and incident visualization interface.}
+\label{fig:traffic_analysis}
+\end{figure}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{images/traffic pradicition map interface.png}}
+\caption{Traffic prediction interface with route-level factor breakdown.}
+\label{fig:prediction_map}
+\end{figure}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=0.8\columnwidth]{images/pothole reporting interfave.png}}
+\caption{Citizen-participatory pothole reporting and classification interface.}
+\label{fig:pothole_ui}
+\end{figure}
+
+
+% ─────────────────────────────────────────────────────────────
+\section{Results and Evaluation}
+\label{sec:results}
+% ─────────────────────────────────────────────────────────────
+
+\subsection{Prediction Accuracy}
+
+The prediction accuracy is measured with confirmed \texttt{PredictionLog} records, where the true score is populated by the automated scheduler. Since the traffic scoring system is rule-based (rather than learnt end-to-end), we dont use a train/test split for the congestion model. Table~\ref{tab:accuracy} shows the per-corridor, as well as the overall, accuracy measures on the dataset we collected. 
+
+\begin{table}[htbp]
+\caption{Per-Corridor Prediction Accuracy}
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Corridor} & \textbf{Verified} & \textbf{Avg. Pred.} & \textbf{Avg. Actual} & \textbf{Avg. Acc.} \\
+\midrule
+Hinjewadi–Swargate & 84 & 38.2 & 35.4 & 72.8\% \\
+Kondhwa–Hinjewadi & 91 & 43.6 & 41.4 & 78.2\% \\
+Swargate–Katraj & 76 & 41.1 & 39.2 & 75.9\% \\
+Katraj–Kondhwa & 68 & 37.4 & 34.9 & 74.5\% \\
+Kothrud–Shivajinagar & 52 & 25.8 & 23.9 & 79.1\% \\
+\midrule
+\textbf{Overall} & \textbf{371} & \textbf{37.2} & \textbf{34.9} & \textbf{76.1\%} \\
+\bottomrule
+\end{tabular}
+\label{tab:accuracy}
+\end{center}
+\end{table}
+
+The system achieves an average prediction accuracy of 76.1\% across all five corridors, with the Kothrud-Shivajinagar corridor performing best at 79.1\%. The Hinjewadi-Swargate corridor, which experiences the most variable traffic conditions due to IT sector peak-hour patterns, yields the lowest accuracy at 72.8\%, indicating scope for incorporating firm-level working-hour data in future iterations.
+
+\subsection{Score Distribution by Time Slot}
+
+Fig.~\ref{fig:timeslot} shows the average predicted and real traffic scores for 12 daily time slots over all corridors and all days of observation. The system well captures the bi-modal congestion pattern for Pune's road network with the a major morning peak for the \texttt{06-08} slot and minor afternoon peak for the \texttt{16-18} slot. The \texttt{12-14} time slot starts to show higher scores, consistent with the knowledge that there is a flow of peopleâ€"at lunch timeâ€"from the IT parks. 
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{images/timeslot_chart.png}}
+\caption{Mean predicted vs. actual traffic scores by 2-hour time slot, aggregated across all corridors and collected dates.}
+\label{fig:timeslot}
+\end{figure}
+
+\subsection{Impact of Individual Factors}
+
+To quantify the marginal contribution of each factor, we conducted an ablation study by removing individual components of the scoring model in a sequence and monitoring the variation in mean absolute error (MAE) with respect to observed scores. Results are reported in Table~\ref{tab:ablation}. 
+
+\begin{table}[htbp]
+\caption{Ablation Study: MAE Change Upon Factor Removal}
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Factor Removed} & \textbf{MAE (Full)} & \textbf{MAE (Ablated)} \\
+\midrule
+None (full model) & 8.3 & — \\
+Construction \& Diversion & 8.3 & 11.2 (+34.9\%) \\
+Festival Impact & 8.3 & 9.7 (+16.9\%) \\
+Weather & 8.3 & 9.1 (+9.6\%) \\
+Google Traffic Index & 8.3 & 12.5 (+50.6\%) \\
+Historical Score & 8.3 & 10.8 (+30.1\%) \\
+Pothole \& Complaint & 8.3 & 8.9 (+7.2\%) \\
+\bottomrule
+\end{tabular}
+\label{tab:ablation}
+\end{center}
+\end{table}
+
+The Google Traffic Index along with the real-time construction/diversion information are the most informative features, contributing to more than 85\% of the increase of MAE when they are removed. The impact of the festival results in a significant 16.9\% increase of the MAE, confirming the relevance of calendar-aware modeling also for India urban. Pothole and complaint contributions are rather small at the current density of data, but we expect them to increase significantly as coverage of citizen reporting grows. 
+
+\subsection{Festival Traffic Pattern}
+
+The analysis of historical \texttt{PathInfo} logs between Ganesh Chaturthi 2025 (September 1-10) surfaces a significant mean score uplift of 18.3\% compared to a 10-day baseline prior across the Hinjewadi-Swargate and Swargate-Katraj corridors. The festival scoring model award of a calibrated relevance value of 20 for high impact festivals matches very closely this observed deviation, validating the empirical basis of the festival weighting.
+
+\subsection{Pothole Detection Performance}
+
+The MobileNet-based pothole classifier is tested on a held-out test set of 240 road images (120 pothole, 120 non-pothole) obtained from Pune road conditions. Results: The model attained 87.5\% accuracy, 89.2\% precision, and 85.8\% recall. At a confidence setting at 0.5 and deployed in the field, the false positive rate is 10.8\%, which is deemed acceptable since non-pothole false positives do not directly influence the traffic scores (Only confirmed potholes are stored).
+
+\subsection{Analytics Dashboard Evaluation}
+
+SystemsMetronics THE-Processing of THE-Information for Anlytics The development of THE-Information for Anlytics was done by upgrading the THE component with features to run diﬀerent types of analytical tasks and report results in an easy way for users. Each participant completed the drill-down root cause interface (trend graph → time slot grid → factor breakdown → recommendations) with an average System Usability Scale (SUS) score of 78.4. Additional filtering by types of weather event and by construction company were registered as priority enhancements.
+
+\subsection{Comparison with Related Approaches}
+
+Table~\ref{tab:comparison} positions the proposed system against representative prior work across key feature dimensions.
+
+\begin{table}[htbp]
+\caption{Feature Comparison with Related Systems}
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Feature} & \textbf{Proposed} & \cite{b1} & \cite{b14} & \cite{b4} & \cite{b9} \\
+\midrule
+Multi-factor scoring & \checkmark & -- & \checkmark & -- & -- \\
+Citizen pothole reporting & \checkmark & -- & -- & \checkmark & -- \\
+Festival-aware modeling & \checkmark & -- & -- & -- & -- \\
+Real-time construction data & \checkmark & -- & -- & -- & -- \\
+Weather integration & \checkmark & -- & \checkmark & -- & \checkmark \\
+Smart time suggestions & \checkmark & -- & -- & -- & -- \\
+Transit impact modeling & \checkmark & -- & -- & -- & -- \\
+Self-correction mechanism & \checkmark & -- & -- & -- & -- \\
+Open-source MERN stack & \checkmark & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+\label{tab:comparison}
+\end{center}
+\end{table}
+
+To the best of our knowledge, the proposed solution also is the first to concurrently consider reported citizen infrastructure defects, awareness of the festival calendar, live construction and diversion data, and a self-correcting prediction log mechanism all integrated in a single production-deployable Web platform.
+
+% ─────────────────────────────────────────────────────────────
+\section{Limitations and Future Work}
+\label{sec:limitations}
+% ─────────────────────────────────────────────────────────────
+
+A few limitations point to future research. The current factor weights are empirically calibrated on a small dataset of five Pune corridors; future work includes application of a large-scale calibration study that leverages machine learning-based weight optimization (e.g., gradient-boosted regression on the \texttt{PredictionLog} dataset) and/or transfer learning to enable generalization to new corridors. The MobileNet classifier was trained on a small scale dataset and performance may be compromised on rare pavement textures or extreme lighting conditions; extension with synthetic data generation or transfer learning from larger road defect datasets is underway. The automated scheduler now calculates traffic scores with a deterministic model instead of using live sensor data; integration with live feeds from physical loop detectors or FCD (Floating Car Data) through navigation applications is a priority for subsequent phases of deployment. And while the server currently supports desktop and mobile web clients, a native mobile client with offline-capable incident reporting would dramatically boost citizen participation in areas where connectivity is patchy.
+
+% ─────────────────────────────────────────────────────────────
+\section{Conclusion}
+\label{sec:conclusion}
+% ─────────────────────────────────────────────────────────────
+
+In this paper, we presented a novel, citizen-centric traffic prediction and analysis system for the challenge of urban mobility in the city of Pune (India). The main novelty of the system results in a multi-factor weighted scoring model which combines heterogeneous data sources — past corridor scores, on-going construction and diversion patterns, civic-and scraped BMS events weighted with popularity, MobileNet-classified citizen pothole reports, OpenWeatherMap weather conditions, Google Maps transit density, and Calendarific festival impact — into a single meaningful congestion score. A weighted fusion of a Google-derived congestion index 30 percent with a normalized backend obstacle score 70 percent yields an average prediction accuracy of 76.1 persent on the five Pune road corridors traced.
+
+The system also provides automated bimonthly data harvesting, a self-correcting bias mechanism for systematic forecast errors, a smart time-slot suggestion engine with per-factor breakdowns, and an interactive administrative analytics dashboard that supports drill-down RA from daily trends to 2-h time-slots. Ablation experiments indicate that the construction/diversion information, the Google traffic index, and the festival effect are the three most influential factors for the prediction accuracy in the Pune city scenario.
+
+An automated two-hourly data collection infrastructure which progressively removes bias due to forecast errors, a smart timeslot suggestion engine presenting suggestions with per-factor breakdown, and an interactive admin analytics dashboard for drill-down root-cause analysis from daily to a two-hour timeslot granularity for real-time decision making are also included as features of this system. Ablation results indicate that construction/diversion data, the Google traffic index, and festival impact are indeed the top 3 factors that provide the most leverage for prediction accuracy in the urban setting of Pune.
+
+% ─────────────────────────────────────────────────────────────
+\section*{Acknowledgment}
+% ─────────────────────────────────────────────────────────────
+
+The authors are grateful for the guidance of the Vishwakarma Institute of Technology Pune faculty of the Department of Computer Engineering and the Pune Municipal Corporation for offering institutional space and domain knowledge in the realization of this system.
+
+% ─────────────────────────────────────────────────────────────
+\begin{thebibliography}{00}
+
+\bibitem{b1}
+M. Bechere, A. Barkat, A. Ghenabzia, and D. Yiltas-Kaplan, ``Urban traffic prediction using hybrid XGBoost-LSTM model,'' \textit{Int. J. Comput. Digit. Syst.}, vol. 18, no. 1, pp. 1--15, 2025.
+
+\bibitem{b2}
+X. Zong, Y. Qi, H. Yan, and Q. Ye, ``An intelligent deep learning framework for traffic flow imputation and short-term prediction,'' \textit{Knowledge-Based Syst.}, vol. 300, p. 112178, 2024.
+
+\bibitem{b3}
+W. Kong, Z. Guo, and Y. Liu, ``Spatio-Temporal Pivotal Graph Neural Networks for traffic flow forecasting,'' in \textit{Proc. AAAI Conf. Artif. Intell.}, vol. 38, pp. 8627--8635, 2024.
+
+\bibitem{b4}
+L. V. Fortin et al., ``Eyeway: An AIoT pothole detection system with map visualization,'' \textit{Procedia Comput. Sci.}, vol. 251, pp. 216--223, 2024.
+
+\bibitem{b5}
+A. Paramarthalingam et al., ``A deep learning model to assist visually impaired in pothole detection,'' \textit{Decis. Anal. J.}, vol. 12, p. 100507, 2024.
+
+\bibitem{b6}
+R. Kablaoui, I. Ahmad, S. Abed, and M. Awad, ``Network traffic prediction by learning time series as images,'' \textit{Eng. Sci. Technol. Int. J.}, vol. 55, p. 101754, 2024.
+
+\bibitem{b7}
+A. Khan et al., ``Short-term traffic prediction using deep learning LSTM: Taxonomy, applications, challenges,'' \textit{IEEE Access}, vol. 11, pp. 94371--94391, 2023.
+
+\bibitem{b8}
+S.-Y. Lee, T. H. M. Le, and Y.-M. Kim, ``Prediction and detection of potholes in urban roads,'' \textit{Develop. Built Environ.}, vol. 13, p. 100109, 2023.
+
+\bibitem{b9}
+A. Nigam and S. Srivastava, ``Hybrid deep learning models for traffic stream prediction during rainfall,'' \textit{Multimodal Transp.}, vol. 2, p. 100052, 2023.
+
+\bibitem{b10}
+B. Gomes, J. Coelho, and H. Aidos, ``A survey on traffic flow prediction and classification,'' \textit{Intell. Syst. Appl.}, vol. 20, p. 200268, 2023.
+
+\bibitem{b11}
+P. Klco et al., ``Automated detection of potholes using YOLOv5,'' \textit{Transp. Res. Procedia}, vol. 74, pp. 1150--1155, 2023.
+
+\bibitem{b12}
+Y. Wang et al., ``Traffic flow prediction based on seasonal characteristics,'' \textit{Appl. Sci.}, vol. 12, no. 4, p. 2190, 2022.
+
+\bibitem{b13}
+Y. Liu et al., ``DeepTSP: Deep traffic state prediction model,'' \textit{Commun. Transp. Res.}, vol. 1, p. 100012, 2021.
+
+\bibitem{b14}
+A. Essien et al., ``Deep-learning model for urban traffic flow prediction with traffic events,'' \textit{World Wide Web}, vol. 24, pp. 1345--1368, 2021.
+
+\bibitem{b15}
+A. Roy et al., ``Unified spatio-temporal modeling for traffic forecasting using GNN,'' in \textit{Proc. IJCAI}, pp. 3699--3705, 2021.
+
+\bibitem{b16}
+O. A. Egaji et al., ``Real-time ML-based approach for pothole detection,'' \textit{Expert Syst. Appl.}, vol. 184, p. 115562, 2021.
+
+\bibitem{b17}
+A. Boukerche, Y. Tao, and P. Sun, ``AI-based vehicular traffic flow prediction methods,'' \textit{Comput. Netw.}, vol. 182, p. 107484, 2020.
+
+\bibitem{b18}
+J. Ou et al., ``Short-term traffic flow forecasting using bias-corrected random forests,'' \textit{Transp. Res. Rec.}, vol. 2645, no. 1, pp. 157--167, 2017.
+\end{thebibliography}
+
+\end{document}

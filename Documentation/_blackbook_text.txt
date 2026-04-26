@@ -1,0 +1,150 @@
+[Normal] A Report on Major project
+[Body Text] 
+[Normal] Data Driven Pune Municipal Corporation (PMC) Traffic Analysis System 
+[Normal] SUBMITTED IN PARTIAL FULFILLMENT OF THE REQUIREMENTS FOR THE DEGREE OF
+[Body Text] 
+[Heading 4] BACHELOR OF TECHNOLOGY IN
+[Normal] COMPUTER ENGINEERING OF
+[Normal] VISHWAKARMA INSTITUTE OF TECHNOLOGY
+[Heading 2] Savitribai Phule Pune University
+[Body Text] 
+[Normal] BY
+[Normal] 
+[Normal] Ajinkya Walunj (GR No. 12110283) 
+[Normal] Akash Bhandari (GR No. 12111450) 
+[Normal] Anish Sagri (GR No. 12110206)
+[Normal]  Annany Dev Singh (GR No. 12110296)
+[Body Text] 
+[Normal] UNDER THE GUIDANCE OF
+[Body Text] 
+[Normal]  Dr. Radhika Kulkarni.
+[Body Text] 
+[Body Text] 
+[Normal] DEPARTMENT OF COMPUTER ENGINEERING
+[Body Text] 
+[Heading 5] BANSILAL RAMNATH AGARWAL CHARITABLE TRUST’S
+[Normal] VISHWAKARMA INSTITUTE OF TECHNOLOGY
+[Normal] (An Autonomous Institute affiliated to Savitribai Phule Pune University)
+[Normal] PUNE - 411037
+[Normal] 2024 - 2025
+[Normal] 
+[Normal] BANSILAL RAMNATH AGARWAL CHARITABLE TRUST’S
+[Normal] VISHWAKARMA INSTITUTE OF TECHNOLOGY
+[Normal] (An Autonomous Institute affiliated to Savitribai Phule Pune University)
+[Normal] PUNE – 411037
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Normal] CERTIFICATE
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Normal] This is to certify that the Major Project titled Data Driven Pune Municipal Corporation (PMC) Traffic Analysis System submitted by group members Ajinkya Walunj (GR No. 12110283), Akash Bhandari (GR No. 12111450), Anish Sagri (GR No. 12110206), Annany Dev Singh (GR No. 12110296) in partial fulfillment for the award of Degree of Bachelor of Technology in Computer Engineering of Vishwakarma Institute of Technology, Savitribai Phule Pune University. This Major Project is a record of bonafide work carried out by them under my guidance during the academic year 2024-25.
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Normal]             Guide		                       Head 
+[Normal] Dr. Radhika Kulkarni			   Prof. Dr. S. R. Shinde
+[Normal] 	
+[Normal]                       Department of Computer Engineering	
+[Normal]  
+[Body Text] 
+[Heading 4] Sign of External Examiner	Date
+[Normal] 
+[Body Text] 
+[Body Text] Bansilal Ramnath Agarwal Charitable Trust’s
+[Normal] Vishwakarma Institute Of Technology, Pune-37
+[Normal] Department Of Computer Engineering
+[Body Text] 
+[Body Text] 
+[Heading 2] PROJECT SYNOPSIS
+[Body Text] 
+[Body Text] Group No: A - 14 Group Members:
+[Body Text] 
+[Body Text] 
+[Body Text] Academic Year	: 2024-2025
+[Body Text] Project Title	: Data Driven Pune Municipal Corporation (PMC) Traffic Analysis System
+[Body Text]  Project Area	: AI-ML, Web Technology 
+[Body Text] Sponsor Company	: Pune Municipal Corporation (PMC)
+[Body Text] 
+[Body Text] Company Address	: Pune
+[Body Text] 
+[Body Text] Internal Guide	: Dr. Radhika Kulkarni
+[Body Text] 
+[Body Text] 
+[Body Text] Name of the External Guide:
+[Body Text] Contact No:
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Normal] Signature of Internal Guide
+[Normal] 
+[Heading 2] ACKNOWLEDGEMENT
+[Body Text] 
+[Body Text] We express our deepest gratitude to Mr. Rahul Jagtap, IT Head of Pune Municipal Corporation, for his invaluable guidance and support throughout this project. His expertise and insights were instrumental in shaping our approach and ensuring the project’s relevance to real-world applications. We are profoundly thankful to our project guide, Dr. Radhika Kulkarni, for their continuous mentorship, constructive feedback, and encouragement, which greatly contributed to the successful execution of this project. We also extend our heartfelt thanks to Dr. Amar Buchade and Dr. Tushar Mote from IEEE Pune Chapter Smart City Section, for their unwavering support and assistance, which provided us with the necessary resources and motivation during critical phases of the project. A special acknowledgment goes to Prof. Rakhi Bhardwaj, whose invaluable suggestions and constructive evaluations enriched the quality of this work. Lastly, we are sincerely grateful to our esteemed Head of Department, Prof. Dr. Sandeep Shinde, for their guidance, encouragement, and for providing us with the opportunity to undertake this project. We owe the success of this endeavor to the combined efforts and support of all individuals.
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Normal] Ajinkya Walunj
+[Normal] Akash Bhandari
+[Normal] Anish Sagri
+[Normal] Annany Dev Singh
+[Normal] 
+[Normal] INDEX
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Normal] 
+[Normal] 
+[Normal] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Heading 1] Software Project Synopsis
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Body Text] 
+[Heading 4] Approvals Signature Block
+[Body Text] 
+[Body Text] 

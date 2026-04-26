@@ -94,7 +94,7 @@ const getTimeMultiplier = (timeSlot) => {
 const generateBreakdown = (timeSlot, pathId, totalScore) => {
   const hour = parseInt(timeSlot.split('-')[0]);
   const timeMultiplier = getTimeMultiplier(timeSlot);
-  
+
   // Distribute score among factors based on realistic patterns
   let breakdown = {
     construction: 0,
@@ -333,7 +333,7 @@ export const collectTrafficData = async (date, timeSlot) => {
       // Generate realistic traffic score
       const score = generateRealisticScore(timeSlot, route.pathId);
       const level = getTrafficLevel(score);
-      
+
       // Generate breakdown data for this route/time
       const breakdown = generateBreakdown(timeSlot, route.pathId, score);
 
@@ -351,18 +351,18 @@ export const collectTrafficData = async (date, timeSlot) => {
         // Update existing record with averaged score and new breakdown
         const newScore = (existingRecord.score + score) / 2;
         const newLevel = getTrafficLevel(newScore);
-        
+
         await PathInfo.updateOne(
           { _id: existingRecord._id },
-          { 
-            $set: { 
-              score: newScore, 
+          {
+            $set: {
+              score: newScore,
               level: newLevel,
               breakdown: breakdown  // Update breakdown too
-            } 
+            }
           }
         );
-        
+
         recordsUpdated++;
         console.log(`   Updated: ${route.pathId} | Score: ${existingRecord.score.toFixed(1)} -> ${newScore.toFixed(1)} | Level: ${newLevel}`);
 
@@ -435,9 +435,14 @@ export const getRouteDetails = (pathId) => {
   return MONITORED_ROUTES.find(route => route.pathId === pathId) || null;
 };
 
-export default { 
-  collectTrafficData, 
-  MONITORED_ROUTES, 
-  getMonitoredRouteIds, 
-  getRouteDetails 
+export { generateBreakdown, getTimeMultiplier, getTrafficLevel };
+
+export default {
+  collectTrafficData,
+  MONITORED_ROUTES,
+  getMonitoredRouteIds,
+  getRouteDetails,
+  generateBreakdown,
+  getTimeMultiplier,
+  getTrafficLevel,
 };
