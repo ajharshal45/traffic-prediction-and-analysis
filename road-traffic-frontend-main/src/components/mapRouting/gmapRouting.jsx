@@ -2832,15 +2832,17 @@ const MapRouting = () => {
       )} */}
       {routePoints.length > 0 &&
         (<div className='message'>
-          <button className="btn-map" id="analyze" onClick={() => setShowAnalysis(true)}>
-            View Detailed Analysis
-          </button>
-          <button className="btn-map" id="downloadReport" onClick={handleDownloadReport}>
-            Download Report
-          </button>
-          <button className={`btn-map ${heatmapVisible ? 'active' : ''}`} id="toggleHeatmap" onClick={toggleHeatmap}>
-            {heatmapVisible ? 'Hide Heatmap' : 'Show Heatmap'}
-          </button>
+          <div className="message-actions">
+            <button className="btn-map" id="analyze" onClick={() => setShowAnalysis(true)}>
+              View Detailed Analysis
+            </button>
+            <button className="btn-map" id="downloadReport" onClick={handleDownloadReport}>
+              Download Report
+            </button>
+            <button className={`btn-map ${heatmapVisible ? 'active' : ''}`} id="toggleHeatmap" onClick={toggleHeatmap}>
+              {heatmapVisible ? 'Hide Heatmap' : 'Show Heatmap'}
+            </button>
+          </div>
           <ScoreGauge
             score={totalScore}
             estimatedTime={formatTime(estimatedTime)}

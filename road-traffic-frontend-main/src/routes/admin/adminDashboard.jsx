@@ -85,7 +85,7 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      <div className='btn-container'>
+      <div className='admin-btn-grid'>
         <a href="/admin/analytics" className="btn">Traffic Analytics</a>
         <a href="/admin/predictions" className="btn">Prediction Accuracy</a>
         <a href="/admin/potholes" className="btn">View Potholes</a>

@@ -24,24 +24,27 @@
 
 .btn-top {
   background-color: #fabc3c;
-  padding: 5px;
+  padding: 12px 24px;
   display: inline-block;
   text-align: center;
-  width: 150px;
+  width: auto;
+  min-width: 150px;
   text-decoration: none;
   color: white;
-  border-color: antiquewhite;
-  font-weight: bold;
+  border: none;
+  font-weight: 600;
   border-radius: 8px;
   font-size: 16px;
-  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
-  transition: all 0.6s ease;
-  height: 35px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
   margin-right: 12px;
+  cursor: pointer;
 }
 
 .btn-top:hover {
-  transform: scale(1.1);
+  transform: translateY(-2px);
+  background-color: #ffdc73;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
 }
 
 
@@ -71,12 +74,11 @@
 
 
 #get {
-  background-color: #A6AEBF;
+  background-color: #fabc3c;
 }
 
-
 .btn-top.active {
-  background-color: #4CAF50;
+  background-color: #22c55e;
   color: white;
 }
 
@@ -84,11 +86,11 @@
 .traffic-prediction-container {
   max-width: 840px;
   margin: 50px auto;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background-color: #f9f9f9;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  border: none;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -130,18 +132,22 @@
 
 .predict-button {
   margin-top: 20px;
-  padding: 10px 20px;
+  padding: 12px 24px;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 600;
   color: #fff;
-  background-color: #007bff;
+  background-color: #fabc3c;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
 }
 
 .predict-button:hover {
-  background-color: #0056b3;
+  transform: translateY(-2px);
+  background-color: #ffdc73;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
 }
 
 @media (max-width: 768px) {

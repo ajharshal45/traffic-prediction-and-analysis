@@ -1,25 +1,28 @@
-a {
-  transition: all 0.6s ease;
+.btn {
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
-a:hover {
-  transform: scale(1.1);
+.btn:hover {
+  transform: translateY(-2px);
   background-color: #ffdc73;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
 }
 
 .left .btn {
   background-color: #fabc3c;
-  padding: 15px;
-  margin-top: 30px;
+  padding: 12px 24px;
+  margin-top: 24px;
   display: inline-block;
   text-align: center;
-  width: 220px;
+  width: auto;
+  min-width: 200px;
   text-decoration: none;
   color: white;
-  font-weight: bold;
+  font-weight: 600;
   border-radius: 8px;
   font-size: 16px;
-  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .homePage {
@@ -46,7 +49,7 @@ a:hover {
   height: 500px;
   width: 100%;
   border: 2px solid #ddd;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
   background-color: #fefefe;
 }

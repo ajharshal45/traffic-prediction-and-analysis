@@ -16,38 +16,37 @@ L.Icon.Default.mergeOptions({
 });
 
 const MapComponent = () => {
-  const [position, setPosition] = useState(null);
-  const specificCoordinates = [18.521279, 73.855104]; // The specific coordinates for the marker
+  const specificCoordinates = [18.521279, 73.855104]; // Pune coordinates
+  const [position, setPosition] = useState(specificCoordinates);
 
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setPosition([latitude, longitude]);
-        console.log(`User's Location - Longitude: ${longitude}, Latitude: ${latitude}`);
-      },
-      (error) => {
-        console.error(error);
-      }
-    );
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          setPosition([latitude, longitude]);
+          console.log(`User's Location - Longitude: ${longitude}, Latitude: ${latitude}`);
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          // Fallback is already handled since position is initialized to specificCoordinates
+        },
+        { timeout: 5000 }
+      );
+    }
   }, []);
 
   return (
     <div className="map-container">
-      {position ? (
-        <MapContainer center={specificCoordinates} zoom={10} style={{ height: '100%', width: '100%' }}>
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          {/* Marker at the specific coordinates */}
-          <Marker position={specificCoordinates}>
-            <Popup>Marker at 18.521279, 73.855104</Popup>
-          </Marker>
-        </MapContainer>
-      ) : (
-        <p>Loading your location...</p>
-      )}
+      <MapContainer center={specificCoordinates} zoom={10} style={{ height: '100%', width: '100%' }}>
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <Marker position={position}>
+          <Popup>Current Location</Popup>
+        </Marker>
+      </MapContainer>
     </div>
   );
 };
