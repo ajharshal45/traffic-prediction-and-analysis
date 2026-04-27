@@ -16,6 +16,8 @@ function HomePage() {
         <a href="/predictive-analysis" className="btn">Traffic Prediction</a>
         <br />
         <a href="/analysis" className="btn">Analyze</a>
+        <br />
+        <a href="/route-comparison" className="btn">Compare Routes</a>
       </div>
       <div className="right">
         <MapComponent />

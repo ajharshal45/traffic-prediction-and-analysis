@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import apiRequest from "../../lib/apiRequest";
 import fetchFestivals from '../../lib/fetchFestivals';
+import { jsPDF } from 'jspdf';
+import ScoreGauge from '../scoreGauge/scoreGauge';
 import './gmapRouting.css';
 
 const MapRouting = () => {
@@ -32,6 +34,8 @@ const MapRouting = () => {
   const [trafficStatus, setTrafficStatus] = useState([]);
   const [baseDuration, setBaseDuration] = useState(0); // Google's time at zero traffic in seconds
   const [estimatedTime, setEstimatedTime] = useState(0); // Estimated time with traffic in seconds
+  const [heatmapVisible, setHeatmapVisible] = useState(false);
+  const heatmapLayerRef = useRef(null);
 
 
   const sourceInputRef = useRef(null);
@@ -89,7 +93,7 @@ const MapRouting = () => {
       }
 
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry&loading=async`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry,visualization&loading=async`;
       script.async = true;
       script.defer = true;
 
@@ -2527,6 +2531,162 @@ const MapRouting = () => {
 
   }, [diversions, constructions, events]);
 
+  // --- HEATMAP TOGGLE (Potholes + Complaints) ---
+  const toggleHeatmap = () => {
+    if (heatmapVisible) {
+      if (heatmapLayerRef.current) {
+        heatmapLayerRef.current.setMap(null);
+        heatmapLayerRef.current = null;
+      }
+      setHeatmapVisible(false);
+    } else {
+      if (!window.google?.maps?.visualization) {
+        console.error('Google Maps visualization library not loaded');
+        return;
+      }
+      const heatmapData = [];
+      potholes.forEach(p => {
+        heatmapData.push(new window.google.maps.LatLng(
+          parseFloat(p.latitude), parseFloat(p.longitude)
+        ));
+      });
+      complaints.forEach(c => {
+        heatmapData.push(new window.google.maps.LatLng(
+          parseFloat(c.latitude), parseFloat(c.longitude)
+        ));
+      });
+
+      if (heatmapData.length === 0) {
+        alert('No pothole or complaint data available for heatmap.');
+        return;
+      }
+
+      const heatmap = new window.google.maps.visualization.HeatmapLayer({
+        data: heatmapData,
+        map: googleMapRef.current,
+        radius: 30,
+        opacity: 0.7,
+        gradient: [
+          'rgba(0, 255, 0, 0)',
+          'rgba(0, 255, 0, 1)',
+          'rgba(173, 255, 47, 1)',
+          'rgba(255, 255, 0, 1)',
+          'rgba(255, 165, 0, 1)',
+          'rgba(255, 69, 0, 1)',
+          'rgba(255, 0, 0, 1)',
+        ],
+      });
+      heatmapLayerRef.current = heatmap;
+      setHeatmapVisible(true);
+    }
+  };
+
+  // --- PDF REPORT DOWNLOAD ---
+  const handleDownloadReport = () => {
+    const doc = new jsPDF();
+    const now = new Date();
+    let y = 20;
+
+    // Title
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Traffic Analysis Report', 105, y, { align: 'center' });
+    y += 12;
+
+    // Separator
+    doc.setDrawColor(250, 188, 60);
+    doc.setLineWidth(1);
+    doc.line(20, y, 190, y);
+    y += 10;
+
+    // Generated date
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generated: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`, 20, y);
+    y += 10;
+
+    // Route
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Route:', 20, y);
+    doc.setFont('helvetica', 'normal');
+    y += 7;
+    doc.setFontSize(11);
+    const srcText = sourceAddress || 'N/A';
+    const destText = destinationAddress || 'N/A';
+    doc.text(`From: ${srcText}`, 25, y);
+    y += 6;
+    doc.text(`To: ${destText}`, 25, y);
+    y += 12;
+
+    // Score and Level
+    const score = Math.ceil(totalScore);
+    let level = 'Very Low';
+    if (score >= 80) level = 'Very High';
+    else if (score >= 60) level = 'High';
+    else if (score >= 30) level = 'Medium';
+    else if (score >= 16) level = 'Low';
+
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Traffic Assessment:', 20, y);
+    y += 7;
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Traffic Score: ${score} / 100`, 25, y);
+    y += 6;
+    doc.text(`Level: ${level}`, 25, y);
+    y += 6;
+    doc.text(`Estimated Travel Time: ${formatTime(estimatedTime)}`, 25, y);
+    y += 6;
+    doc.text(`Base Time (No Traffic): ${formatTime(baseDuration)}`, 25, y);
+    y += 14;
+
+    // Contributing Factors
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Contributing Factors:', 20, y);
+    y += 8;
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+
+    const factors = [
+      { name: 'Potholes', count: potholes.length },
+      { name: 'Complaints', count: complaints.length },
+      { name: 'Constructions', count: constructions.length },
+      { name: 'Diversions', count: diversions.length },
+      { name: 'Events', count: events.length },
+      { name: 'Traffic Hotspots', count: spots.length },
+      { name: 'Schools', count: schools.length },
+      { name: 'Banquet Halls', count: banquethalls.length },
+      { name: 'Hospitals', count: hospitals.length },
+      { name: 'Hotels', count: hotels.length },
+      { name: 'Malls', count: malls.length },
+      { name: 'Gardens', count: gardens.length },
+      { name: 'Parking Buildings', count: parkingbuildings.length },
+      { name: 'Real-Time Updates', count: trafficStatus.length },
+    ];
+
+    const nonZero = factors.filter(f => f.count > 0);
+    if (nonZero.length === 0) {
+      doc.text('  No significant contributing factors detected.', 25, y);
+      y += 7;
+    } else {
+      nonZero.forEach(f => {
+        doc.text(`  • ${f.name}: ${f.count}`, 25, y);
+        y += 6;
+      });
+    }
+
+    // Footer
+    y = 280;
+    doc.setFontSize(9);
+    doc.setTextColor(150);
+    doc.text('Generated by Smart Traffic Analysis System', 105, y, { align: 'center' });
+
+    doc.save(`Traffic_Report_${now.toISOString().slice(0,10)}.pdf`);
+  };
+
   return (
     <div>
       <div className="address-inputs">
@@ -2675,51 +2835,17 @@ const MapRouting = () => {
           <button className="btn-map" id="analyze" onClick={() => setShowAnalysis(true)}>
             View Detailed Analysis
           </button>
-          <p style={{
-            color: totalScore <= 15
-              ? 'green'
-              : totalScore <= 29
-                ? 'lightgreen'
-                : totalScore <= 59
-                  ? 'orange'
-                  : totalScore <= 79
-                    ? 'red'
-                    : 'darkred',
-            fontSize: '20px',
-            fontWeight: 'bold',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '10px',
-            margin: '20px 0',
-          }}>
-
-            {/* Traffic Message */}
-            <span>
-              {totalScore <= 15 && "🚦 Traffic on the selected route seems to be VERY LOW "}
-              {totalScore >= 16 && totalScore <= 29 && "🟢 Traffic on the selected route seems to be LOW "}
-              {totalScore >= 30 && totalScore <= 59 && "🟠 Traffic on the selected route seems to be MEDIUM "}
-              {totalScore >= 60 && totalScore <= 79 && "🔴 Traffic on the selected route seems to be HIGH "}
-              {totalScore >= 80 && "🚨 Traffic on the selected route seems to be VERY HIGH "}
-            </span>
-
-
-            <span style={{
-              fontSize: '16px',
-              color: '#555',
-              animation: 'fadeIn 1s',
-            }}>
-              Estimated Travel Time: {formatTime(estimatedTime)}
-            </span>
-
-            <span style={{
-              fontSize: '14px',
-              color: '#777',
-            }}>
-              (Base time: {formatTime(baseDuration)} | Traffic Score: {Math.ceil(totalScore)}%)
-            </span>
-          </p>
+          <button className="btn-map" id="downloadReport" onClick={handleDownloadReport}>
+            Download Report
+          </button>
+          <button className={`btn-map ${heatmapVisible ? 'active' : ''}`} id="toggleHeatmap" onClick={toggleHeatmap}>
+            {heatmapVisible ? 'Hide Heatmap' : 'Show Heatmap'}
+          </button>
+          <ScoreGauge
+            score={totalScore}
+            estimatedTime={formatTime(estimatedTime)}
+            baseDuration={formatTime(baseDuration)}
+          />
         </div>)}
 
       <div className='detailed'>

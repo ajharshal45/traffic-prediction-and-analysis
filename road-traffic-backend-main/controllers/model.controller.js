@@ -92,3 +92,13 @@ export const getPotholeDatamodel = async (req, res) => {
       res.status(500).json({ message: 'Error fetching pothole images' });
     }
   };
+
+export const resolvePothole = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Image.findByIdAndUpdate(id, { isresolved: true });
+    res.status(200).json({ message: 'Pothole resolved successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error resolving pothole' });
+  }
+};

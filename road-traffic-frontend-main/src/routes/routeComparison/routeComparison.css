@@ -1,0 +1,123 @@
+.route-comparison {
+  padding: 30px;
+  font-family: "Lato", sans-serif;
+}
+
+.route-comparison h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+.route-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .route-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.route-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  transition: transform 0.4s ease;
+}
+
+.route-card:hover {
+  transform: translateY(-4px);
+}
+
+.route-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.route-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  align-self: flex-start;
+}
+
+.route-badge.best {
+  background-color: #22c55e;
+}
+
+.route-badge.worst {
+  background-color: #ef4444;
+}
+
+.route-level-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  align-self: flex-start;
+}
+
+.route-detail {
+  font-size: 14px;
+  color: #555;
+}
+
+.route-detail strong {
+  color: #333;
+}
+
+.route-score-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.route-score-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s ease;
+}
+
+.route-analyze-btn {
+  background-color: #fabc3c;
+  padding: 10px;
+  text-align: center;
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.route-analyze-btn:hover {
+  transform: scale(1.05);
+  background-color: #ffdc73;
+}
+
+.route-loading {
+  text-align: center;
+  padding: 60px;
+  font-size: 16px;
+  color: #fabc3c;
+  font-weight: bold;
+}

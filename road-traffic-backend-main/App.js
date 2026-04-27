@@ -31,7 +31,7 @@ dotenv.config({
 
 import cors from "cors" ;
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8080;
 const allowedOrigins = [
     "https://form-data-collection.onrender.com", 
     "https://road-traffic-frontend.onrender.com",

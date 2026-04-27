@@ -51,5 +51,13 @@ export const getComplaintDatamodel = async (req, res) => {
       res.status(500).json({ message: 'Error fetching complaints' });
     }
   };
-  
 
+export const resolveComplaint = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Complaint.findByIdAndUpdate(id, { isresolved: true });
+    res.status(200).json({ message: 'Complaint resolved successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error resolving complaint' });
+  }
+};

@@ -6,6 +6,7 @@ import apiRequest from "../../lib/apiRequest";
 const ComplaintDisplay = () => {
   const [complaints, setComplaints] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [toast, setToast] = useState('');
 
   const fetchComplaints = async () => {
     try {
@@ -56,8 +57,15 @@ const ComplaintDisplay = () => {
     fetchComplaints();
   }, []);
 
-  const handleResolved = (id) => {
-    console.log(`Complaint ${id} resolved`);
+  const handleResolved = async (id) => {
+    try {
+      await apiRequest.put(`/complaint/${id}/resolve`);
+      setComplaints(prev => prev.filter(c => c._id !== id));
+      setToast('Resolved!');
+      setTimeout(() => setToast(''), 2000);
+    } catch (error) {
+      console.error('Error resolving complaint:', error);
+    }
   };
 
   // Filter users based on search term
@@ -68,6 +76,13 @@ const ComplaintDisplay = () => {
 
   return (
     <div className="complaint-display">
+    {toast && (
+      <div style={{
+        position: 'fixed', top: '20px', right: '20px', background: '#22c55e',
+        color: '#fff', padding: '12px 24px', borderRadius: '8px', fontWeight: 'bold',
+        zIndex: 9999, boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+      }}>{toast}</div>
+    )}
     <input
         type="text"
         placeholder="Search Potholes by location...."

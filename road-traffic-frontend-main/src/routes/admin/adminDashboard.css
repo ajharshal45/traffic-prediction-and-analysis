@@ -1,17 +1,101 @@
-.btn-container {
+.admin-dashboard {
+    padding: 30px;
+    font-family: "Lato", sans-serif;
+}
+
+.admin-dashboard-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.admin-last-updated {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 24px;
+}
+
+/* --- Stat Cards --- */
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 36px;
+}
+
+.admin-stat-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 24px 20px;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
-    padding: 30px;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    min-height: 130px;
+    justify-content: center;
+}
+
+.admin-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.25);
+}
+
+.admin-stat-icon {
+    font-size: 28px;
+}
+
+.admin-stat-value {
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.admin-stat-label {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* --- Spinner --- */
+.admin-spinner-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+}
+
+.admin-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #fabc3c;
+    border-radius: 50%;
+    animation: admin-spin 0.7s linear infinite;
+}
+
+@keyframes admin-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* --- Navigation Buttons (2 per row grid) --- */
+.btn-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 0;
     font-family: "Lato", sans-serif;
 }
 
 .btn {
     background-color: #fabc3c;
     padding: 15px;
-    margin-top: 30px;
     display: inline-block;
     text-align: center;
-    width: 220px;
+    width: auto;
     text-decoration: none;
     color: white;
     font-weight: bold;
@@ -24,12 +108,4 @@
 .btn:hover {
     transform: scale(1.08);
     background-color: #ffdc73;
-}
-
-.btn-predictions {
-    background-color: #6366f1;
-}
-
-.btn-predictions:hover {
-    background-color: #818cf8;
-}
+}

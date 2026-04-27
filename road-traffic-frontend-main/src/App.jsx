@@ -20,7 +20,8 @@ import TrafficStatus from "./routes/trafficStatus/trafficStatus";
 import LineScoreDate from "./routes/linescoredate/lineScoreDate";
 import LineWeekDay from "./routes/lineweekday/lineWeekDay";
 import TrafficPrediction from "./routes/trafficPrediction/trafficPrediction";
-
+import RouteComparison from "./routes/routeComparison/routeComparison";
+import ConstructionTimeline from "./routes/constructionTimeline/constructionTimeline";
 
 function App() {
   // const router = createBrowserRouter([
@@ -167,6 +168,10 @@ function App() {
         {
           path: "/traffic-status",
           element: <TrafficStatus/> 
+        },
+        {
+          path: "/route-comparison",
+          element: <RouteComparison />
         }
       ],
     },
@@ -197,6 +202,10 @@ function App() {
         {
           path: "users", // UserDisplay
           element: <UserDisplay />,
+        },
+        {
+          path: "construction-timeline",
+          element: <ConstructionTimeline />,
         },
       ],
     },

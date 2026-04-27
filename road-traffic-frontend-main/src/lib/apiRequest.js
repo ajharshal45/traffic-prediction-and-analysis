@@ -4,7 +4,7 @@ import axios from 'axios';
 // variables prefixed with VITE_ to the client at build time).
 // We include a fallback to the localhost URL for pure development environments 
 // where the .env file might not be perfectly configured yet.
-const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3001/api"; 
+const baseURL = import.meta.env.VITE_API_URL || "http://localhost:8080/api"; 
 
 const apiRequest = axios.create({
     baseURL: baseURL, 

@@ -36,7 +36,7 @@ The system manages traffic data, complaints, events, construction projects, and 
 
 ```
 Traffic Analysis Backend
-├── Node.js Express Server (Port: 3001)
+├── Node.js Express Server (Port: 8080)
 │   ├── REST APIs
 │   ├── MongoDB Database
 │   ├── JWT Authentication
@@ -82,7 +82,7 @@ Create a `.env` file in the root directory with the following variables:
 
 ```env
 # Server Configuration
-PORT=3001
+PORT=8080
 
 # Database
 MONGODB_URI=mongodb://localhost:27017
@@ -122,7 +122,7 @@ node App.js
 # OR using nodemon for development
 npx nodemon App.js
 ```
-The API server will start on `http://localhost:3001`
+The API server will start on `http://localhost:8080`
 
 ## 📡 API Endpoints
 

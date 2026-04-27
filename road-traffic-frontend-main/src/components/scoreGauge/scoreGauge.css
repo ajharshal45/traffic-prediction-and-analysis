@@ -1,0 +1,50 @@
+.score-gauge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  width: 100%;
+}
+
+.score-gauge-svg {
+  overflow: visible;
+}
+
+.gauge-needle {
+  transition: transform 1s ease;
+  transform-origin: 150px 150px;
+}
+
+.gauge-score-value {
+  font-size: 36px;
+  font-weight: 800;
+  fill: #333;
+}
+
+.gauge-level-text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.gauge-label-text {
+  font-size: 11px;
+  fill: #888;
+}
+
+.gauge-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.gauge-info span {
+  font-size: 14px;
+  color: #555;
+}
+
+.gauge-info span:last-child {
+  font-size: 12px;
+  color: #999;
+}
