@@ -16,7 +16,7 @@ PORT = 3003
 MODEL_PATH = 'pothole_mobnet_base.h5' 
 
 # --- LOAD MODEL WITH COMPATIBILITY FIX ---
-print("⏳ Loading Keras model...")
+print("Loading Keras model...")
 
 # FIX: Create a custom DepthwiseConv2D that ignores the 'groups' argument
 # This fixes the version mismatch error without needing to downgrade TensorFlow
@@ -32,16 +32,16 @@ try:
     with tf.keras.utils.custom_object_scope({'DepthwiseConv2D': FixedDepthwiseConv2D}):
         model = load_model(MODEL_PATH)
     
-    print(f"✅ Model '{MODEL_PATH}' loaded successfully (with compatibility fix)!")
+    print(f"Model '{MODEL_PATH}' loaded successfully (with compatibility fix)!")
 
 except Exception as e:
-    print(f"❌ Error loading model: {e}")
-    print("⚠️  Attempting standard load...")
+    print(f"Error loading model: {e}")
+    print("Attempting standard load...")
     try:
         model = load_model(MODEL_PATH)
-        print(f"✅ Model '{MODEL_PATH}' loaded successfully (standard load)!")
+        print(f"Model '{MODEL_PATH}' loaded successfully (standard load)!")
     except Exception as e2:
-        print(f"❌ Fatal Error: {e2}")
+        print(f"Fatal Error: {e2}")
         model = None
 
 def prepare_image(img_path):
@@ -91,7 +91,7 @@ def predict():
             prediction_value = float(preds[0][0] if len(preds[0]) == 1 else preds[0][1])
             class_name = 'pothole' if prediction_value > 0.5 else 'no-pothole'
             
-            print(f"🔍 Prediction: {class_name} (Score: {prediction_value:.4f})")
+            print(f"Prediction: {class_name} (Score: {prediction_value:.4f})")
 
             os.remove(file_path)
 
