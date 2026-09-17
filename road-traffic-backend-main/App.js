@@ -1,3 +1,8 @@
+// Force Node.js to use Google DNS for SRV lookups (bypasses system DNS issues)
+import dns from 'dns';
+dns.setDefaultResultOrder('ipv4first');
+dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+
 import express from "express";
 import modelRoute from "./routes/model.route.js"
 import connectDB from "./mongoose/connection.js"
@@ -35,7 +40,8 @@ const PORT = process.env.PORT || 8080;
 const allowedOrigins = [
     "https://form-data-collection.onrender.com", 
     "https://road-traffic-frontend.onrender.com",
-    "http://localhost:5173"
+    "http://localhost:5173",
+    "http://localhost:5174"
 ];
 
 app.use(cors({
@@ -65,10 +71,17 @@ app.get("/", (req, res) => {
 connectDB()
 .then(()=>{
     app.listen(PORT, () => {
-        console.log(`Server running on http://localhost:${PORT}`);        
-        // ✅ Start the 2-hourly traffic data collection scheduler
-        console.log('🚀 Initializing Traffic Data Scheduler...');
-        startScheduler();      });
+        console.log(`Server running on http://localhost:${PORT}`);
+        // Scheduler is gated by ENABLE_SCHEDULER=true so Render and GitHub Actions
+        // are never both writing at the same time.  Remove the env var on Render
+        // once the GitHub Actions workflows are active.
+        if (process.env.ENABLE_SCHEDULER === 'true') {
+            console.log('🚀 Initializing Traffic Data Scheduler (ENABLE_SCHEDULER=true)...');
+            startScheduler();
+        } else {
+            console.log('⏸️  In-process scheduler disabled (ENABLE_SCHEDULER != true). GitHub Actions handles collection.');
+        }
+      });
 }).catch((err)=>{
     console.log("MONGODB connection failed!!! ",err)
 })

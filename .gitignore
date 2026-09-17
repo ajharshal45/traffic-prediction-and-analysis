@@ -2,3 +2,10 @@ venv/
 **/node_modules/
 **/.env
 .DS_Store
+
+# Contains secrets / generated file
+complete_project_codebase.txt
+
+# Large files exceeding GitHub 50MB limit
+mongo_export/predictionlogs.json
+road-traffic-backend-main/backups/**/predictionlogs_backup.json

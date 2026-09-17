@@ -6,7 +6,8 @@ import {
   getRootCauseBreakdown,
   getRecommendations,
   getRouteComparison,
-  getAvailableRoutes
+  getAvailableRoutes,
+  getAdvancedInsights
 } from '../controllers/analytics.controller.js';
 
 const router = express.Router();
@@ -37,5 +38,9 @@ router.get('/recommendations', getRecommendations);
 // Compare all routes (which is worst today)
 // GET /api/analytics/comparison
 router.get('/comparison', getRouteComparison);
+
+// Advanced data science insights
+// GET /api/analytics/insights?days=30
+router.get('/insights', getAdvancedInsights);
 
 export default router;

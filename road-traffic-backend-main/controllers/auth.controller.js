@@ -4,27 +4,26 @@ import jwt from "jsonwebtoken";
 // Function to handle user registration (Logic remains mostly the same, password hashing handled by pre-save hook)
 export const registerUser = async (req, res) => {
   try {
-  const { username, email, password, mobile_number } = req.body;
+    const { username, email, password } = req.body;
 
-// Check if the user already exists (checking by mobile_number is fine)
-    const existingUser = await User.findOne({ mobile_number });
+    // Check if a user with the same email or username already exists
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
-    return res
-    .status(400)
-    .json({ message: "User with this phone number already exists" });
+      return res
+        .status(400)
+        .json({ message: "User with this email or username already exists" });
     }
 
     // When newUser.save() is called, the pre-save hook in user.model.js will automatically hash the password.
-const newUser = new User({ username, email, password, mobile_number });
-const savedUser = await newUser.save();
-console.log("new user has been saved !");
-// console.log(savedUser);
+    const newUser = new User({ username, email, password });
+    const savedUser = await newUser.save();
+    console.log("new user has been saved!");
 
- res.status(201).json(savedUser);
- } catch (error) {
- console.error(error);
-res.status(500).json({ message: "Error creating user" });
-}
+    res.status(201).json(savedUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error creating user" });
+  }
 };
 
 // Function to handle user login (SECURELY UPDATED)

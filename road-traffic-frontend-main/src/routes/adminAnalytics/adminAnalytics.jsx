@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Line, Bar } from 'react-chartjs-2';
+import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -7,6 +7,7 @@ import {
   PointElement,
   LineElement,
   BarElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend,
@@ -21,6 +22,7 @@ ChartJS.register(
   PointElement,
   LineElement,
   BarElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend,
@@ -66,10 +68,23 @@ const AdminAnalytics = () => {
   const [showRouteRecommendations, setShowRouteRecommendations] = useState(false);
   const [loadingRouteRecommendations, setLoadingRouteRecommendations] = useState(false);
 
+  // Data Science Insights Tab State
+  const [insightsData, setInsightsData] = useState(null);
+  const [loadingInsights, setLoadingInsights] = useState(false);
+  const [insightsDays, setInsightsDays] = useState(30);
+  const [selectedFactorRoute, setSelectedFactorRoute] = useState(null);
+
   // Fetch available routes on mount
   useEffect(() => {
     fetchRoutes();
   }, []);
+
+  // Fetch insights when tab changes or days change
+  useEffect(() => {
+    if (activeTab === 'insights') {
+      fetchInsights();
+    }
+  }, [activeTab, insightsDays]);
 
   // Fetch trend data when route or days change
   useEffect(() => {
@@ -93,6 +108,25 @@ const AdminAnalytics = () => {
     } catch (err) {
       console.error('Error fetching routes:', err);
     }
+  };
+
+  const fetchInsights = async () => {
+    setLoadingInsights(true);
+    try {
+      const param = insightsDays === 'all' ? 'all' : insightsDays;
+      const res = await apiRequest.get(`/analytics/insights?days=${param}`);
+      setInsightsData(res.data);
+      // Auto-select first route for factor chart
+      if (res.data.factorContribution) {
+        const routeKeys = Object.keys(res.data.factorContribution);
+        if (routeKeys.length > 0 && !selectedFactorRoute) {
+          setSelectedFactorRoute(routeKeys[0]);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching insights:', err);
+    }
+    setLoadingInsights(false);
   };
 
   const fetchTrendData = async () => {
@@ -440,6 +474,12 @@ const AdminAnalytics = () => {
           onClick={() => setActiveTab('routeDetails')}
         >
           Route Details
+        </button>
+        <button
+          className={`tab ${activeTab === 'insights' ? 'active' : ''}`}
+          onClick={() => setActiveTab('insights')}
+        >
+          Insights & Analysis
         </button>
       </div>
 
@@ -884,8 +924,300 @@ const AdminAnalytics = () => {
         </div>
       )}
 
+      {/* ========== DATA SCIENCE INSIGHTS TAB ========== */}
+      {activeTab === 'insights' && (
+        <div className="analytics-content ds-insights">
+          {/* Period Selector */}
+          <div className="ds-period-selector">
+            <span className="ds-period-label">Analysis Period:</span>
+            <div className="period-buttons">
+              {[7, 30, 60, 'all'].map(d => (
+                <button
+                  key={d}
+                  className={`period-btn ${insightsDays === d ? 'active' : ''}`}
+                  onClick={() => setInsightsDays(d)}
+                >
+                  {d === 'all' ? 'All Data' : `${d} Days`}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {loadingInsights ? (
+            <div className="loading">Loading insights...</div>
+          ) : insightsData ? (
+            <>
+
+              {/* --- MODEL VALIDATION METRICS --- */}
+              <div className="ds-section">
+                <div className="ds-section-header">
+                  <h2>Prediction Performance</h2>
+                  <span className="ds-subtitle">
+                    {insightsData.validation.totalSamples > 0
+                      ? `Based on ${insightsData.validation.totalSamples.toLocaleString()} verified predictions`
+                      : 'No verified predictions available for this period'}
+                  </span>
+                </div>
+
+                {insightsData.validation.totalSamples > 0 ? (
+                  <>
+                    <div className="ds-kpi-grid">
+                      <div className="ds-kpi-card">
+                        <div className="ds-kpi-label">Avg. Error</div>
+                        <div className="ds-kpi-value">{insightsData.validation.mae ?? 'N/A'}</div>
+                        <div className="ds-kpi-unit">points off on average</div>
+                        <div className="ds-kpi-sub">{insightsData.validation.totalSamples.toLocaleString()} predictions checked</div>
+                      </div>
+                      <div className="ds-kpi-card">
+                        <div className="ds-kpi-label">Error %</div>
+                        <div className="ds-kpi-value">{insightsData.validation.mape ?? 'N/A'}</div>
+                        <div className="ds-kpi-unit">% average deviation</div>
+                        <div className="ds-kpi-sub">{insightsData.validation.mapeSampleCount.toLocaleString()} valid comparisons</div>
+                      </div>
+                      <div className="ds-kpi-card">
+                        <div className="ds-kpi-label">Error Range</div>
+                        <div className="ds-kpi-value">{insightsData.validation.rmse ?? 'N/A'}</div>
+                        <div className="ds-kpi-unit">typical spread of error</div>
+                      </div>
+                      <div className="ds-kpi-card">
+                        <div className="ds-kpi-label">Accuracy</div>
+                        <div className={`ds-kpi-value ${
+                          insightsData.validation.r2 === null ? '' :
+                          insightsData.validation.r2 >= 0.7 ? 'ds-good' :
+                          insightsData.validation.r2 >= 0.4 ? 'ds-warn' : 'ds-bad'
+                        }`}>
+                          {insightsData.validation.r2 !== null ? `${Math.round(insightsData.validation.r2 * 100)}%` : 'N/A'}
+                        </div>
+                        <div className="ds-kpi-unit">prediction reliability</div>
+                      </div>
+                    </div>
+
+                    <div className="ds-accuracy-band">
+                      <div className="ds-band-item">
+                        <span className="ds-band-label">Very Close</span>
+                        <div className="ds-band-bar"><div className="ds-band-fill ds-fill-green" style={{width: `${insightsData.validation.accuracyBand.within5}%`}}></div></div>
+                        <span className="ds-band-value">{insightsData.validation.accuracyBand.within5}%</span>
+                      </div>
+                      <div className="ds-band-item">
+                        <span className="ds-band-label">Close</span>
+                        <div className="ds-band-bar"><div className="ds-band-fill ds-fill-amber" style={{width: `${insightsData.validation.accuracyBand.within10}%`}}></div></div>
+                        <span className="ds-band-value">{insightsData.validation.accuracyBand.within10}%</span>
+                      </div>
+                      <div className="ds-band-item">
+                        <span className="ds-band-label">Reasonable</span>
+                        <div className="ds-band-bar"><div className="ds-band-fill ds-fill-blue" style={{width: `${insightsData.validation.accuracyBand.within20}%`}}></div></div>
+                        <span className="ds-band-value">{insightsData.validation.accuracyBand.within20}%</span>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="no-data">No verified predictions available for this period.</div>
+                )}
+              </div>
+
+              {/* --- FACTOR CONTRIBUTION --- */}
+              {insightsData.factorContribution && Object.keys(insightsData.factorContribution).length > 0 && (
+                <div className="ds-section">
+                  <div className="ds-section-header">
+                    <h2>What Affects Traffic</h2>
+                    <span className="ds-subtitle">Breakdown of factors contributing to traffic scores on each route</span>
+                  </div>
+
+                  <div className="ds-factor-controls">
+                    <label>Select Route:</label>
+                    <select
+                      value={selectedFactorRoute || ''}
+                      onChange={e => setSelectedFactorRoute(e.target.value)}
+                    >
+                      {Object.keys(insightsData.factorContribution).map(r => (
+                        <option key={r} value={r}>{r.replace(/-/g, ' → ')}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {selectedFactorRoute && insightsData.factorContribution[selectedFactorRoute] && (() => {
+                    const factors = insightsData.factorContribution[selectedFactorRoute];
+                    const sorted = Object.entries(factors)
+                      .filter(([, v]) => v.pct > 0)
+                      .sort((a, b) => b[1].pct - a[1].pct);
+                    const COLORS = ['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f59e0b','#22c55e','#06b6d4','#3b82f6','#a855f7','#14b8a6'];
+
+                    const doughnutData = {
+                      labels: sorted.map(([name]) => name),
+                      datasets: [{
+                        data: sorted.map(([, v]) => v.pct),
+                        backgroundColor: sorted.map((_, i) => COLORS[i % COLORS.length]),
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                      }]
+                    };
+
+                    return (
+                      <div className="ds-factor-content">
+                        <div className="ds-factor-chart">
+                          <Doughnut data={doughnutData} options={{
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                              legend: { position: 'right', labels: { color: '#374151', padding: 12 } },
+                              tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed}%` } }
+                            },
+                            cutout: '60%'
+                          }} />
+                        </div>
+                        <div className="ds-factor-table">
+                          <table className="ds-table">
+                            <thead><tr><th>Factor</th><th>Impact Score</th><th>Share</th></tr></thead>
+                            <tbody>
+                              {sorted.map(([name, v], idx) => (
+                                <tr key={name}>
+                                  <td><span className="ds-factor-dot" style={{backgroundColor: COLORS[idx % COLORS.length]}}></span>{name}</td>
+                                  <td>{v.total}</td>
+                                  <td><strong>{v.pct}%</strong></td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                          <p className="ds-factor-note">Percentages show each factor's share in the overall traffic score calculation for this route.</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* --- TREND ANALYSIS --- */}
+              {insightsData.trendRegression && Object.keys(insightsData.trendRegression).length > 0 && (
+                <div className="ds-section">
+                  <div className="ds-section-header">
+                    <h2>Traffic Trends</h2>
+                    <span className="ds-subtitle">How traffic is changing over time on each route</span>
+                  </div>
+                  <div className="ds-trend-grid">
+                    {Object.entries(insightsData.trendRegression).map(([routeId, data]) => {
+                      const arrow = data.direction === 'worsening' ? '↑' : data.direction === 'improving' ? '↓' : '→';
+                      const arrowColor = data.direction === 'worsening' ? '#ef4444' : data.direction === 'improving' ? '#22c55e' : '#6b7280';
+                      const sparkData = {
+                        labels: data.dailyAvgs.map(d => d.date.slice(5)),
+                        datasets: [{
+                          data: data.dailyAvgs.map(d => d.avg),
+                          borderColor: arrowColor,
+                          backgroundColor: 'transparent',
+                          tension: 0.4,
+                          pointRadius: 0,
+                          borderWidth: 2,
+                        }]
+                      };
+
+                      return (
+                        <div key={routeId} className="ds-trend-card">
+                          <div className="ds-trend-header">
+                            <span className="ds-trend-route">{routeId.replace(/-/g, ' → ')}</span>
+                            <span className="ds-trend-arrow" style={{color: arrowColor}}>{arrow}</span>
+                          </div>
+                          <div className="ds-trend-meta">
+                            <span>Change: <strong style={{color: arrowColor}}>{data.slope > 0 ? '+' : ''}{data.slope}/day</strong></span>
+                            <span>Confidence: <strong>{Math.round(data.r2 * 100)}%</strong></span>
+                            <span className={`ds-trend-badge ds-trend-${data.direction}`}>{data.direction === 'worsening' ? 'Getting Worse' : data.direction === 'improving' ? 'Getting Better' : 'Stable'}</span>
+                          </div>
+                          <div className="ds-sparkline">
+                            <Line data={sparkData} options={{
+                              responsive: true, maintainAspectRatio: false,
+                              plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                              scales: { x: { display: false }, y: { display: false } },
+                              elements: { point: { radius: 0 } }
+                            }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* --- ROUTE STATISTICS --- */}
+              {insightsData.routeStats && Object.keys(insightsData.routeStats).length > 0 && (
+                <div className="ds-section">
+                  <div className="ds-section-header">
+                    <h2>Route Comparison</h2>
+                    <span className="ds-subtitle">Side-by-side comparison of all monitored routes</span>
+                  </div>
+                  <div className="ds-table-wrapper">
+                    <table className="ds-table">
+                      <thead>
+                        <tr>
+                          <th>Route</th>
+                          <th>Avg Score</th>
+                          <th>Middle Value</th>
+                          <th>Variation</th>
+                          <th>Lowest</th>
+                          <th>Highest</th>
+                          <th>Busiest Time</th>
+                          <th>Data Points</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(() => {
+                          const entries = Object.entries(insightsData.routeStats).sort((a, b) => b[1].mean - a[1].mean);
+                          const worstRoute = entries.length > 0 ? entries[0][0] : null;
+                          const bestRoute = entries.length > 0 ? entries[entries.length - 1][0] : null;
+                          return entries.map(([routeId, s]) => (
+                            <tr key={routeId} className={
+                              routeId === worstRoute ? 'ds-row-worst' :
+                              routeId === bestRoute ? 'ds-row-best' : ''
+                            }>
+                              <td style={{fontWeight: 600}}>{routeId.replace(/-/g, ' → ')}</td>
+                              <td>{s.mean}</td>
+                              <td>{s.median}</td>
+                              <td>{s.std}</td>
+                              <td>{s.min}</td>
+                              <td>{s.max}</td>
+                              <td>{s.peakHour}</td>
+                              <td>{s.recordCount}</td>
+                            </tr>
+                          ));
+                        })()}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* --- KEY INSIGHTS (last) --- */}
+              {insightsData.insights && insightsData.insights.length > 0 && (
+                <div className="ds-section">
+                  <div className="ds-section-header">
+                    <h2>Key Insights</h2>
+                    <span className="ds-subtitle">Based on analysis of traffic data for the selected period</span>
+                  </div>
+                  <div className="ds-insights-list">
+                    {insightsData.insights.map((insight, idx) => (
+                      <div key={idx} className="ds-insight-card">
+                        <span className="ds-insight-bullet"></span>
+                        <span className="ds-insight-text">{insight}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="no-data">Unable to load insights data.</div>
+          )}
+        </div>
+      )}
+
     </div>
   );
+};
+
+// Helper for anomaly table
+const getTrafficLevel = (score) => {
+  if (score <= 15) return 'very low';
+  if (score <= 35) return 'low';
+  if (score <= 60) return 'medium';
+  if (score <= 85) return 'high';
+  return 'very high';
 };
 
 export default AdminAnalytics;

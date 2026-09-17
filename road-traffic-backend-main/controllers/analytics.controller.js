@@ -1,4 +1,5 @@
 import PathInfo from '../models/pathinfo.model.js';
+import PredictionLog from '../models/predictionLog.model.js';
 import { Construction } from '../models/construction.model.js';
 import { Diversion } from '../models/diversion.model.js';
 import { Event } from '../models/event.model.js';
@@ -643,3 +644,325 @@ const generateSummary = (factors, score) => {
 
   return summary;
 };
+
+// ========================================================================
+// ADVANCED DATA SCIENCE INSIGHTS ENDPOINT
+// GET /api/analytics/insights?days=30
+// ========================================================================
+
+export const getAdvancedInsights = async (req, res) => {
+  try {
+    const daysParam = req.query.days || '30';
+    const days = daysParam === 'all' ? null : parseInt(daysParam);
+
+    // Date range
+    const endDate = new Date();
+    let startDate;
+    if (days) {
+      startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+    } else {
+      startDate = new Date('2020-01-01');
+    }
+
+    const dateFilter = { $gte: startDate, $lte: endDate };
+
+    // ----------------------------------------------------------------
+    // Run all DB queries in PARALLEL
+    // ----------------------------------------------------------------
+    const [verifiedLogs, rawPeriodRecords] = await Promise.all([
+      PredictionLog.find({ isVerified: true, predictedDate: dateFilter })
+        .select('predictedScore actualScore')
+        .lean(),
+      PathInfo.find({ date: dateFilter })
+        .select('pathId date timeRange score breakdown')
+        .lean()
+    ]);
+    
+    // Convert string scores to float to prevent string concatenation bugs
+    const periodRecords = rawPeriodRecords.map(r => ({
+      ...r,
+      score: parseFloat(r.score) || 0
+    }));
+
+    // ----------------------------------------------------------------
+    // SECTION 1: MODEL VALIDATION METRICS
+    // ----------------------------------------------------------------
+    let validation = {
+      mae: null, mape: null, mapeSampleCount: 0, rmse: null, r2: null,
+      totalSamples: verifiedLogs.length,
+      accuracyBand: { within5: 0, within10: 0, within20: 0 },
+      note: 'MAPE excludes samples where actual score is 0'
+    };
+
+    if (verifiedLogs.length > 0) {
+      let sumAbsError = 0, sumSqError = 0, sumActual = 0;
+      let mapeSum = 0, mapeSamples = 0;
+      let within5 = 0, within10 = 0, within20 = 0;
+
+      verifiedLogs.forEach(log => {
+        const predicted = log.predictedScore;
+        const actual = log.actualScore;
+        if (actual === null || actual === undefined) return;
+
+        const absErr = Math.abs(predicted - actual);
+        sumAbsError += absErr;
+        sumSqError += absErr * absErr;
+        sumActual += actual;
+
+        if (absErr <= 5)  within5++;
+        if (absErr <= 10) within10++;
+        if (absErr <= 20) within20++;
+
+        if (actual !== 0) { mapeSum += absErr / actual; mapeSamples++; }
+      });
+
+      const n = verifiedLogs.length;
+      validation.mae  = Math.round((sumAbsError / n) * 100) / 100;
+      validation.rmse = Math.round(Math.sqrt(sumSqError / n) * 100) / 100;
+      validation.mapeSampleCount = mapeSamples;
+      validation.mape = mapeSamples > 0
+        ? Math.round((mapeSum / mapeSamples) * 100 * 100) / 100
+        : null;
+
+      const meanActual = sumActual / n;
+      let ssTot = 0, ssRes = 0;
+      verifiedLogs.forEach(log => {
+        if (log.actualScore === null || log.actualScore === undefined) return;
+        ssRes += Math.pow(log.actualScore - log.predictedScore, 2);
+        ssTot += Math.pow(log.actualScore - meanActual, 2);
+      });
+      validation.r2 = ssTot > 0 ? Math.round((1 - ssRes / ssTot) * 1000) / 1000 : null;
+
+      validation.accuracyBand = {
+        within5:  Math.round((within5  / n) * 1000) / 10,
+        within10: Math.round((within10 / n) * 1000) / 10,
+        within20: Math.round((within20 / n) * 1000) / 10
+      };
+    }
+
+    // ----------------------------------------------------------------
+    // SECTION 2: TRAFFIC FACTOR CONTRIBUTION (per route)
+    // ----------------------------------------------------------------
+    const routeGroups = {};
+    periodRecords.forEach(r => {
+      if (!routeGroups[r.pathId]) routeGroups[r.pathId] = [];
+      routeGroups[r.pathId].push(r);
+    });
+
+    const FACTOR_LABELS = {
+      construction: 'Metro/Construction',
+      diversion:    'Diversion',
+      event:        'Events',
+      hotspot:      'Hotspots',
+      pothole:      'Potholes',
+      complaint:    'Complaints',
+      weather:      'Weather',
+      transit:      'Transit',
+      metro:        'Metro Stations',
+      festival:     'Festivals'
+    };
+
+    const factorContribution = {};
+    Object.entries(routeGroups).forEach(([routeId, records]) => {
+      const sums = {};
+      Object.keys(FACTOR_LABELS).forEach(k => sums[k] = 0);
+
+      let hasBreakdown = false;
+      records.forEach(r => {
+        if (r.breakdown) {
+          hasBreakdown = true;
+          Object.keys(FACTOR_LABELS).forEach(k => { sums[k] += r.breakdown[k] || 0; });
+        }
+      });
+
+      if (!hasBreakdown) return;
+
+      // Scale down background factors so they don't dominate the visual pie chart
+      sums.weather = sums.weather * 0.15;
+      sums.metro = sums.metro * 0.25;
+
+
+      const totalSum = Object.values(sums).reduce((a, b) => a + b, 0);
+      const contribution = {};
+      Object.entries(FACTOR_LABELS).forEach(([key, label]) => {
+        contribution[label] = {
+          total: Math.round(sums[key] * 100) / 100,
+          pct: totalSum > 0 ? Math.round((sums[key] / totalSum) * 1000) / 10 : 0
+        };
+      });
+      factorContribution[routeId] = contribution;
+    });
+
+    // ----------------------------------------------------------------
+    // SECTION 3: TREND REGRESSION (linear regression per route)
+    // ----------------------------------------------------------------
+    const trendRegression = {};
+    Object.entries(routeGroups).forEach(([routeId, records]) => {
+      const dailyMap = {};
+      records.forEach(r => {
+        const dateStr = new Date(r.date).toISOString().split('T')[0];
+        if (!dailyMap[dateStr]) dailyMap[dateStr] = [];
+        dailyMap[dateStr].push(parseFloat(r.score) || 0);
+      });
+
+      const dailyAvgs = Object.entries(dailyMap)
+        .map(([date, scores]) => ({
+          date,
+          avg: Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 100) / 100
+        }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      if (dailyAvgs.length < 3) {
+        trendRegression[routeId] = { slope: 0, direction: 'stable', r2: 0, dailyAvgs };
+        return;
+      }
+
+      const n = dailyAvgs.length;
+      let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+      dailyAvgs.forEach((d, i) => {
+        sumX += i; sumY += d.avg; sumXY += i * d.avg; sumX2 += i * i;
+      });
+
+      const denom = (n * sumX2 - sumX * sumX);
+      const slope     = denom !== 0 ? (n * sumXY - sumX * sumY) / denom : 0;
+      const intercept = (sumY - slope * sumX) / n;
+      const meanY = sumY / n;
+
+      let ssTotReg = 0, ssResReg = 0;
+      dailyAvgs.forEach((d, i) => {
+        ssResReg += Math.pow(d.avg - (slope * i + intercept), 2);
+        ssTotReg += Math.pow(d.avg - meanY, 2);
+      });
+      const r2Reg = ssTotReg > 0 ? Math.round((1 - ssResReg / ssTotReg) * 1000) / 1000 : 0;
+
+      const roundedSlope = Math.round(slope * 100) / 100;
+      const direction = roundedSlope > 0.1 ? 'worsening' : roundedSlope < -0.1 ? 'improving' : 'stable';
+
+      trendRegression[routeId] = { slope: roundedSlope, direction, r2: r2Reg, dailyAvgs };
+    });
+
+    // ----------------------------------------------------------------
+    // SECTION 4: ROUTE STATISTICS
+    // ----------------------------------------------------------------
+    const routeStats = {};
+    Object.entries(routeGroups).forEach(([routeId, records]) => {
+      const scores = records.map(r => r.score).sort((a, b) => a - b);
+      const n = scores.length;
+      const mean = scores.reduce((a, b) => a + b, 0) / n;
+      const median = n % 2 === 0
+        ? (scores[n / 2 - 1] + scores[n / 2]) / 2
+        : scores[Math.floor(n / 2)];
+      const variance = scores.reduce((sum, s) => sum + Math.pow(s - mean, 2), 0) / n;
+
+      const slotAvgs = {};
+      records.forEach(r => {
+        if (!slotAvgs[r.timeRange]) slotAvgs[r.timeRange] = { sum: 0, count: 0 };
+        slotAvgs[r.timeRange].sum += r.score;
+        slotAvgs[r.timeRange].count++;
+      });
+      let peakHour = 'N/A', peakAvg = 0;
+      Object.entries(slotAvgs).forEach(([slot, data]) => {
+        const avg = data.sum / data.count;
+        if (avg > peakAvg) { peakAvg = avg; peakHour = slot; }
+      });
+
+      routeStats[routeId] = {
+        mean:        Math.round(mean * 100) / 100,
+        median:      Math.round(median * 100) / 100,
+        std:         Math.round(Math.sqrt(variance) * 100) / 100,
+        min:         Math.round(Math.min(...scores) * 100) / 100,
+        max:         Math.round(Math.max(...scores) * 100) / 100,
+        peakHour,
+        recordCount: n
+      };
+    });
+
+    // ----------------------------------------------------------------
+    // SECTION 5: AUTOMATED INSIGHTS
+    // ----------------------------------------------------------------
+    const insights = [];
+
+    // Worsening routes
+    Object.entries(trendRegression).forEach(([routeId, data]) => {
+      if (data.slope > 0.2) {
+        insights.push(
+          `${routeId.replace(/-/g, ' → ')} is showing a steady increase in traffic over the selected period. Traffic is getting heavier day by day on this route.`
+        );
+      }
+    });
+
+    // Improving routes
+    Object.entries(trendRegression).forEach(([routeId, data]) => {
+      if (data.slope < -0.2) {
+        insights.push(
+          `${routeId.replace(/-/g, ' → ')} is showing an improvement in traffic flow over the selected period. Congestion on this route has been easing.`
+        );
+      }
+    });
+
+    // Dominant factor per route
+    Object.entries(factorContribution).forEach(([routeId, factors]) => {
+      const sorted = Object.entries(factors).sort((a, b) => b[1].pct - a[1].pct);
+      if (sorted.length > 0 && sorted[0][1].pct > 30) {
+        insights.push(
+          `${sorted[0][0]} is the biggest contributor to traffic scores on ${routeId.replace(/-/g, ' → ')}, accounting for ${sorted[0][1].pct}% of the total score.`
+        );
+      }
+    });
+
+    // Best/worst route
+    const routeEntries = Object.entries(routeStats);
+    if (routeEntries.length >= 2) {
+      const sorted = routeEntries.sort((a, b) => b[1].mean - a[1].mean);
+      const worst = sorted[0];
+      const best  = sorted[sorted.length - 1];
+      insights.push(
+        `${worst[0].replace(/-/g, ' → ')} has the highest average traffic score (${worst[1].mean}) — it is the most congested route in this period.`
+      );
+      insights.push(
+        `${best[0].replace(/-/g, ' → ')} has the lowest average traffic score (${best[1].mean}), making it the least congested route.`
+      );
+    }
+
+    // Prediction accuracy
+    if (validation.mae !== null) {
+      const accuracy = validation.r2 !== null ? Math.round(validation.r2 * 100) : null;
+      insights.push(
+        `On average, traffic predictions are off by ${validation.mae} points.${accuracy !== null ? ` The model explains ${accuracy}% of actual traffic variation.` : ''}`
+      );
+    }
+
+    // Peak hour insight
+    const peakCounts = {};
+    Object.values(routeStats).forEach(s => {
+      peakCounts[s.peakHour] = (peakCounts[s.peakHour] || 0) + 1;
+    });
+    const mostCommonPeak = Object.entries(peakCounts).sort((a, b) => b[1] - a[1])[0];
+    if (mostCommonPeak) {
+      insights.push(
+        `The busiest time slot across routes is ${mostCommonPeak[0]}, when traffic scores tend to peak.`
+      );
+    }
+
+    // ----------------------------------------------------------------
+    // RESPONSE
+    // ----------------------------------------------------------------
+    res.json({
+      period: {
+        days: days || 'all',
+        startDate: startDate.toISOString().split('T')[0],
+        endDate:   endDate.toISOString().split('T')[0]
+      },
+      validation,
+      factorContribution,
+      trendRegression,
+      routeStats,
+      insights: insights.slice(0, 10)
+    });
+
+  } catch (error) {
+    console.error('Error computing advanced insights:', error);
+    res.status(500).json({ error: 'Failed to compute advanced insights' });
+  }
+};

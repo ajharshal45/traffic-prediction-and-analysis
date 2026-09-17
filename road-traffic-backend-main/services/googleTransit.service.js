@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 
-const GOOGLE_API_KEY = process.env.VITE_GOOGLE_MAPS_API_KEY;
+const GOOGLE_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 
 // Cache transit data for 10 minutes to reduce API calls
 let transitCache = new Map();

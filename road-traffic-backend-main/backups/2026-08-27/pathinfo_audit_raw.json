@@ -1,0 +1,762 @@
+{
+  "Hinjewadi-Swargate": {
+    "total": 4245,
+    "avg": 34.36,
+    "median": 30.11,
+    "stdDev": 20.61,
+    "min": 0,
+    "max": 100,
+    "p25": 20.16,
+    "p75": 44.78,
+    "p95": 73.29,
+    "zeroCount": 101,
+    "extremeCount": 62,
+    "minDate": "2025-02-10",
+    "maxDate": "2026-08-27",
+    "timeSlots": {
+      "00-02": {
+        "count": 326,
+        "avg": 16,
+        "std": 11.3,
+        "min": 0,
+        "max": 45.79,
+        "zeros": 30
+      },
+      "02-04": {
+        "count": 330,
+        "avg": 19.93,
+        "std": 12.58,
+        "min": 0,
+        "max": 77.4,
+        "zeros": 19
+      },
+      "04-06": {
+        "count": 326,
+        "avg": 28.51,
+        "std": 16.09,
+        "min": 0,
+        "max": 71.62475172306955,
+        "zeros": 6
+      },
+      "06-08": {
+        "count": 325,
+        "avg": 39.35,
+        "std": 14.68,
+        "min": 0,
+        "max": 73,
+        "zeros": 3
+      },
+      "08-10": {
+        "count": 331,
+        "avg": 48.37,
+        "std": 25.38,
+        "min": 0,
+        "max": 100,
+        "zeros": 4
+      },
+      "10-12": {
+        "count": 345,
+        "avg": 37.54,
+        "std": 17.11,
+        "min": 0,
+        "max": 82.17,
+        "zeros": 5
+      },
+      "12-14": {
+        "count": 339,
+        "avg": 46.84,
+        "std": 16.93,
+        "min": 4.238688704638889,
+        "max": 81.68026729519535,
+        "zeros": 0
+      },
+      "14-16": {
+        "count": 349,
+        "avg": 41.15,
+        "std": 16.43,
+        "min": 0,
+        "max": 91.52233462622047,
+        "zeros": 2
+      },
+      "16-18": {
+        "count": 338,
+        "avg": 43.79,
+        "std": 21.01,
+        "min": 0,
+        "max": 98,
+        "zeros": 1
+      },
+      "18-20": {
+        "count": 560,
+        "avg": 36.04,
+        "std": 25.17,
+        "min": 0,
+        "max": 100,
+        "zeros": 11
+      },
+      "20-22": {
+        "count": 335,
+        "avg": 30.52,
+        "std": 14.62,
+        "min": 0,
+        "max": 70.92,
+        "zeros": 9
+      },
+      "22-24": {
+        "count": 341,
+        "avg": 22.28,
+        "std": 12.41,
+        "min": 0,
+        "max": 76,
+        "zeros": 11
+      }
+    },
+    "dayOfWeek": {
+      "Sun": {
+        "count": 568,
+        "avg": 27.61
+      },
+      "Mon": {
+        "count": 604,
+        "avg": 36.99
+      },
+      "Tue": {
+        "count": 542,
+        "avg": 38.57
+      },
+      "Wed": {
+        "count": 540,
+        "avg": 38.71
+      },
+      "Thu": {
+        "count": 634,
+        "avg": 35.96
+      },
+      "Fri": {
+        "count": 776,
+        "avg": 32.68
+      },
+      "Sat": {
+        "count": 581,
+        "avg": 30.79
+      }
+    },
+    "repeatedConsecutive": 475,
+    "maxConsecutiveRepeat": 25,
+    "focusPeriod": {
+      "count": 539,
+      "avg": 43.57,
+      "std": 20.77,
+      "min": 5,
+      "max": 98
+    }
+  },
+  "Katraj-Kondhwa": {
+    "total": 3100,
+    "avg": 31.48,
+    "median": 30.39,
+    "stdDev": 17.79,
+    "min": 0,
+    "max": 120,
+    "p25": 18.270000000000003,
+    "p75": 43.95,
+    "p95": 62.81,
+    "zeroCount": 127,
+    "extremeCount": 3,
+    "minDate": "2024-12-12",
+    "maxDate": "2026-08-27",
+    "timeSlots": {
+      "00-02": {
+        "count": 262,
+        "avg": 19.28,
+        "std": 11.41,
+        "min": 0,
+        "max": 58.09,
+        "zeros": 25
+      },
+      "02-04": {
+        "count": 269,
+        "avg": 22.54,
+        "std": 16.71,
+        "min": 0,
+        "max": 120,
+        "zeros": 15
+      },
+      "04-06": {
+        "count": 255,
+        "avg": 28.43,
+        "std": 14.92,
+        "min": 0,
+        "max": 81,
+        "zeros": 11
+      },
+      "06-08": {
+        "count": 254,
+        "avg": 37.86,
+        "std": 14.44,
+        "min": 0,
+        "max": 83.36,
+        "zeros": 4
+      },
+      "08-10": {
+        "count": 256,
+        "avg": 41.51,
+        "std": 19.85,
+        "min": 0,
+        "max": 83.96,
+        "zeros": 5
+      },
+      "10-12": {
+        "count": 257,
+        "avg": 31.8,
+        "std": 15.05,
+        "min": 0,
+        "max": 61.87,
+        "zeros": 11
+      },
+      "12-14": {
+        "count": 264,
+        "avg": 46.01,
+        "std": 13.62,
+        "min": 0,
+        "max": 82.06,
+        "zeros": 2
+      },
+      "14-16": {
+        "count": 255,
+        "avg": 37.2,
+        "std": 15.04,
+        "min": 0,
+        "max": 68.5,
+        "zeros": 3
+      },
+      "16-18": {
+        "count": 255,
+        "avg": 36.97,
+        "std": 16.73,
+        "min": 0,
+        "max": 72.92,
+        "zeros": 3
+      },
+      "18-20": {
+        "count": 257,
+        "avg": 31.72,
+        "std": 22.09,
+        "min": 0,
+        "max": 94,
+        "zeros": 14
+      },
+      "20-22": {
+        "count": 258,
+        "avg": 25.74,
+        "std": 13,
+        "min": 0,
+        "max": 76.5,
+        "zeros": 14
+      },
+      "22-24": {
+        "count": 257,
+        "avg": 19.16,
+        "std": 12.16,
+        "min": 0,
+        "max": 83.89,
+        "zeros": 20
+      }
+    },
+    "dayOfWeek": {
+      "Sun": {
+        "count": 447,
+        "avg": 28.04
+      },
+      "Mon": {
+        "count": 462,
+        "avg": 32.76
+      },
+      "Tue": {
+        "count": 428,
+        "avg": 32.38
+      },
+      "Wed": {
+        "count": 437,
+        "avg": 33.11
+      },
+      "Thu": {
+        "count": 438,
+        "avg": 32.41
+      },
+      "Fri": {
+        "count": 440,
+        "avg": 31.72
+      },
+      "Sat": {
+        "count": 448,
+        "avg": 29.98
+      }
+    },
+    "repeatedConsecutive": 55,
+    "maxConsecutiveRepeat": 3,
+    "focusPeriod": {
+      "count": 543,
+      "avg": 42.35,
+      "std": 13.24,
+      "min": 10.44,
+      "max": 76.81
+    }
+  },
+  "Kondhwa-Hinjewadi": {
+    "total": 4233,
+    "avg": 37.7,
+    "median": 36.505973317487985,
+    "stdDev": 18.64,
+    "min": 0,
+    "max": 101,
+    "p25": 25.46,
+    "p75": 49.29,
+    "p95": 71.52512306811224,
+    "zeroCount": 72,
+    "extremeCount": 13,
+    "minDate": "2025-01-27",
+    "maxDate": "2026-08-27",
+    "timeSlots": {
+      "00-02": {
+        "count": 319,
+        "avg": 24.47,
+        "std": 15.08,
+        "min": 0,
+        "max": 76,
+        "zeros": 15
+      },
+      "02-04": {
+        "count": 329,
+        "avg": 27.44,
+        "std": 16.49,
+        "min": 0,
+        "max": 78.14,
+        "zeros": 17
+      },
+      "04-06": {
+        "count": 326,
+        "avg": 38.64,
+        "std": 19.23,
+        "min": 0,
+        "max": 89.00597331748799,
+        "zeros": 3
+      },
+      "06-08": {
+        "count": 324,
+        "avg": 41.71,
+        "std": 14.99,
+        "min": 0,
+        "max": 77.49,
+        "zeros": 3
+      },
+      "08-10": {
+        "count": 331,
+        "avg": 49.79,
+        "std": 21.14,
+        "min": 0,
+        "max": 100,
+        "zeros": 3
+      },
+      "10-12": {
+        "count": 342,
+        "avg": 37.69,
+        "std": 14.49,
+        "min": 0,
+        "max": 67.33,
+        "zeros": 3
+      },
+      "12-14": {
+        "count": 341,
+        "avg": 52.34,
+        "std": 16.49,
+        "min": 0,
+        "max": 83.92,
+        "zeros": 1
+      },
+      "14-16": {
+        "count": 343,
+        "avg": 46.15,
+        "std": 16.97,
+        "min": 0,
+        "max": 101,
+        "zeros": 3
+      },
+      "16-18": {
+        "count": 334,
+        "avg": 42.79,
+        "std": 14.27,
+        "min": 4.840000000000003,
+        "max": 73.67,
+        "zeros": 0
+      },
+      "18-20": {
+        "count": 560,
+        "avg": 35.55,
+        "std": 19.18,
+        "min": 0,
+        "max": 100,
+        "zeros": 12
+      },
+      "20-22": {
+        "count": 338,
+        "avg": 31.98,
+        "std": 12.55,
+        "min": 0,
+        "max": 77.63,
+        "zeros": 5
+      },
+      "22-24": {
+        "count": 346,
+        "avg": 24.84,
+        "std": 12.67,
+        "min": 0,
+        "max": 72,
+        "zeros": 7
+      }
+    },
+    "dayOfWeek": {
+      "Sun": {
+        "count": 564,
+        "avg": 35.28
+      },
+      "Mon": {
+        "count": 601,
+        "avg": 39.88
+      },
+      "Tue": {
+        "count": 546,
+        "avg": 39.82
+      },
+      "Wed": {
+        "count": 546,
+        "avg": 39.99
+      },
+      "Thu": {
+        "count": 621,
+        "avg": 37.68
+      },
+      "Fri": {
+        "count": 771,
+        "avg": 35.23
+      },
+      "Sat": {
+        "count": 584,
+        "avg": 36.98
+      }
+    },
+    "repeatedConsecutive": 502,
+    "maxConsecutiveRepeat": 46,
+    "focusPeriod": {
+      "count": 544,
+      "avg": 49.21,
+      "std": 14.83,
+      "min": 13.34,
+      "max": 84.31
+    }
+  },
+  "Kothrud-Shivajinagar": {
+    "total": 3074,
+    "avg": 25.28,
+    "median": 23.59,
+    "stdDev": 18.13,
+    "min": 0,
+    "max": 100,
+    "p25": 11.8,
+    "p75": 35.44,
+    "p95": 57.94,
+    "zeroCount": 226,
+    "extremeCount": 15,
+    "minDate": "2024-12-16",
+    "maxDate": "2026-08-27",
+    "timeSlots": {
+      "00-02": {
+        "count": 261,
+        "avg": 14.21,
+        "std": 11.5,
+        "min": 0,
+        "max": 72.14,
+        "zeros": 39
+      },
+      "02-04": {
+        "count": 264,
+        "avg": 17.96,
+        "std": 11.23,
+        "min": 0,
+        "max": 54.99,
+        "zeros": 33
+      },
+      "04-06": {
+        "count": 254,
+        "avg": 19.2,
+        "std": 13.65,
+        "min": 0,
+        "max": 52.57,
+        "zeros": 17
+      },
+      "06-08": {
+        "count": 253,
+        "avg": 28.76,
+        "std": 15.03,
+        "min": 0,
+        "max": 80,
+        "zeros": 5
+      },
+      "08-10": {
+        "count": 255,
+        "avg": 32.69,
+        "std": 21.25,
+        "min": 0,
+        "max": 100,
+        "zeros": 12
+      },
+      "10-12": {
+        "count": 255,
+        "avg": 27.22,
+        "std": 16.55,
+        "min": 0,
+        "max": 81,
+        "zeros": 13
+      },
+      "12-14": {
+        "count": 256,
+        "avg": 37.44,
+        "std": 15.86,
+        "min": 0,
+        "max": 83.49,
+        "zeros": 3
+      },
+      "14-16": {
+        "count": 254,
+        "avg": 31.08,
+        "std": 15.05,
+        "min": 0,
+        "max": 84,
+        "zeros": 5
+      },
+      "16-18": {
+        "count": 254,
+        "avg": 29.03,
+        "std": 17.36,
+        "min": 0,
+        "max": 88,
+        "zeros": 13
+      },
+      "18-20": {
+        "count": 256,
+        "avg": 29.22,
+        "std": 26.77,
+        "min": 0,
+        "max": 100,
+        "zeros": 32
+      },
+      "20-22": {
+        "count": 257,
+        "avg": 22.13,
+        "std": 15.56,
+        "min": 0,
+        "max": 81,
+        "zeros": 26
+      },
+      "22-24": {
+        "count": 255,
+        "avg": 14.96,
+        "std": 14.31,
+        "min": 0,
+        "max": 91,
+        "zeros": 28
+      }
+    },
+    "dayOfWeek": {
+      "Sun": {
+        "count": 445,
+        "avg": 22.58
+      },
+      "Mon": {
+        "count": 448,
+        "avg": 26.49
+      },
+      "Tue": {
+        "count": 425,
+        "avg": 26.25
+      },
+      "Wed": {
+        "count": 436,
+        "avg": 26.76
+      },
+      "Thu": {
+        "count": 436,
+        "avg": 25.66
+      },
+      "Fri": {
+        "count": 438,
+        "avg": 25.57
+      },
+      "Sat": {
+        "count": 446,
+        "avg": 23.74
+      }
+    },
+    "repeatedConsecutive": 125,
+    "maxConsecutiveRepeat": 7,
+    "focusPeriod": {
+      "count": 544,
+      "avg": 33.15,
+      "std": 12.03,
+      "min": 2.45,
+      "max": 66.19
+    }
+  },
+  "Swargate-Katraj": {
+    "total": 4320,
+    "avg": 35.5,
+    "median": 33.86,
+    "stdDev": 17.77,
+    "min": 0,
+    "max": 100,
+    "p25": 25.27,
+    "p75": 46.032846995504656,
+    "p95": 67.46395738862641,
+    "zeroCount": 85,
+    "extremeCount": 3,
+    "minDate": "2021-01-01",
+    "maxDate": "2026-08-27",
+    "timeSlots": {
+      "00-02": {
+        "count": 319,
+        "avg": 21.79,
+        "std": 15.2,
+        "min": 0,
+        "max": 83.97,
+        "zeros": 23
+      },
+      "02-04": {
+        "count": 339,
+        "avg": 26.75,
+        "std": 16.28,
+        "min": 0,
+        "max": 100,
+        "zeros": 13
+      },
+      "04-06": {
+        "count": 327,
+        "avg": 31.18,
+        "std": 15.82,
+        "min": 0,
+        "max": 70.14,
+        "zeros": 8
+      },
+      "06-08": {
+        "count": 326,
+        "avg": 42.74,
+        "std": 14.33,
+        "min": 0,
+        "max": 73.1,
+        "zeros": 2
+      },
+      "08-10": {
+        "count": 332,
+        "avg": 46.9,
+        "std": 18.87,
+        "min": 0,
+        "max": 86.17,
+        "zeros": 3
+      },
+      "10-12": {
+        "count": 341,
+        "avg": 35.29,
+        "std": 13.35,
+        "min": 0,
+        "max": 67.24,
+        "zeros": 3
+      },
+      "12-14": {
+        "count": 378,
+        "avg": 49.71,
+        "std": 17.26,
+        "min": 0,
+        "max": 85.17,
+        "zeros": 4
+      },
+      "14-16": {
+        "count": 342,
+        "avg": 47.78,
+        "std": 18.16,
+        "min": 0,
+        "max": 91.53284699550466,
+        "zeros": 3
+      },
+      "16-18": {
+        "count": 350,
+        "avg": 40.04,
+        "std": 14.14,
+        "min": 0,
+        "max": 68.42,
+        "zeros": 3
+      },
+      "18-20": {
+        "count": 566,
+        "avg": 31.8,
+        "std": 14.35,
+        "min": 0,
+        "max": 80.71,
+        "zeros": 6
+      },
+      "20-22": {
+        "count": 335,
+        "avg": 29.94,
+        "std": 11.95,
+        "min": 0,
+        "max": 74.46395738862641,
+        "zeros": 8
+      },
+      "22-24": {
+        "count": 364,
+        "avg": 23.09,
+        "std": 11.96,
+        "min": 0,
+        "max": 70.23,
+        "zeros": 9
+      }
+    },
+    "dayOfWeek": {
+      "Sun": {
+        "count": 590,
+        "avg": 32.56
+      },
+      "Mon": {
+        "count": 620,
+        "avg": 36.86
+      },
+      "Tue": {
+        "count": 553,
+        "avg": 37.12
+      },
+      "Wed": {
+        "count": 555,
+        "avg": 37.05
+      },
+      "Thu": {
+        "count": 638,
+        "avg": 36.1
+      },
+      "Fri": {
+        "count": 779,
+        "avg": 33.9
+      },
+      "Sat": {
+        "count": 585,
+        "avg": 35.5
+      }
+    },
+    "repeatedConsecutive": 679,
+    "maxConsecutiveRepeat": 197,
+    "focusPeriod": {
+      "count": 544,
+      "avg": 47.54,
+      "std": 14.51,
+      "min": 14.07,
+      "max": 86.17
+    }
+  }
+}

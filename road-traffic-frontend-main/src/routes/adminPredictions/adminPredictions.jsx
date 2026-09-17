@@ -27,7 +27,13 @@ ChartJS.register(
   Filler
 );
 
-const ROUTES = ['Kondhwa-Hinjewadi', 'Swargate-Katraj', 'Hinjewadi-Swargate'];
+const ROUTES = [
+  'Hinjewadi-Swargate',
+  'Katraj-Kondhwa',
+  'Kondhwa-Hinjewadi',
+  'Kothrud-Shivajinagar',
+  'Swargate-Katraj',
+];
 
 const AdminPredictions = () => {
   // --- STATE ---

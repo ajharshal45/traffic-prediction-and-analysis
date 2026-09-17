@@ -12,6 +12,7 @@ const HIGH_IMPACT = [
     "maha shivaratri",
     "raksha bandhan",
     "janmashtami",
+    "dahi handi",
     "new year",
     "new year's day"
 ];
@@ -53,7 +54,7 @@ function getFestivalImpact(name) {
     return 0;
 }
 
-const API_KEY = "kzuAnngcrYJZQc76F6fTIPJdVUmmTTpx";
+const API_KEY = process.env.CALENDARIFIC_API_KEY;
 
 // ------------------------------------------------------------
 // MAIN FUNCTION — FESTIVAL MATCHING

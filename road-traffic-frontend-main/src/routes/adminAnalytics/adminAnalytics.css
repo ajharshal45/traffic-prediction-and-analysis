@@ -881,3 +881,447 @@
     align-items: flex-start;
   }
 }
+
+/* ========================================================================
+   DATA SCIENCE INSIGHTS TAB
+   ======================================================================== */
+
+/* Period Selector */
+.ds-period-selector {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.ds-period-label {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #374151;
+}
+
+/* Section Cards */
+.ds-section {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.3s ease;
+}
+
+.ds-section:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.ds-section-header {
+  margin-bottom: 20px;
+}
+
+.ds-section-header h2 {
+  margin: 0 0 4px;
+  font-size: 1.35rem;
+  color: #1f2937;
+  font-weight: 800;
+}
+
+.ds-subtitle {
+  color: #6b7280;
+  font-size: 0.88rem;
+}
+
+/* --- INSIGHTS PANEL --- */
+.ds-insights-panel {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: white;
+}
+
+.ds-insights-panel .ds-section-header h2 {
+  color: #e0e0ff;
+  font-size: 1.5rem;
+}
+
+.ds-insights-panel .ds-subtitle {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.ds-insights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ds-insight-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 20px;
+  background: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  border-left: 4px solid #fabc3c;
+  transition: all 0.3s ease;
+}
+
+.ds-insight-card:hover {
+  background: #fff9e6;
+  border-left-color: #fece51;
+  transform: translateX(4px);
+}
+
+.ds-insight-bullet {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ds-insight-text {
+  color: #374151;
+  line-height: 1.65;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* --- KPI GRID --- */
+.ds-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.ds-kpi-card {
+  background: linear-gradient(145deg, #f9fafb, #f3f4f6);
+  border-radius: 14px;
+  padding: 24px 20px;
+  text-align: center;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ds-kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.ds-kpi-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+}
+
+.ds-kpi-value {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.ds-kpi-value.ds-good { color: #22c55e; }
+.ds-kpi-value.ds-warn { color: #f59e0b; }
+.ds-kpi-value.ds-bad { color: #ef4444; }
+
+.ds-kpi-unit {
+  font-size: 0.82rem;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+.ds-kpi-sub {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  margin-top: 8px;
+}
+
+/* --- ACCURACY BAND --- */
+.ds-accuracy-band {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ds-band-item {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ds-band-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #6b7280;
+  white-space: nowrap;
+  min-width: 90px;
+}
+
+.ds-band-bar {
+  flex: 1;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.ds-band-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.8s ease;
+}
+
+.ds-fill-green { background: linear-gradient(90deg, #22c55e, #4ade80); }
+.ds-fill-amber { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.ds-fill-blue { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+
+.ds-band-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #374151;
+  min-width: 40px;
+  text-align: right;
+}
+
+/* --- TABLES --- */
+.ds-table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.ds-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.ds-table thead {
+  background: #f9fafb;
+}
+
+.ds-table th {
+  padding: 14px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: #4b5563;
+  border-bottom: 2px solid #e5e7eb;
+  white-space: nowrap;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ds-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
+}
+
+.ds-table tbody tr:hover {
+  background: #f0f4ff;
+}
+
+.ds-table tbody tr:nth-child(even) {
+  background: #fafbfc;
+}
+
+.ds-table tbody tr:nth-child(even):hover {
+  background: #f0f4ff;
+}
+
+/* Row highlights */
+.ds-row-worst {
+  background: rgba(239, 68, 68, 0.06) !important;
+}
+
+.ds-row-worst:hover {
+  background: rgba(239, 68, 68, 0.12) !important;
+}
+
+.ds-row-best {
+  background: rgba(34, 197, 94, 0.06) !important;
+}
+
+.ds-row-best:hover {
+  background: rgba(34, 197, 94, 0.12) !important;
+}
+
+/* Z-Score Badges */
+.ds-zscore-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.ds-z-severe {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+.ds-z-high {
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+}
+
+.ds-z-moderate {
+  background: rgba(234, 179, 8, 0.15);
+  color: #a16207;
+}
+
+.ds-cause-cell {
+  max-width: 220px;
+  font-size: 0.83rem;
+  color: #6b7280;
+}
+
+/* --- WHAT AFFECTS TRAFFIC (FACTOR CONTRIBUTION) --- */
+.ds-factor-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.ds-factor-controls label {
+  font-weight: 600;
+  color: #374151;
+  font-family: "Lato", sans-serif;
+  font-size: 0.9rem;
+}
+
+.ds-factor-controls select {
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+  font-size: 0.9rem;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  font-family: "Lato", sans-serif;
+  transition: border-color 0.2s ease;
+}
+
+.ds-factor-controls select:focus {
+  outline: none;
+  border-color: #fabc3c;
+}
+
+.ds-factor-content {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.ds-factor-chart {
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.ds-factor-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.ds-factor-note {
+  margin-top: 14px;
+  font-size: 0.82rem;
+  color: #9ca3af;
+  font-style: italic;
+  line-height: 1.5;
+  font-family: "Lato", sans-serif;
+}
+
+/* --- TRAFFIC TRENDS CARDS --- */
+.ds-trend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.ds-trend-card {
+  background: #f9f9f9;
+  border-radius: 10px;
+  padding: 18px;
+  border: 2px solid #e5e7eb;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.ds-trend-card:hover {
+  box-shadow: 0px 4px 12px rgba(250, 188, 60, 0.2);
+  border-color: #fabc3c;
+}
+
+.ds-trend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.ds-trend-route {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1f2937;
+  font-family: "Lato", sans-serif;
+}
+
+.ds-trend-arrow {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.ds-trend-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin-bottom: 10px;
+  font-family: "Lato", sans-serif;
+}
+
+.ds-trend-badge {
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-family: "Lato", sans-serif;
+}
+
+.ds-trend-worsening { background: #fee2e2; color: #dc2626; }
+.ds-trend-improving  { background: #dcfce7; color: #16a34a; }
+.ds-trend-stable     { background: #f3f4f6; color: #6b7280; }
+
+.ds-sparkline {
+  height: 55px;
+  margin-top: 6px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .ds-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .ds-factor-content { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .ds-kpi-grid { grid-template-columns: 1fr 1fr; }
+  .ds-accuracy-band { flex-direction: column; }
+  .ds-trend-grid { grid-template-columns: 1fr; }
+  .ds-period-selector { flex-direction: column; align-items: flex-start; }
+}

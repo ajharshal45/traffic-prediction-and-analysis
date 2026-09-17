@@ -1,0 +1,17 @@
+{"_id":{"$oid":"697a1f8b5309f705d2dd96ca"},"name":"Civil Court","line":"Purple","type":"Interchange","location":{"lat":18.5284,"lng":73.8544},"crowdFactor":10}
+{"_id":{"$oid":"697a1f8b5309f705d2dd96d4"},"name":"Kalyani Nagar","line":"Aqua","type":"Regular","location":{"lat":18.546,"lng":73.9045},"crowdFactor":7}
+{"_id":{"$oid":"697a1f8b5309f705d2dd96d1"},"name":"Pune Railway Station","line":"Aqua","type":"Regular","location":{"lat":18.5297,"lng":73.8735},"crowdFactor":10}
+{"_id":{"$oid":"697a1f8b5309f705d2dd96c9"},"name":"Shivajinagar","line":"Purple","type":"Interchange","location":{"lat":18.5308,"lng":73.8475},"crowdFactor":9}
+{"_id":{"$oid":"697a1f8b5309f705d2dd96ce"},"name":"Anand Nagar","line":"Aqua","type":"Regular","location":{"lat":18.5105,"lng":73.815},"crowdFactor":6}
+{"_id":{"$oid":"697a1f8b5309f705d2dd96d5"},"name":"Ramwadi","line":"Aqua","type":"Terminal","location":{"lat":18.5516,"lng":73.9234},"crowdFactor":9}
+{"_id":{"$oid":"697a1f8b5309f705d2dd96d3"},"name":"Bund Garden","line":"Aqua","type":"Regular","location":{"lat":18.537,"lng":73.886},"crowdFactor":6}
+{"_id":{"$oid":"697a1f8b5309f705d2dd96d2"},"name":"Ruby Hall Clinic","line":"Aqua","type":"Regular","location":{"lat":18.5335,"lng":73.8778},"crowdFactor":7}
+{"_id":{"$oid":"697a1f8b5309f705d2dd96c5"},"name":"PCMC Station","line":"Purple","type":"Terminal","location":{"lat":18.6298,"lng":73.8066},"crowdFactor":8}
+{"_id":{"$oid":"697a1f8b5309f705d2dd96c7"},"name":"Bhosari (Nashik Phata)","line":"Purple","type":"Regular","location":{"lat":18.6045,"lng":73.816},"crowdFactor":7}
+{"_id":{"$oid":"697a1f8b5309f705d2dd96cd"},"name":"Vanaz","line":"Aqua","type":"Terminal","location":{"lat":18.5132,"lng":73.8055},"crowdFactor":8}
+{"_id":{"$oid":"697a1f8b5309f705d2dd96d0"},"name":"Deccan Gymkhana","line":"Aqua","type":"Regular","location":{"lat":18.5173,"lng":73.8415},"crowdFactor":9}
+{"_id":{"$oid":"697a1f8b5309f705d2dd96c6"},"name":"Sant Tukaram Nagar","line":"Purple","type":"Regular","location":{"lat":18.6202,"lng":73.8118},"crowdFactor":6}
+{"_id":{"$oid":"697a1f8b5309f705d2dd96cb"},"name":"PMC Bhavan","line":"Purple","type":"Regular","location":{"lat":18.5236,"lng":73.8525},"crowdFactor":7}
+{"_id":{"$oid":"697a1f8b5309f705d2dd96cf"},"name":"Nal Stop","line":"Aqua","type":"Regular","location":{"lat":18.5085,"lng":73.832},"crowdFactor":8}
+{"_id":{"$oid":"697a1f8b5309f705d2dd96cc"},"name":"Swargate","line":"Purple","type":"Terminal","location":{"lat":18.5018,"lng":73.8636},"crowdFactor":10}
+{"_id":{"$oid":"697a1f8b5309f705d2dd96c8"},"name":"Khadki","line":"Purple","type":"Regular","location":{"lat":18.5721,"lng":73.8329},"crowdFactor":5}

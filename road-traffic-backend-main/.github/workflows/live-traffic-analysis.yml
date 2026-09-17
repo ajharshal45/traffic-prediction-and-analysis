@@ -1,0 +1,37 @@
+name: Live Traffic Analysis & Caching
+
+on:
+  schedule:
+    # Runs every 2 hours at the start of the hour (e.g. 00:00, 02:00 UTC)
+    - cron: '0 */2 * * *'
+  workflow_dispatch: # Allows manual trigger for testing
+
+jobs:
+  analyze-traffic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Assuming Node 20
+          cache: 'npm'
+          # Path to where package.json is located (since repo structure might have backend in a subfolder, 
+          # but we assume the workflow runs from the root where package.json is. Wait, the user said 
+          # "This repo is the backend". Let's assume package.json is in the root of the repo).
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Live Traffic Analysis
+        run: node scripts/liveTrafficAnalysis.js
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+          # Pass any other necessary secrets if required
