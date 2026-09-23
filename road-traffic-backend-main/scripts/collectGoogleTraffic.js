@@ -202,6 +202,8 @@ const run = async () => {
 
         const existing = await PathInfo.findOne(filter);
 
+        const collectedAt = new Date(); // exact moment of collection
+
         if (existing) {
           // If a record already exists for this slot (e.g. from old simulated collector),
           // blend the scores: keep the new real score but average with existing
@@ -221,10 +223,11 @@ const run = async () => {
               durationNormal,
               durationTraffic,
               breakdown,
+              collectedAt,
             },
           });
 
-          console.log(`   ✅ UPDATED  (blended ${existing.score.toFixed(2)} → ${blendedScore.toFixed(2)})`);
+          console.log(`   ✅ UPDATED  (blended ${existing.score.toFixed(2)} → ${blendedScore.toFixed(2)}) @ ${collectedAt.toISOString()}`);
           updated++;
 
           // Backfill prediction logs with blended score
@@ -240,6 +243,7 @@ const run = async () => {
             durationNormal,
             durationTraffic,
             breakdown,
+            collectedAt,
           });
 
           console.log(`   ✅ CREATED  (score=${finalScore.toFixed(2)})`);

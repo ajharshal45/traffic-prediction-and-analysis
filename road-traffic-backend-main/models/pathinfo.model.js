@@ -81,9 +81,16 @@ const pathInfoSchema = new mongoose.Schema({
       parkingBuildingCount: { type: Number, default: 0 }
     },
     required: false
-  }
+  },
+  // Exact datetime when this record was collected/updated
+  // Set automatically by the collectors — tells you the precise moment
+  // the score was captured (not just the slot date which is always midnight UTC)
+  collectedAt: {
+    type: Date,
+    default: null,
+  },
 }, {
-  timestamps: false, 
+  timestamps: true,   // adds createdAt + updatedAt automatically
 });
 
 const PathInfo = mongoose.model('PathInfo', pathInfoSchema);
