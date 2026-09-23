@@ -1,0 +1,60 @@
+name: Real Google Traffic Collector
+
+on:
+  schedule:
+    # Runs at HH:30 UTC for every even UTC hour.
+    # IST = UTC + 5:30, so HH:30 UTC = (HH+6):00 IST exactly.
+    # This fires at the START of every IST 2-hour slot:
+    #   18:30 UTC -> 00:00 IST (00-02 slot)
+    #   20:30 UTC -> 02:00 IST (02-04 slot)
+    #   22:30 UTC -> 04:00 IST (04-06 slot)
+    #   00:30 UTC -> 06:00 IST (06-08 slot)
+    #   02:30 UTC -> 08:00 IST (08-10 slot)  <- morning rush
+    #   04:30 UTC -> 10:00 IST (10-12 slot)
+    #   06:30 UTC -> 12:00 IST (12-14 slot)
+    #   08:30 UTC -> 14:00 IST (14-16 slot)
+    #   10:30 UTC -> 16:00 IST (16-18 slot)
+    #   12:30 UTC -> 18:00 IST (18-20 slot)  <- evening rush
+    #   14:30 UTC -> 20:00 IST (20-22 slot)
+    #   16:30 UTC -> 22:00 IST (22-24 slot)
+    - cron: '30 */2 * * *'
+
+  # Allow manual trigger from GitHub Actions UI (useful for testing)
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Enable extra debug logging'
+        required: false
+        default: 'false'
+
+defaults:
+  run:
+    working-directory: road-traffic-backend-main
+
+jobs:
+  collect-google-traffic:
+    name: Collect Real Google Traffic Data
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: road-traffic-backend-main/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Real Google Traffic Collector
+        run: node scripts/collectGoogleTraffic.js
+        env:
+          MONGODB_URI:          ${{ secrets.MONGODB_URI }}
+          GOOGLE_MAPS_API_KEY:  ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          OPENWEATHER_API_KEY:  ${{ secrets.OPENWEATHER_API_KEY }}
+          NODE_ENV: production

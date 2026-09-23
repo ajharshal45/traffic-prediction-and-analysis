@@ -1,0 +1,37 @@
+name: 5-Day Traffic Prediction Generator
+
+on:
+  schedule:
+    # Runs once daily at 01:00 UTC (06:30 IST)
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: road-traffic-backend-main
+
+jobs:
+  generate-predictions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: road-traffic-backend-main/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run 5-Day Prediction Generator
+        run: node scripts/fiveDayPrediction.js
+        env:
+          MONGODB_URI:          ${{ secrets.MONGODB_URI }}
+          GOOGLE_MAPS_API_KEY:  ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          OPENWEATHER_API_KEY:  ${{ secrets.OPENWEATHER_API_KEY }}

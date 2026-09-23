@@ -1,0 +1,37 @@
+name: Live Traffic Analysis & Caching
+
+on:
+  schedule:
+    # Runs every 2 hours at the start of the even UTC hour
+    - cron: '0 */2 * * *'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: road-traffic-backend-main
+
+jobs:
+  analyze-traffic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: road-traffic-backend-main/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Live Traffic Analysis
+        run: node scripts/liveTrafficAnalysis.js
+        env:
+          MONGODB_URI:          ${{ secrets.MONGODB_URI }}
+          GOOGLE_MAPS_API_KEY:  ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          OPENWEATHER_API_KEY:  ${{ secrets.OPENWEATHER_API_KEY }}
