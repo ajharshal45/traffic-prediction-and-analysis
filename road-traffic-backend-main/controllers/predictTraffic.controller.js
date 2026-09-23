@@ -1,6 +1,41 @@
 import PredictionLog from '../models/predictionLog.model.js';
 import { calculateTrafficScore } from '../services/trafficScoring.js';
 
+// --- Imports required by getTimeSuggestions ---
+import { Construction } from '../models/construction.model.js';
+import { Diversion } from '../models/diversion.model.js';
+import { Event } from '../models/event.model.js';
+import { BMSEvent } from '../models/bms_event.model.js';
+import { MetroStation } from '../models/metroStation.model.js';
+import { hotspotLocation } from '../models/nearbyHotspot.model.js';
+import { Image } from '../models/image.model.js';
+import { Complaint } from '../models/complaint.model.js';
+import PathInfo from '../models/pathinfo.model.js';
+import { getFestivalForDate } from './festival.controller.js';
+import {
+  getWeatherScore,
+  getGoogleTrafficScore,
+  getTimeMultiplier,
+  calculateDistance,
+} from '../services/trafficScoring.js';
+import { calculateTransitImpact } from '../services/googleTransit.service.js';
+
+// Weight constants (must match trafficScoring.js values)
+const W_CONSTRUCTION    = 25;
+const W_DIVERSION       = 20;
+const W_EVENT           = 20;
+const W_HOTSPOT         = 12;
+const W_POTHOLE         = 8;
+const W_COMPLAINT       = 5;
+const PROXIMITY_RADIUS_M = 200;
+
+const getDecayFactor = (dateReported) => {
+  const diffDays = Math.ceil(Math.abs(new Date() - new Date(dateReported)) / (1000 * 60 * 60 * 24));
+  if (diffDays <= 7)  return 1.0;
+  if (diffDays <= 30) return 0.5;
+  return 0.1;
+};
+
 // --- MAIN PREDICTION CONTROLLER ---
 export const predictTraffic = async (req, res) => {
   const { pathId, date, timeSlot, routePoints, sourceCoords, destinationCoords } = req.body;

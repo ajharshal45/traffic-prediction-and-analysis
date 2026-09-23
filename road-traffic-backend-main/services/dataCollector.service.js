@@ -511,14 +511,28 @@ const generateRealisticScore = (timeSlot, pathId) => {
  * Backfill actual scores into PredictionLog entries when real data arrives.
  * Finds unverified predictions matching this route + date + timeSlot,
  * sets actualScore, calculates accuracy, and marks as verified.
+ *
+ * FIX: predictedDate is stored as a real datetime (e.g. "2026-09-23T14:30:00Z")
+ * but dateObj is midnight UTC ("2026-09-23T00:00:00Z").
+ * An exact equality match would miss any prediction saved after 00:00 UTC,
+ * which in IST (+05:30) means predictions made after 05:30 AM are never backfilled.
+ * Solution: use a $gte/$lt range that spans the full calendar day in IST.
  */
 const backfillPredictionLogs = async (pathId, dateObj, timeSlot, realScore) => {
   try {
-    // Find all unverified predictions for this exact route + date + time
+    // Build a date range that covers the full IST calendar day.
+    // dateObj is already midnight UTC (= 05:30 IST), so the IST day runs
+    // from midnight UTC to the next midnight UTC (same as the UTC date boundary).
+    const dayStart = new Date(dateObj);
+    dayStart.setUTCHours(0, 0, 0, 0);   // 00:00:00 UTC = 05:30 IST
+    const dayEnd = new Date(dayStart);
+    dayEnd.setUTCDate(dayEnd.getUTCDate() + 1); // next midnight UTC
+
+    // Find all unverified predictions for this exact route + date-range + time
     const unverifiedLogs = await PredictionLog.find({
       pathId,
       timeRange: timeSlot,
-      predictedDate: dateObj,
+      predictedDate: { $gte: dayStart, $lt: dayEnd },
       isVerified: false,
     });
 

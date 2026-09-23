@@ -27,6 +27,19 @@ const pathInfoSchema = new mongoose.Schema({
     required: true,
     enum: ['low', 'medium', 'high','very high','very low'], 
   },
+  // Real Google Directions API data — populated by the GitHub Actions collector
+  googleScore: {
+    type: Number,
+    default: null,   // % extra time due to traffic: ((durationTraffic - durationNormal) / durationNormal) * 100
+  },
+  durationNormal: {
+    type: Number,
+    default: null,   // Free-flow travel time in seconds (no traffic)
+  },
+  durationTraffic: {
+    type: Number,
+    default: null,   // With-traffic travel time in seconds
+  },
   // NEW: Store root cause breakdown for each record
   breakdown: {
     type: {

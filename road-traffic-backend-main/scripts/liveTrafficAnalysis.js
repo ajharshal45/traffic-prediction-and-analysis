@@ -63,21 +63,39 @@ const runLiveAnalysis = async () => {
 
         const level = getTrafficLevel(scoreData.finalScore);
 
-        // 1. Save ground truth to PathInfo
-        await PathInfo.create({
-          pathId: route.pathId,
-          timeRange: timeSlot,
-          date: normalizedDate,
-          score: scoreData.finalScore,
-          level: level,
-        });
-        console.log(`✅ Saved PathInfo for ${route.pathId}: Score ${scoreData.finalScore} (${level})`);
+        // 1. UPSERT into PathInfo — avoids duplicate records if the workflow fires twice
+        await PathInfo.findOneAndUpdate(
+          {
+            pathId: route.pathId,
+            timeRange: timeSlot,
+            date: normalizedDate,
+          },
+          {
+            $set: {
+              score: scoreData.finalScore,
+              level,
+              breakdown: scoreData.breakdown,
+              // Carry over Google data if available
+              ...(scoreData.googleScore != null && {
+                googleScore:    scoreData.googleScore,
+                durationNormal: scoreData.durationNormal,
+                durationTraffic: scoreData.durationTraffic,
+              }),
+            },
+          },
+          { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
+        console.log(`✅ Upserted PathInfo for ${route.pathId}: Score ${scoreData.finalScore} (${level})`);
 
-        // 2. Verify any outstanding PredictionLogs for this exact time and route
+        // 2. Backfill PredictionLogs — use IST-day date range, not exact timestamp
+        const dayStart = new Date(normalizedDate);
+        const dayEnd   = new Date(normalizedDate);
+        dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
+
         const unverifiedLogs = await PredictionLog.find({
           pathId: route.pathId,
           timeRange: timeSlot,
-          predictedDate: normalizedDate,
+          predictedDate: { $gte: dayStart, $lt: dayEnd },
           isVerified: false
         });
 
