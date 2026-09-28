@@ -37,10 +37,14 @@ const runLiveAnalysis = async () => {
 
     const timeSlot = getCurrentISTTimeSlot();
     const date = new Date().toISOString(); // Current timestamp
-    
-    // Normalize date to midnight UTC for the day
-    const normalizedDate = new Date();
-    normalizedDate.setUTCHours(0, 0, 0, 0);
+
+    // Normalize to IST calendar date at midnight UTC.
+    // IMPORTANT: after 18:30 UTC, the IST date is already the next UTC date.
+    // Using setUTCHours(0,0,0,0) gives the wrong (UTC) date for the IST day.
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+    const istNow = new Date(Date.now() + IST_OFFSET_MS);
+    const istDateStr = istNow.toISOString().split('T')[0]; // "YYYY-MM-DD" in IST
+    const normalizedDate = new Date(istDateStr + 'T00:00:00.000Z');
 
     console.log(`📅 Current IST TimeSlot: ${timeSlot}`);
     console.log(`🛣️ Processing ${AUTOMATION_ROUTES.length} routes...`);
