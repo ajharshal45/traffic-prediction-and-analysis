@@ -100,6 +100,18 @@ export default function AdminReports() {
   // Fetch comparison data
   useEffect(() => {
     if (viewMode !== 'compare' || !selectedRoute || !selectedKeyA || !selectedKeyB) return;
+    if (availableReports.length === 0) return;
+
+    const keyAExists = availableReports.some(r => r.periodKey === selectedKeyA);
+    const keyBExists = availableReports.some(r => r.periodKey === selectedKeyB);
+
+    if (!keyAExists || !keyBExists) {
+      const missingKey = !keyAExists ? `Period A ("${selectedKeyA}")` : `Period B ("${selectedKeyB}")`;
+      setError(`Notice: ${missingKey} does not have traffic records in the database. Please select an available date from the dropdown.`);
+      setComparisonData(null);
+      return;
+    }
+
     async function fetchComparison() {
       setLoading(true);
       setError(null);
@@ -123,11 +135,20 @@ export default function AdminReports() {
       }
     }
     fetchComparison();
-  }, [viewMode, selectedRoute, periodType, selectedKeyA, selectedKeyB]);
+  }, [viewMode, selectedRoute, periodType, selectedKeyA, selectedKeyB, availableReports]);
 
   // Fetch single report data
   useEffect(() => {
     if (viewMode !== 'single' || !selectedRoute || !singleKey) return;
+    if (availableReports.length === 0) return;
+
+    const keyExists = availableReports.some(r => r.periodKey === singleKey);
+    if (!keyExists) {
+      setError(`Notice: "${singleKey}" does not have traffic records in the database. Please select an available date from the dropdown.`);
+      setSingleReport(null);
+      return;
+    }
+
     async function fetchSingle() {
       setLoading(true);
       setError(null);
@@ -150,7 +171,7 @@ export default function AdminReports() {
       }
     }
     fetchSingle();
-  }, [viewMode, selectedRoute, periodType, singleKey]);
+  }, [viewMode, selectedRoute, periodType, singleKey, availableReports]);
 
   // Render Data Quality Badge
   const renderQualityBadge = (sourceMix, label) => {

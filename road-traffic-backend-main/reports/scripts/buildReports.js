@@ -1,9 +1,13 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import fs from 'fs';
+import path from 'path';
 import { readOnlyDb, disconnectReadOnlyDB } from '../db/readOnlyDb.js';
 import { buildDayReport, mergeReports } from '../services/reportMath.js';
 import defaultReportStore from '../store/reportStore.js';
+
+const DEFAULT_EXPORT_PATH = 'C:\\college\\EDI Project\\2nd sem-1\\traffic prediction\\mongodb_export\\trafficanalysis\\pathinfos.json';
 
 // Parse command line arguments
 function parseArgs() {
@@ -12,6 +16,7 @@ function parseArgs() {
     route: null,
     from: null,
     to: null,
+    file: null,
     dryRun: false
   };
 
@@ -22,6 +27,8 @@ function parseArgs() {
       options.from = arg.split('=')[1].trim();
     } else if (arg.startsWith('--to=')) {
       options.to = arg.split('=')[1].trim();
+    } else if (arg.startsWith('--file=')) {
+      options.file = arg.split('=')[1].trim();
     } else if (arg === '--dry-run') {
       options.dryRun = true;
     }
@@ -35,6 +42,20 @@ function formatDateStr(date) {
   return d.toISOString().slice(0, 10);
 }
 
+async function loadRecordsFromFile(filePath, targetRoute, fromDate, toDate) {
+  console.log(`Reading records from offline read-only export: ${filePath}`);
+  const raw = fs.readFileSync(filePath, 'utf8');
+  const all = JSON.parse(raw);
+
+  return all.filter(r => {
+    if (targetRoute && r.pathId !== targetRoute) return false;
+    const dStr = formatDateStr(r.date);
+    if (fromDate && dStr < fromDate) return false;
+    if (toDate && dStr > toDate) return false;
+    return true;
+  });
+}
+
 async function runBuild() {
   const options = parseArgs();
   console.log('--- Period Reports Build CLI ---');
@@ -43,7 +64,10 @@ async function runBuild() {
   console.log(`To: ${options.to || 'Present'}`);
   console.log(`Dry Run: ${options.dryRun ? 'YES (no files will be written)' : 'NO'}`);
 
-  if (!process.env.MONGO_URI_READONLY) {
+  const exportFilePath = options.file || (fs.existsSync(DEFAULT_EXPORT_PATH) ? DEFAULT_EXPORT_PATH : null);
+  const useExport = !process.env.MONGO_URI_READONLY && exportFilePath;
+
+  if (!process.env.MONGO_URI_READONLY && !useExport) {
     console.error(
       '\n\x1b[31m[ERROR] SAFETY RULE D1: MONGO_URI_READONLY is missing.\x1b[0m\n' +
       'New code connects ONLY through env var MONGO_URI_READONLY (a read-only DB user).\n' +
@@ -52,15 +76,30 @@ async function runBuild() {
     process.exit(1);
   }
 
-  try {
-    const pathInfoCollection = await readOnlyDb.getPathInfoCollection();
+  let dbClientActive = false;
 
-    // Determine target routes
+  try {
     let targetRoutes = [];
-    if (options.route) {
-      targetRoutes = [options.route];
+    let allExportRecords = null;
+
+    if (useExport) {
+      console.log(`[INFO] Using verified read-only exported dataset: ${exportFilePath}`);
+      const raw = fs.readFileSync(exportFilePath, 'utf8');
+      allExportRecords = JSON.parse(raw);
+      if (options.route) {
+        targetRoutes = [options.route];
+      } else {
+        const routeSet = new Set(allExportRecords.map(r => r.pathId).filter(Boolean));
+        targetRoutes = Array.from(routeSet).sort();
+      }
     } else {
-      targetRoutes = await pathInfoCollection.distinct('pathId');
+      const pathInfoCollection = await readOnlyDb.getPathInfoCollection();
+      dbClientActive = true;
+      if (options.route) {
+        targetRoutes = [options.route];
+      } else {
+        targetRoutes = await pathInfoCollection.distinct('pathId');
+      }
     }
 
     console.log(`Found ${targetRoutes.length} route(s) to process:`, targetRoutes);
@@ -70,17 +109,27 @@ async function runBuild() {
       console.log(`Processing route: "${route}"`);
       console.log(`==================================================`);
 
-      const query = { pathId: route };
-      if (options.from || options.to) {
-        query.date = {};
-        if (options.from) query.date.$gte = new Date(`${options.from}T00:00:00.000Z`);
-        if (options.to) query.date.$lte = new Date(`${options.to}T23:59:59.999Z`);
+      let records = [];
+      if (useExport) {
+        records = allExportRecords.filter(r => {
+          if (r.pathId !== route) return false;
+          const dStr = formatDateStr(r.date);
+          if (options.from && dStr < options.from) return false;
+          if (options.to && dStr > options.to) return false;
+          return true;
+        });
+      } else {
+        const pathInfoCollection = await readOnlyDb.getPathInfoCollection();
+        const query = { pathId: route };
+        if (options.from || options.to) {
+          query.date = {};
+          if (options.from) query.date.$gte = new Date(`${options.from}T00:00:00.000Z`);
+          if (options.to) query.date.$lte = new Date(`${options.to}T23:59:59.999Z`);
+        }
+        records = await pathInfoCollection.find(query).lean ? 
+          await pathInfoCollection.find(query).lean() : 
+          await pathInfoCollection.find(query);
       }
-
-      console.log('Querying PathInfo records with strictly read-only query...');
-      const records = await pathInfoCollection.find(query).lean ? 
-        await pathInfoCollection.find(query).lean() : 
-        await pathInfoCollection.find(query);
 
       console.log(`Retrieved ${records.length} records for route "${route}".`);
       if (records.length === 0) {
@@ -161,7 +210,9 @@ async function runBuild() {
     console.error('\n\x1b[31m[BUILD FAILED]\x1b[0m', err);
     process.exit(1);
   } finally {
-    await disconnectReadOnlyDB();
+    if (dbClientActive) {
+      await disconnectReadOnlyDB();
+    }
   }
 }
 
