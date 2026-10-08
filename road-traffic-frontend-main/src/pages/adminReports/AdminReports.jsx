@@ -280,50 +280,122 @@ export default function AdminReports() {
 
         {viewMode === 'compare' ? (
           <>
-            <div className="control-group">
+            <div className="control-group period-picker-group">
               <label>Period A (Baseline)</label>
-              <select
-                className="control-select"
-                value={selectedKeyA}
-                onChange={e => setSelectedKeyA(e.target.value)}
-              >
-                {availableReports.map(rep => (
-                  <option key={rep.periodKey} value={rep.periodKey}>
-                    {rep.periodKey} (Avg: {rep.avgScore})
-                  </option>
-                ))}
-              </select>
+              <div className="picker-inputs-row">
+                {periodType === 'day' && (
+                  <input
+                    type="date"
+                    className="control-date-input"
+                    value={selectedKeyA && selectedKeyA.match(/^\d{4}-\d{2}-\d{2}$/) ? selectedKeyA : ''}
+                    onChange={e => {
+                      if (e.target.value) setSelectedKeyA(e.target.value);
+                    }}
+                    title="Pick Period A date from calendar"
+                  />
+                )}
+                {periodType === 'month' && (
+                  <input
+                    type="month"
+                    className="control-date-input"
+                    value={selectedKeyA ? selectedKeyA.slice(0, 7) : ''}
+                    onChange={e => {
+                      if (e.target.value) setSelectedKeyA(e.target.value);
+                    }}
+                    title="Pick Period A month from calendar"
+                  />
+                )}
+                <select
+                  className="control-select"
+                  value={selectedKeyA}
+                  onChange={e => setSelectedKeyA(e.target.value)}
+                >
+                  {availableReports.map(rep => (
+                    <option key={rep.periodKey} value={rep.periodKey}>
+                      {rep.periodKey} (Avg: {rep.avgScore})
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div className="control-group">
+            <div className="control-group period-picker-group">
               <label>Period B (Comparison)</label>
-              <select
-                className="control-select"
-                value={selectedKeyB}
-                onChange={e => setSelectedKeyB(e.target.value)}
-              >
-                {availableReports.map(rep => (
-                  <option key={rep.periodKey} value={rep.periodKey}>
-                    {rep.periodKey} (Avg: {rep.avgScore})
-                  </option>
-                ))}
-              </select>
+              <div className="picker-inputs-row">
+                {periodType === 'day' && (
+                  <input
+                    type="date"
+                    className="control-date-input"
+                    value={selectedKeyB && selectedKeyB.match(/^\d{4}-\d{2}-\d{2}$/) ? selectedKeyB : ''}
+                    onChange={e => {
+                      if (e.target.value) setSelectedKeyB(e.target.value);
+                    }}
+                    title="Pick Period B date from calendar"
+                  />
+                )}
+                {periodType === 'month' && (
+                  <input
+                    type="month"
+                    className="control-date-input"
+                    value={selectedKeyB ? selectedKeyB.slice(0, 7) : ''}
+                    onChange={e => {
+                      if (e.target.value) setSelectedKeyB(e.target.value);
+                    }}
+                    title="Pick Period B month from calendar"
+                  />
+                )}
+                <select
+                  className="control-select"
+                  value={selectedKeyB}
+                  onChange={e => setSelectedKeyB(e.target.value)}
+                >
+                  {availableReports.map(rep => (
+                    <option key={rep.periodKey} value={rep.periodKey}>
+                      {rep.periodKey} (Avg: {rep.avgScore})
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </>
         ) : (
-          <div className="control-group">
+          <div className="control-group period-picker-group">
             <label>Select Period</label>
-            <select
-              className="control-select"
-              value={singleKey}
-              onChange={e => setSingleKey(e.target.value)}
-            >
-              {availableReports.map(rep => (
-                <option key={rep.periodKey} value={rep.periodKey}>
-                  {rep.periodKey} (Avg: {rep.avgScore})
-                </option>
-              ))}
-            </select>
+            <div className="picker-inputs-row">
+              {periodType === 'day' && (
+                <input
+                  type="date"
+                  className="control-date-input"
+                  value={singleKey && singleKey.match(/^\d{4}-\d{2}-\d{2}$/) ? singleKey : ''}
+                  onChange={e => {
+                    if (e.target.value) setSingleKey(e.target.value);
+                  }}
+                  title="Pick date from calendar"
+                />
+              )}
+              {periodType === 'month' && (
+                <input
+                  type="month"
+                  className="control-date-input"
+                  value={singleKey ? singleKey.slice(0, 7) : ''}
+                  onChange={e => {
+                    if (e.target.value) setSingleKey(e.target.value);
+                  }}
+                  title="Pick month from calendar"
+                />
+              )}
+              <select
+                className="control-select"
+                value={singleKey}
+                onChange={e => setSingleKey(e.target.value)}
+              >
+                {availableReports.map(rep => (
+                  <option key={rep.periodKey} value={rep.periodKey}>
+                    {rep.periodKey} (Avg: {rep.avgScore})
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         )}
       </div>

@@ -64,20 +64,52 @@
   color: #94a3b8;
 }
 
-.control-select {
-  background: #1e293b;
-  border: 1px solid #334155;
-  color: #f8fafc;
-  padding: 0.6rem 0.9rem;
+.admin-reports-container select.control-select,
+.admin-reports-container input.control-date-input,
+.reports-controls select,
+.reports-controls input {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  border: 1px solid #475569 !important;
+  padding: 0.65rem 0.9rem;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
+  font-weight: 500;
   outline: none;
+  color-scheme: dark !important;
   transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.control-select:focus {
-  border-color: #38bdf8;
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+.admin-reports-container select.control-select:focus,
+.admin-reports-container input.control-date-input:focus,
+.reports-controls select:focus,
+.reports-controls input:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3) !important;
+}
+
+.admin-reports-container select.control-select option,
+.reports-controls select option {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+  padding: 8px 12px;
+}
+
+.period-picker-group {
+  min-width: 280px;
+}
+
+.picker-inputs-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.picker-inputs-row input[type="date"],
+.picker-inputs-row input[type="month"] {
+  max-width: 140px;
+  cursor: pointer;
 }
 
 /* Mode Switch & View Tabs */
