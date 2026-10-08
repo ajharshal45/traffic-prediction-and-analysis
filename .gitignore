@@ -9,3 +9,7 @@ complete_project_codebase.txt
 # Large files exceeding GitHub 50MB limit
 mongo_export/predictionlogs.json
 road-traffic-backend-main/backups/**/predictionlogs_backup.json
+
+# Report data generated storage
+road-traffic-backend-main/reports/data/
+**/reports/data/

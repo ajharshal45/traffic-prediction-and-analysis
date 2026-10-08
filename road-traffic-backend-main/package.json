@@ -6,7 +6,11 @@
   "type": "module",
   "scripts": {
     "start": "nodemon App.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "check:readonly": "node reports/scripts/checkReadonly.js",
+    "reports:build": "node reports/scripts/buildReports.js",
+    "reports:server": "node reports/server.js",
+    "reports:test": "node reports/tests/reportMath.test.js"
   },
   "author": "",
   "license": "ISC",
@@ -35,5 +39,9 @@
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "uuid": "^10.0.0",
     "xlsx": "^0.18.5"
+  },
+  "allowScripts": {
+    "core-js@3.38.1": true,
+    "puppeteer@24.31.0": true
   }
 }
