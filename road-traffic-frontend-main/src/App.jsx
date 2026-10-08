@@ -22,6 +22,7 @@ import LineWeekDay from "./routes/lineweekday/lineWeekDay";
 import TrafficPrediction from "./routes/trafficPrediction/trafficPrediction";
 import RouteComparison from "./routes/routeComparison/routeComparison";
 import ConstructionTimeline from "./routes/constructionTimeline/constructionTimeline";
+import AdminReports from "./pages/adminReports/AdminReports";
 
 function App() {
   const router = createBrowserRouter([
@@ -128,6 +129,12 @@ function App() {
           path: "construction-timeline",
           element: <ConstructionTimeline />,
         },
+        ...(import.meta.env.VITE_ENABLE_REPORTS === 'true' ? [
+          {
+            path: "reports",
+            element: <AdminReports />,
+          }
+        ] : []),
       ],
     },
   ]);
