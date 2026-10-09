@@ -12,7 +12,10 @@ const segmentSchema = new mongoose.Schema({
   durationNormal: Number,   // seconds free-flow
   durationTraffic: Number,  // seconds with traffic
   congestionScore: Number,  // % extra time
-  level: String             // low/medium/high/very high
+  level: String,            // low/medium/high/very high
+  cause: { type: String, default: 'Normal Flow' },          // e.g. 'Metro Line 3 Pier Work', 'Road Widening Excavation', 'Market Rush'
+  causeCategory: { type: String, default: 'regular' },      // 'construction', 'bottleneck', 'market_junction', 'protest', 'regular'
+  delaySeconds: { type: Number, default: 0 }
 }, { _id: false });
 
 const routeSegmentLogSchema = new mongoose.Schema({

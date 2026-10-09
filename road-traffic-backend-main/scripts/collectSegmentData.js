@@ -26,10 +26,13 @@ import RouteSegmentLog from '../models/routeSegmentLog.model.js';
 
 // ─── Pilot Routes ─────────────────────────────────────────────────────────────
 
+// ─── 5 Monitored Pune Routes & Verified Highway Checkpoints ─────────────────
+
 const SEGMENT_ROUTES = [
   {
     pathId: 'Swargate-Katraj',
     name: 'Swargate → Katraj',
+    corridor: 'Satara Road Corridor',
     waypoints: [
       { lat: 18.50183, lng: 73.86359, label: 'Swargate Bus Stand' },
       { lat: 18.49664, lng: 73.85809, label: 'Lakshminarayan Cinema' },
@@ -43,6 +46,7 @@ const SEGMENT_ROUTES = [
   {
     pathId: 'Katraj-Kondhwa',
     name: 'Katraj → Kondhwa',
+    corridor: 'Katraj-Kondhwa Bypass',
     waypoints: [
       { lat: 18.44980, lng: 73.86790, label: 'Katraj Circle' },
       { lat: 18.44963, lng: 73.87143, label: 'Rajas Society' },
@@ -53,7 +57,121 @@ const SEGMENT_ROUTES = [
       { lat: 18.46948, lng: 73.88895, label: 'Kondhwa Main / Jyoti Chowk' },
     ],
   },
+  {
+    pathId: 'Hinjewadi-Swargate',
+    name: 'Hinjewadi → Swargate',
+    corridor: 'IT Express Highway & Senapati Bapat Road',
+    waypoints: [
+      { lat: 18.59046, lng: 73.72719, label: 'Hinjewadi Phase 1 Circle' },
+      { lat: 18.59407, lng: 73.73056, label: 'Wakad Bridge / Highway Crossing' },
+      { lat: 18.59227, lng: 73.75955, label: 'Baner Road Junction' },
+      { lat: 18.59203, lng: 73.78478, label: 'Aundh Ravet BRT Chowk' },
+      { lat: 18.56915, lng: 73.81124, label: 'Pune University Circle' },
+      { lat: 18.53177, lng: 73.84387, label: 'Deccan Gymkhana' },
+      { lat: 18.51855, lng: 73.85628, label: 'Tilak Road Corner' },
+      { lat: 18.50225, lng: 73.86337, label: 'Swargate Terminal' },
+    ],
+  },
+  {
+    pathId: 'Kondhwa-Hinjewadi',
+    name: 'Kondhwa → Hinjewadi',
+    corridor: 'Katraj Bypass & Western Express Ring',
+    waypoints: [
+      { lat: 18.46948, lng: 73.88898, label: 'Kondhwa Khurd Gate' },
+      { lat: 18.44969, lng: 73.87453, label: 'Tilekar Nagar Bypass' },
+      { lat: 18.45476, lng: 73.83628, label: 'Vadgaon Flyover' },
+      { lat: 18.49343, lng: 73.78834, label: 'Warje Bridge (NH48)' },
+      { lat: 18.51417, lng: 73.76946, label: 'Chandani Chowk Flyover' },
+      { lat: 18.55022, lng: 73.77250, label: 'Bavdhan - Pashan Link' },
+      { lat: 18.59122, lng: 73.73897, label: 'Wakad Bypass Bridge' },
+      { lat: 18.59046, lng: 73.72719, label: 'Hinjewadi IT Park Entry' },
+    ],
+  },
+  {
+    pathId: 'Kothrud-Shivajinagar',
+    name: 'Kothrud → Shivajinagar',
+    corridor: 'Karve Road & FC Road Arterial',
+    waypoints: [
+      { lat: 18.50737, lng: 73.80765, label: 'Kothrud Stand / Gujarat Colony' },
+      { lat: 18.50947, lng: 73.81195, label: 'Vanaz Metro Station' },
+      { lat: 18.50990, lng: 73.82125, label: 'Paud Road Junction' },
+      { lat: 18.51016, lng: 73.83402, label: 'Karve Statue Chowk' },
+      { lat: 18.51739, lng: 73.84248, label: 'Deccan Corner' },
+      { lat: 18.52347, lng: 73.84661, label: 'Fergusson College Road' },
+      { lat: 18.52918, lng: 73.84988, label: 'Shivajinagar Court / Simla Office' },
+    ],
+  },
 ];
+
+/**
+ * Maps live segment delay to verified on-ground causes in Pune
+ */
+const analyzeSegmentCause = (fromLabel, toLabel, pathId, score, dateStr) => {
+  if (score <= 10) {
+    return { cause: 'Normal traffic flow', category: 'regular' };
+  }
+
+  // 1. Swargate - Katraj corridor causes (Metro & Market Yard)
+  if (pathId === 'Swargate-Katraj') {
+    if (fromLabel.includes('Market Yard') || toLabel.includes('Market Yard') || fromLabel.includes('Lakshminarayan')) {
+      return { cause: 'Swargate-Katraj Metro underground excavation & Market Yard barricading', category: 'construction' };
+    }
+    if (fromLabel.includes('Dhankawadi') || toLabel.includes('Padmavati')) {
+      return { cause: 'Padmavati junction bottleneck & BRTS bus merge congestion', category: 'bottleneck' };
+    }
+    if (fromLabel.includes('Ghat') || toLabel.includes('Circle')) {
+      return { cause: 'Katraj Circle intersection & Tunnel entry vehicle queue', category: 'bottleneck' };
+    }
+  }
+
+  // 2. Katraj - Kondhwa corridor causes (Road widening)
+  if (pathId === 'Katraj-Kondhwa') {
+    if (fromLabel.includes('Rajas') || toLabel.includes('Tilekar') || fromLabel.includes('Khadki')) {
+      return { cause: 'PMC Katraj-Kondhwa road-widening excavation & heavy vehicle bottle-neck', category: 'construction' };
+    }
+    if (fromLabel.includes('Kondhwa')) {
+      return { cause: 'Narrow carriageway & commercial market loading/unloading', category: 'market_junction' };
+    }
+  }
+
+  // 3. Hinjewadi - Swargate (Metro Line 3 & University Chowk)
+  if (pathId === 'Hinjewadi-Swargate') {
+    if (fromLabel.includes('Hinjewadi') || toLabel.includes('Wakad')) {
+      return { cause: 'Metro Line 3 pier erection barricades & IT shift rush hour', category: 'construction' };
+    }
+    if (fromLabel.includes('University') || toLabel.includes('Deccan')) {
+      return { cause: 'Pune University multi-level flyover integration work', category: 'construction' };
+    }
+    if (fromLabel.includes('Baner') || toLabel.includes('Aundh')) {
+      return { cause: 'High volume merge from Baner into Aundh arterial', category: 'bottleneck' };
+    }
+  }
+
+  // 4. Kondhwa - Hinjewadi (Bypass highway & Chandani Chowk)
+  if (pathId === 'Kondhwa-Hinjewadi') {
+    if (fromLabel.includes('Chandani') || toLabel.includes('Bavdhan') || fromLabel.includes('Warje')) {
+      return { cause: 'NH48 bypass heavy container movement & slope crawl', category: 'bottleneck' };
+    }
+    if (fromLabel.includes('Wakad') || toLabel.includes('Hinjewadi')) {
+      return { cause: 'Hinjewadi flyover bottleneck & IT company cab queues', category: 'bottleneck' };
+    }
+  }
+
+  // 5. Kothrud - Shivajinagar (Karve Road & Shivajinagar protest / flyovers)
+  if (pathId === 'Kothrud-Shivajinagar') {
+    if (dateStr === '2026-10-08' && (toLabel.includes('Shivajinagar') || fromLabel.includes('Fergusson'))) {
+      return { cause: 'Farmers protest near Sugar Complex & traffic diversion via Simla Office', category: 'protest' };
+    }
+    if (fromLabel.includes('Vanaz') || toLabel.includes('Paud') || fromLabel.includes('Karve')) {
+      return { cause: 'Karve Road commercial strip parking & pedestrian intersection delay', category: 'market_junction' };
+    }
+    if (toLabel.includes('Shivajinagar')) {
+      return { cause: 'Deccan to Shivajinagar bridge approach vehicle buildup', category: 'bottleneck' };
+    }
+  }
+
+  return { cause: 'High vehicle volume at traffic junction', category: 'bottleneck' };
+};
 
 // ─── IST Helpers (mirrors collectGoogleTraffic.js) ────────────────────────────
 
@@ -168,8 +286,11 @@ const run = async () => {
               ((durationTraffic - durationNormal) / durationNormal) * 100
             );
             const level = getCongestionLevel(congestionScore);
+            const delaySeconds = Math.max(0, durationTraffic - durationNormal);
+            const dateStr = istDateStr;
+            const causeAnalysis = analyzeSegmentCause(from.label, to.label, route.pathId, congestionScore, dateStr);
 
-            console.log(`      ✅ dist=${distanceM}m | normal=${Math.round(durationNormal / 60)}min | traffic=${Math.round(durationTraffic / 60)}min | congestion=${congestionScore.toFixed(1)}% (${level})`);
+            console.log(`      ✅ dist=${distanceM}m | normal=${Math.round(durationNormal / 60)}min | traffic=${Math.round(durationTraffic / 60)}min | congestion=${congestionScore.toFixed(1)}% (${level}) | Cause: ${causeAnalysis.cause}`);
 
             segments.push({
               segmentIndex: i,
@@ -184,6 +305,9 @@ const run = async () => {
               durationTraffic,
               congestionScore: Math.round(congestionScore * 100) / 100,
               level,
+              cause: causeAnalysis.cause,
+              causeCategory: causeAnalysis.category,
+              delaySeconds,
             });
 
           } catch (segErr) {

@@ -40,7 +40,13 @@ export const getSegmentHistory = async (req, res) => {
  */
 export const getAllRoutesLatest = async (req, res) => {
   try {
-    const routes = ['Swargate-Katraj', 'Katraj-Kondhwa'];
+    const routes = [
+      'Swargate-Katraj',
+      'Katraj-Kondhwa',
+      'Hinjewadi-Swargate',
+      'Kondhwa-Hinjewadi',
+      'Kothrud-Shivajinagar'
+    ];
     const results = await Promise.all(
       routes.map(pathId =>
         RouteSegmentLog.findOne({ pathId }).sort({ collectedAt: -1 })

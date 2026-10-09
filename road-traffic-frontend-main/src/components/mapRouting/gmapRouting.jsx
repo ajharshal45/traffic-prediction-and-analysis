@@ -315,16 +315,29 @@ const MapRouting = () => {
     const isSwargate = s.includes('swargate') || d.includes('swargate');
     const isKatraj = s.includes('katraj') || d.includes('katraj');
     const isKondhwa = s.includes('kondhwa') || d.includes('kondhwa');
+    const isHinjewadi = s.includes('hinjewadi') || d.includes('hinjewadi') || s.includes('hinjawadi') || d.includes('hinjawadi');
+    const isKothrud = s.includes('kothrud') || d.includes('kothrud');
+    const isShivajinagar = s.includes('shivajinagar') || d.includes('shivajinagar');
 
+    // 1. Swargate - Katraj
     if (isSwargate && isKatraj) return 'Swargate-Katraj';
+    // 2. Katraj - Kondhwa
     if (isKatraj && isKondhwa) return 'Katraj-Kondhwa';
+    // 3. Hinjewadi - Swargate
+    if (isHinjewadi && isSwargate) return 'Hinjewadi-Swargate';
+    // 4. Kondhwa - Hinjewadi
+    if (isKondhwa && isHinjewadi) return 'Kondhwa-Hinjewadi';
+    // 5. Kothrud - Shivajinagar
+    if (isKothrud && isShivajinagar) return 'Kothrud-Shivajinagar';
 
-    // Fallback based on coordinate proximity to pilot corridor centers
+    // Proximity fallback based on coordinates
     if (sourceCoords && destinationCoords) {
       const avgLat = (sourceCoords.lat + destinationCoords.lat) / 2;
       const avgLng = (sourceCoords.lng + destinationCoords.lng) / 2;
-      if (avgLng < 73.87) return 'Swargate-Katraj';
-      return 'Katraj-Kondhwa';
+      if (avgLng < 73.80) return 'Hinjewadi-Swargate';
+      if (avgLat > 18.51) return 'Kothrud-Shivajinagar';
+      if (avgLng > 73.87) return 'Katraj-Kondhwa';
+      return 'Swargate-Katraj';
     }
 
     return 'Swargate-Katraj';
@@ -3150,6 +3163,11 @@ const MapRouting = () => {
                       <div className="segment-distance">
                         Distance: {(seg.distanceM / 1000).toFixed(2)} km
                       </div>
+                      {seg.cause && (
+                        <div className="segment-cause-text" style={{ fontSize: '0.8rem', color: '#b91c1c', marginTop: '3px', fontWeight: '500' }}>
+                          ⚠️ <strong>Identified Cause:</strong> {seg.cause}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -3157,6 +3175,11 @@ const MapRouting = () => {
                     <div className="segment-time-info">
                       <span>Normal: <strong>{Math.round(seg.durationNormal / 60)}m</strong></span>
                       <span>Traffic: <strong>{Math.round(seg.durationTraffic / 60)}m</strong></span>
+                      {seg.delaySeconds > 0 && (
+                        <span style={{ color: '#dc2626', fontWeight: '600' }}>
+                          +{Math.round(seg.delaySeconds / 60)}m delay
+                        </span>
+                      )}
                     </div>
                     <div className="segment-level-badge" style={{ backgroundColor: `${color}20`, color: color }}>
                       {seg.level?.toUpperCase() || 'NORMAL'} (+{seg.congestionScore?.toFixed(1)}%)
