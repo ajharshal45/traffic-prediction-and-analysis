@@ -248,4 +248,145 @@
     display: flex;
     justify-content: space-around;
   }
+
+  /* --- Point-to-Point Segment Tracking UI Styles --- */
+  .segment-analysis-wrapper {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding: 20px 24px;
+    margin: 20px auto 30px auto;
+    width: 90%;
+    max-width: 1100px;
+  }
+
+  .segment-card-header {
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .segment-card-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #1e293b;
+    font-weight: 700;
+  }
+
+  .segment-subtitle {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+
+  .segment-summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .segment-stat-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .segment-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .segment-item-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.2s ease;
+  }
+
+  .segment-item-card:hover {
+    background: #f8fafc;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .segment-item-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+  }
+
+  .segment-badge {
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 9999px;
+    min-width: 32px;
+    text-align: center;
+  }
+
+  .segment-title {
+    font-size: 0.95rem;
+    color: #1e293b;
+    margin-bottom: 2px;
+  }
+
+  .segment-distance {
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+
+  .segment-item-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-align: right;
+  }
+
+  .segment-time-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.82rem;
+    color: #475569;
+  }
+
+  .segment-level-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    min-width: 90px;
+    text-align: center;
+  }
   

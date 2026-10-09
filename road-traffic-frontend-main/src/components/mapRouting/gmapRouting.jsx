@@ -37,6 +37,13 @@ const MapRouting = () => {
   const [heatmapVisible, setHeatmapVisible] = useState(false);
   const heatmapLayerRef = useRef(null);
 
+  // --- Point-to-Point Segment Tracking State ---
+  const [segmentData, setSegmentData] = useState(null);
+  const [segmentLoading, setSegmentLoading] = useState(false);
+  const [segmentVisible, setSegmentVisible] = useState(false);
+  const segmentPolylinesRef = useRef([]);
+  const segmentMarkersRef = useRef([]);
+  const segmentInfoWindowRef = useRef(null);
 
   const sourceInputRef = useRef(null);
   const destinationInputRef = useRef(null);
@@ -273,8 +280,214 @@ const MapRouting = () => {
   };
 
 
+  const clearSegmentLayers = () => {
+    segmentPolylinesRef.current.forEach(poly => poly.setMap(null));
+    segmentPolylinesRef.current = [];
+    segmentMarkersRef.current.forEach(m => m.setMap(null));
+    segmentMarkersRef.current = [];
+    if (segmentInfoWindowRef.current) {
+      segmentInfoWindowRef.current.close();
+    }
+  };
+
+  const getSegmentColor = (level, score) => {
+    switch (level) {
+      case 'low': return '#10b981'; // Green
+      case 'medium': return '#f59e0b'; // Amber
+      case 'high': return '#ef4444'; // Red
+      case 'very high': return '#991b1b'; // Dark red
+      default:
+        if (score <= 10) return '#10b981';
+        if (score <= 25) return '#f59e0b';
+        if (score <= 50) return '#ef4444';
+        return '#991b1b';
+    }
+  };
+
+  const identifyPilotPathId = () => {
+    const s = (sourceAddress || '').toLowerCase();
+    const d = (destinationAddress || '').toLowerCase();
+
+    const isSwargate = s.includes('swargate') || d.includes('swargate');
+    const isKatraj = s.includes('katraj') || d.includes('katraj');
+    const isKondhwa = s.includes('kondhwa') || d.includes('kondhwa');
+
+    if (isSwargate && isKatraj) return 'Swargate-Katraj';
+    if (isKatraj && isKondhwa) return 'Katraj-Kondhwa';
+
+    // Fallback based on coordinate proximity to pilot corridor centers
+    if (sourceCoords && destinationCoords) {
+      const avgLat = (sourceCoords.lat + destinationCoords.lat) / 2;
+      const avgLng = (sourceCoords.lng + destinationCoords.lng) / 2;
+      if (avgLng < 73.87) return 'Swargate-Katraj';
+      return 'Katraj-Kondhwa';
+    }
+
+    return 'Swargate-Katraj';
+  };
+
+  const fetchAndRenderSegments = async () => {
+    if (!googleMapRef.current || !window.google?.maps) return;
+
+    setSegmentLoading(true);
+    try {
+      const targetPathId = identifyPilotPathId();
+      const res = await apiRequest.get(`/segments/latest/${targetPathId}`);
+      const data = res.data;
+
+      if (!data || !data.segments || data.segments.length === 0) {
+        alert(`No segment data found for corridor: ${targetPathId}`);
+        setSegmentVisible(false);
+        return;
+      }
+
+      setSegmentData(data);
+      clearSegmentLayers();
+
+      const map = googleMapRef.current;
+      const bounds = new window.google.maps.LatLngBounds();
+
+      if (!segmentInfoWindowRef.current) {
+        segmentInfoWindowRef.current = new window.google.maps.InfoWindow();
+      }
+      const infoWindow = segmentInfoWindowRef.current;
+
+      data.segments.forEach((seg, idx) => {
+        const strokeColor = getSegmentColor(seg.level, seg.congestionScore);
+
+        const segmentPath = [
+          { lat: seg.fromLat, lng: seg.fromLng },
+          { lat: seg.toLat, lng: seg.toLng }
+        ];
+
+        bounds.extend(segmentPath[0]);
+        bounds.extend(segmentPath[1]);
+
+        // Draw colored segment line
+        const polyline = new window.google.maps.Polyline({
+          path: segmentPath,
+          geodesic: true,
+          strokeColor: strokeColor,
+          strokeOpacity: 0.95,
+          strokeWeight: 6,
+          zIndex: 100 + idx,
+          map: map
+        });
+
+        polyline.addListener('click', (e) => {
+          const content = `
+            <div style="font-family: inherit; font-size: 13px; min-width: 200px; padding: 4px;">
+              <div style="font-weight: 700; color: #1e293b; margin-bottom: 4px;">
+                Segment #${seg.segmentIndex + 1}: ${seg.fromLabel} ➔ ${seg.toLabel}
+              </div>
+              <div style="margin-bottom: 2px;">
+                <strong>Distance:</strong> ${(seg.distanceM / 1000).toFixed(2)} km
+              </div>
+              <div style="margin-bottom: 2px;">
+                <strong>Normal Time:</strong> ${Math.round(seg.durationNormal / 60)} min
+              </div>
+              <div style="margin-bottom: 2px;">
+                <strong>Traffic Time:</strong> ${Math.round(seg.durationTraffic / 60)} min
+              </div>
+              <div style="margin-bottom: 4px;">
+                <strong>Congestion Delay:</strong> <span style="color: ${strokeColor}; font-weight: 700;">+${(seg.congestionScore || 0).toFixed(1)}%</span>
+              </div>
+              <div style="display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase; background: ${strokeColor}22; color: ${strokeColor};">
+                ${seg.level || 'NORMAL'}
+              </div>
+            </div>
+          `;
+          infoWindow.setContent(content);
+          infoWindow.setPosition(e.latLng);
+          infoWindow.open(map);
+        });
+
+        segmentPolylinesRef.current.push(polyline);
+
+        // Add numbered circle marker at start of each segment
+        const marker = new window.google.maps.Marker({
+          position: segmentPath[0],
+          map: map,
+          label: {
+            text: String(seg.segmentIndex + 1),
+            color: '#ffffff',
+            fontSize: '11px',
+            fontWeight: 'bold'
+          },
+          icon: {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            fillColor: strokeColor,
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: '#ffffff',
+            scale: 12
+          },
+          title: seg.fromLabel,
+          zIndex: 200 + idx
+        });
+
+        marker.addListener('click', () => {
+          infoWindow.setContent(`
+            <div style="font-size: 12px; font-weight: 600; padding: 2px;">
+              Checkpoint ${seg.segmentIndex + 1}: ${seg.fromLabel}
+            </div>
+          `);
+          infoWindow.open(map, marker);
+        });
+
+        segmentMarkersRef.current.push(marker);
+
+        // Also add end point marker for the final segment
+        if (idx === data.segments.length - 1) {
+          const endMarker = new window.google.maps.Marker({
+            position: segmentPath[1],
+            map: map,
+            label: {
+              text: String(data.segments.length + 1),
+              color: '#ffffff',
+              fontSize: '11px',
+              fontWeight: 'bold'
+            },
+            icon: {
+              path: window.google.maps.SymbolPath.CIRCLE,
+              fillColor: strokeColor,
+              fillOpacity: 1,
+              strokeWeight: 2,
+              strokeColor: '#ffffff',
+              scale: 12
+            },
+            title: seg.toLabel,
+            zIndex: 200 + idx + 1
+          });
+          segmentMarkersRef.current.push(endMarker);
+        }
+      });
+
+      map.fitBounds(bounds);
+      setSegmentVisible(true);
+    } catch (err) {
+      console.error('Error fetching segment data:', err);
+      alert('Could not load point-to-point segment data: ' + (err.response?.data?.error || err.message));
+      setSegmentVisible(false);
+    } finally {
+      setSegmentLoading(false);
+    }
+  };
+
+  const toggleSegmentTracking = () => {
+    if (segmentVisible) {
+      clearSegmentLayers();
+      setSegmentVisible(false);
+    } else {
+      fetchAndRenderSegments();
+    }
+  };
+
   const handleClearRoute = () => {
     clearAllMarkers();
+    clearSegmentLayers();
+    setSegmentVisible(false);
+    setSegmentData(null);
     setShowAnalysis(false);
   };
 
@@ -2842,6 +3055,19 @@ const MapRouting = () => {
             <button className={`btn-map ${heatmapVisible ? 'active' : ''}`} id="toggleHeatmap" onClick={toggleHeatmap}>
               {heatmapVisible ? 'Hide Heatmap' : 'Show Heatmap'}
             </button>
+            <button
+              className={`btn-map ${segmentVisible ? 'active' : ''}`}
+              id="toggleSegments"
+              onClick={toggleSegmentTracking}
+              disabled={segmentLoading}
+              style={{ backgroundColor: segmentVisible ? '#2563eb' : '#f59e0b' }}
+            >
+              {segmentLoading
+                ? 'Loading Points...'
+                : segmentVisible
+                  ? 'Hide Point Tracking'
+                  : '📍 Point-to-Point Tracking'}
+            </button>
           </div>
           <ScoreGauge
             score={totalScore}
@@ -2849,6 +3075,68 @@ const MapRouting = () => {
             baseDuration={formatTime(baseDuration)}
           />
         </div>)}
+
+      {/* Point-to-Point Segment Tracking Breakdown Table / Cards */}
+      {segmentVisible && segmentData && (
+        <div className="segment-analysis-wrapper">
+          <div className="segment-card-header">
+            <h3>📍 Point-to-Point Segment Analysis: {segmentData.pathId}</h3>
+            <span className="segment-subtitle">
+              Slot: <strong>{segmentData.timeRange}</strong> | Date: <strong>{new Date(segmentData.date).toLocaleDateString()}</strong> | Recorded: <strong>{new Date(segmentData.collectedAt).toLocaleTimeString()}</strong>
+            </span>
+          </div>
+
+          <div className="segment-summary-stats">
+            <div className="segment-stat-box">
+              <span className="stat-label">Total Normal Time</span>
+              <span className="stat-value">{Math.round(segmentData.totalDurationNormal / 60)} mins</span>
+            </div>
+            <div className="segment-stat-box">
+              <span className="stat-label">Live Traffic Time</span>
+              <span className="stat-value">{Math.round(segmentData.totalDurationTraffic / 60)} mins</span>
+            </div>
+            <div className="segment-stat-box">
+              <span className="stat-label">Overall Delay</span>
+              <span className="stat-value" style={{ color: segmentData.overallCongestionScore > 20 ? '#dc2626' : '#16a34a' }}>
+                +{segmentData.overallCongestionScore?.toFixed(1) || 0}%
+              </span>
+            </div>
+          </div>
+
+          <div className="segment-list-container">
+            {segmentData.segments?.map((seg) => {
+              const color = getSegmentColor(seg.level, seg.congestionScore);
+              return (
+                <div key={seg.segmentIndex} className="segment-item-card" style={{ borderLeft: `6px solid ${color}` }}>
+                  <div className="segment-item-left">
+                    <span className="segment-badge" style={{ backgroundColor: color }}>
+                      #{seg.segmentIndex + 1}
+                    </span>
+                    <div className="segment-labels">
+                      <div className="segment-title">
+                        <strong>{seg.fromLabel}</strong> ➔ <strong>{seg.toLabel}</strong>
+                      </div>
+                      <div className="segment-distance">
+                        Distance: {(seg.distanceM / 1000).toFixed(2)} km
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="segment-item-right">
+                    <div className="segment-time-info">
+                      <span>Normal: <strong>{Math.round(seg.durationNormal / 60)}m</strong></span>
+                      <span>Traffic: <strong>{Math.round(seg.durationTraffic / 60)}m</strong></span>
+                    </div>
+                    <div className="segment-level-badge" style={{ backgroundColor: `${color}20`, color: color }}>
+                      {seg.level?.toUpperCase() || 'NORMAL'} (+{seg.congestionScore?.toFixed(1)}%)
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className='detailed'>
 
