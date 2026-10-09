@@ -288,6 +288,10 @@ const MapRouting = () => {
     if (segmentInfoWindowRef.current) {
       segmentInfoWindowRef.current.close();
     }
+    // Restore the default route overview polyline
+    if (directionsRenderer && googleMapRef.current) {
+      directionsRenderer.setMap(googleMapRef.current);
+    }
   };
 
   const getSegmentColor = (level, score) => {
@@ -352,61 +356,78 @@ const MapRouting = () => {
       }
       const infoWindow = segmentInfoWindowRef.current;
 
+      // Temporarily hide the solid blue overview route so colored road segments stand out clearly
+      if (directionsRenderer) {
+        directionsRenderer.setMap(null);
+      }
+
+      const directionsService = new window.google.maps.DirectionsService();
+
       data.segments.forEach((seg, idx) => {
         const strokeColor = getSegmentColor(seg.level, seg.congestionScore);
 
-        const segmentPath = [
-          { lat: seg.fromLat, lng: seg.fromLng },
-          { lat: seg.toLat, lng: seg.toLng }
-        ];
+        const origin = { lat: seg.fromLat, lng: seg.fromLng };
+        const dest = { lat: seg.toLat, lng: seg.toLng };
 
-        bounds.extend(segmentPath[0]);
-        bounds.extend(segmentPath[1]);
+        bounds.extend(origin);
+        bounds.extend(dest);
 
-        // Draw colored segment line
-        const polyline = new window.google.maps.Polyline({
-          path: segmentPath,
-          geodesic: true,
-          strokeColor: strokeColor,
-          strokeOpacity: 0.95,
-          strokeWeight: 6,
-          zIndex: 100 + idx,
-          map: map
+        // Fetch exact road-following polyline from DirectionsService for this segment
+        directionsService.route({
+          origin: origin,
+          destination: dest,
+          travelMode: window.google.maps.TravelMode.DRIVING
+        }, (response, status) => {
+          let segmentPath = [origin, dest];
+          if (status === 'OK' && response?.routes?.[0]?.overview_path) {
+            segmentPath = response.routes[0].overview_path;
+          }
+
+          // Draw colored road polyline
+          const polyline = new window.google.maps.Polyline({
+            path: segmentPath,
+            geodesic: true,
+            strokeColor: strokeColor,
+            strokeOpacity: 0.95,
+            strokeWeight: 6,
+            zIndex: 100 + idx,
+            map: map
+          });
+
+          polyline.addListener('click', (e) => {
+            const content = `
+              <div style="font-family: inherit; font-size: 13px; min-width: 220px; padding: 6px;">
+                <div style="font-weight: 700; color: #1e293b; margin-bottom: 6px; font-size: 14px;">
+                  Segment #${seg.segmentIndex + 1}: ${seg.fromLabel} ➔ ${seg.toLabel}
+                </div>
+                <div style="margin-bottom: 3px;">
+                  <strong>Distance:</strong> ${(seg.distanceM / 1000).toFixed(2)} km
+                </div>
+                <div style="margin-bottom: 3px;">
+                  <strong>Normal Free-Flow:</strong> ${Math.round(seg.durationNormal / 60)} min
+                </div>
+                <div style="margin-bottom: 3px;">
+                  <strong>Live Traffic Time:</strong> ${Math.round(seg.durationTraffic / 60)} min
+                </div>
+                <div style="margin-bottom: 6px;">
+                  <strong>Congestion Delay:</strong> <span style="color: ${strokeColor}; font-weight: 700;">+${(seg.congestionScore || 0).toFixed(1)}%</span>
+                </div>
+                <div style="display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase; background: ${strokeColor}22; color: ${strokeColor};">
+                  ${seg.level || 'NORMAL'}
+                </div>
+              </div>
+            `;
+            infoWindow.setContent(content);
+            infoWindow.setPosition(e.latLng);
+            infoWindow.open(map);
+          });
+
+          segmentPolylinesRef.current.push(polyline);
         });
 
-        polyline.addListener('click', (e) => {
-          const content = `
-            <div style="font-family: inherit; font-size: 13px; min-width: 200px; padding: 4px;">
-              <div style="font-weight: 700; color: #1e293b; margin-bottom: 4px;">
-                Segment #${seg.segmentIndex + 1}: ${seg.fromLabel} ➔ ${seg.toLabel}
-              </div>
-              <div style="margin-bottom: 2px;">
-                <strong>Distance:</strong> ${(seg.distanceM / 1000).toFixed(2)} km
-              </div>
-              <div style="margin-bottom: 2px;">
-                <strong>Normal Time:</strong> ${Math.round(seg.durationNormal / 60)} min
-              </div>
-              <div style="margin-bottom: 2px;">
-                <strong>Traffic Time:</strong> ${Math.round(seg.durationTraffic / 60)} min
-              </div>
-              <div style="margin-bottom: 4px;">
-                <strong>Congestion Delay:</strong> <span style="color: ${strokeColor}; font-weight: 700;">+${(seg.congestionScore || 0).toFixed(1)}%</span>
-              </div>
-              <div style="display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase; background: ${strokeColor}22; color: ${strokeColor};">
-                ${seg.level || 'NORMAL'}
-              </div>
-            </div>
-          `;
-          infoWindow.setContent(content);
-          infoWindow.setPosition(e.latLng);
-          infoWindow.open(map);
-        });
-
-        segmentPolylinesRef.current.push(polyline);
-
-        // Add numbered circle marker at start of each segment
+        // Add numbered pin marker at each verified checkpoint
         const marker = new window.google.maps.Marker({
-          position: segmentPath[0],
+          position: origin,
           map: map,
           label: {
             text: String(seg.segmentIndex + 1),
@@ -420,16 +441,16 @@ const MapRouting = () => {
             fillOpacity: 1,
             strokeWeight: 2,
             strokeColor: '#ffffff',
-            scale: 12
+            scale: 13
           },
-          title: seg.fromLabel,
+          title: `Checkpoint ${seg.segmentIndex + 1}: ${seg.fromLabel}`,
           zIndex: 200 + idx
         });
 
         marker.addListener('click', () => {
           infoWindow.setContent(`
-            <div style="font-size: 12px; font-weight: 600; padding: 2px;">
-              Checkpoint ${seg.segmentIndex + 1}: ${seg.fromLabel}
+            <div style="font-size: 13px; font-weight: 600; padding: 4px;">
+              📍 Checkpoint #${seg.segmentIndex + 1}: <strong>${seg.fromLabel}</strong>
             </div>
           `);
           infoWindow.open(map, marker);
@@ -437,10 +458,10 @@ const MapRouting = () => {
 
         segmentMarkersRef.current.push(marker);
 
-        // Also add end point marker for the final segment
+        // Also add end point marker for the final checkpoint
         if (idx === data.segments.length - 1) {
           const endMarker = new window.google.maps.Marker({
-            position: segmentPath[1],
+            position: dest,
             map: map,
             label: {
               text: String(data.segments.length + 1),
@@ -454,11 +475,21 @@ const MapRouting = () => {
               fillOpacity: 1,
               strokeWeight: 2,
               strokeColor: '#ffffff',
-              scale: 12
+              scale: 13
             },
-            title: seg.toLabel,
+            title: `Destination: ${seg.toLabel}`,
             zIndex: 200 + idx + 1
           });
+
+          endMarker.addListener('click', () => {
+            infoWindow.setContent(`
+              <div style="font-size: 13px; font-weight: 600; padding: 4px;">
+                🏁 End Checkpoint: <strong>${seg.toLabel}</strong>
+              </div>
+            `);
+            infoWindow.open(map, endMarker);
+          });
+
           segmentMarkersRef.current.push(endMarker);
         }
       });
