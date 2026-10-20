@@ -236,8 +236,9 @@ const run = async () => {
 
     const timeSlot = getCurrentISTTimeSlot();
     const istMidnightUTC = getISTMidnightUTC();
+    const istDateStr = istMidnightUTC.toISOString().split('T')[0];
 
-    console.log(`📅 IST Date  : ${istMidnightUTC.toISOString().split('T')[0]}`);
+    console.log(`📅 IST Date  : ${istDateStr}`);
     console.log(`⏰ Time Slot : ${timeSlot}`);
     console.log(`🛣️  Routes    : ${SEGMENT_ROUTES.length}\n`);
     console.log('─────────────────────────────────────────────────────');

@@ -13,7 +13,8 @@ CORS(app)
 
 # --- CONFIGURATION ---
 PORT = 3003
-MODEL_PATH = 'pothole_mobnet_base.h5' 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, 'pothole_mobnet_base.h5') 
 
 # --- LOAD MODEL WITH COMPATIBILITY FIX ---
 print("Loading Keras model...")
