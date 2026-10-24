@@ -42,6 +42,10 @@ function App() {
           path: "/register", // Relative path
           element: <Register />,
         },
+        {
+          path: "/reports",
+          element: <AdminReports />,
+        },
       ],
     },
     {

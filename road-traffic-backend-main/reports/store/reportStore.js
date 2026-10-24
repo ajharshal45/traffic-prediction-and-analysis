@@ -89,6 +89,24 @@ export class JsonFileReportStore extends ReportStoreInterface {
     return reports;
   }
 
+  async getAllFullReports(pathId, periodType) {
+    const targetDir = this._getDir(pathId, periodType);
+    if (!fs.existsSync(targetDir)) {
+      return [];
+    }
+    const files = fs.readdirSync(targetDir);
+    const reports = [];
+    for (const file of files) {
+      if (file.endsWith('.json')) {
+        try {
+          const raw = fs.readFileSync(path.join(targetDir, file), 'utf8');
+          reports.push(JSON.parse(raw));
+        } catch {}
+      }
+    }
+    return reports;
+  }
+
   async listRoutes() {
     if (!fs.existsSync(this.baseDir)) {
       return [];

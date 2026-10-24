@@ -14,6 +14,47 @@ export const OBSTACLE_WEIGHT = 0.35; // 70% backend * 100/200 max = 0.35
 export const GOOGLE_WEIGHT = 0.30;
 export const HISTORICAL_WEIGHT = 0.35;
 
+// Named configuration thresholds
+export const ABOUT_THE_SAME_THRESHOLD = 2.0;
+
+export const LEVEL_THRESHOLDS = {
+  veryLow: 15,
+  low: 35,
+  medium: 60,
+  high: 85,
+  veryHigh: 100
+};
+
+export const TIME_OF_DAY_BUCKETS = [
+  { key: 'night', label: 'night (00:00–06:00)', slots: ['00-02', '02-04', '04-06'] },
+  { key: 'early_morning', label: 'early morning (06:00–08:00)', slots: ['06-08'] },
+  { key: 'morning_rush', label: 'morning rush (08:00–12:00)', slots: ['08-10', '10-12'] },
+  { key: 'midday', label: 'midday (12:00–16:00)', slots: ['12-14', '14-16'] },
+  { key: 'evening_rush', label: 'evening rush (16:00–20:00)', slots: ['16-18', '18-20'] },
+  { key: 'late_evening', label: 'late evening (20:00–24:00)', slots: ['20-22', '22-24'] }
+];
+
+export const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+export const WEEKDAY_NAMES = [
+  'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
+];
+
+export function getTrafficLevelName(score) {
+  if (score <= LEVEL_THRESHOLDS.veryLow) return 'Very Low';
+  if (score <= LEVEL_THRESHOLDS.low) return 'Low';
+  if (score <= LEVEL_THRESHOLDS.medium) return 'Medium';
+  if (score <= LEVEL_THRESHOLDS.high) return 'High';
+  return 'Very High';
+}
+
+export function pluralize(count, singular, plural = `${singular}s`) {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
 export function getTimeMultiplier(timeSlot) {
   if (!timeSlot) return 1.0;
   const hour = parseInt(timeSlot.split('-')[0], 10);
@@ -108,9 +149,15 @@ export function buildDayReport(records, options = {}) {
         if (typeof bd.googleScore === 'number') cell.googleSum += bd.googleScore;
         if (typeof bd.historyScore === 'number') cell.historicalSum += bd.historyScore;
 
-        if (bd.constructionCount || bd.construction > 0) contextData.constructionActive++;
-        if (bd.diversionCount || bd.diversion > 0) contextData.diversions++;
-        if (bd.eventCount || bd.event > 0) contextData.eventCount += (bd.eventCount || 1);
+        const cCount = bd.constructionCount || (bd.construction > 0 ? 1 : 0);
+        if (cCount > contextData.constructionActive) contextData.constructionActive = cCount;
+
+        const dCount = bd.diversionCount || (bd.diversion > 0 ? 1 : 0);
+        if (dCount > contextData.diversions) contextData.diversions = dCount;
+
+        const eCount = bd.eventCount || (bd.event > 0 ? 1 : 0);
+        if (eCount > contextData.eventCount) contextData.eventCount = eCount;
+
         if (bd.festivalName) contextData.festivals.add(bd.festivalName);
         if (bd.weatherCondition && bd.weatherCondition.toLowerCase().includes('rain')) {
           hasRain = true;
@@ -489,16 +536,16 @@ export function compareReports(a, b) {
     nonRemainder.sort((x, y) => Math.abs(y.contribution) - Math.abs(x.contribution));
     const top = nonRemainder[0];
     if (top && Math.abs(top.contribution) > 0.05) {
-      largestFactorText = ` The largest contributing factor was ${top.label} (${top.contribution >= 0 ? '+' : ''}${top.contribution} points contributed to the shift).`;
+      largestFactorText = ` The largest contributing factor was ${top.label} (${top.contribution >= 0 ? '+' : ''}${top.contribution} points contributed under the current scoring formula).`;
     }
   } else {
     const facts = [];
     if (b.context?.festivals?.length > 0) facts.push(`festivals [${b.context.festivals.join(', ')}]`);
-    if (b.context?.constructionActive > 0) facts.push(`${b.context.constructionActive} active constructions`);
-    if (b.context?.rainyDays > 0) facts.push(`${b.context.rainyDays} rainy days`);
-    if (b.context?.eventCount > 0) facts.push(`${b.context.eventCount} recorded events`);
+    if (b.context?.constructionActive > 0) facts.push(`${pluralize(b.context.constructionActive, 'active construction site')}`);
+    if (b.context?.rainyDays > 0) facts.push(`${pluralize(b.context.rainyDays, 'rainy day')}`);
+    if (b.context?.eventCount > 0) facts.push(`${pluralize(b.context.eventCount, 'recorded event')}`);
     const factsStr = facts.length > 0 ? facts.join(', ') : 'normal traffic indicators';
-    largestFactorText = ` Context only, not attribution (simulated data exceeds 20%). Context facts for period: ${factsStr}.`;
+    largestFactorText = ` Demo data: shown for reference, not as the cause of the change. Facts for period: ${factsStr}.`;
   }
 
   // Check period length in weeks
@@ -525,6 +572,9 @@ export function compareReports(a, b) {
 
   const explanation = `Between ${a.periodKey} and ${b.periodKey}, the average traffic score on route ${a.pathId} ${directionText}.${largestFactorText}${confidenceNote}`;
 
+  // Generate plain explanation for PMC officers
+  const plainResult = generatePlainExplanation(a, b, { totalScoreChange, ...a }, a.periodType);
+
   return {
     pathId: a.pathId,
     periodType: a.periodType,
@@ -543,6 +593,287 @@ export function compareReports(a, b) {
     sumOfLines,
     bothLowSimulated,
     confidenceNote,
-    explanation
+    explanation,
+    headline: plainResult.headline,
+    changeLine: plainResult.changeLine,
+    plainExplanation: plainResult.explanation
+  };
+}
+
+/**
+ * Pure function to compute typical reference profile from in-memory reports
+ * (0 DB calls, works strictly on loaded report objects)
+ */
+export function typicalProfile(reports, periodType = 'day') {
+  if (!Array.isArray(reports) || reports.length === 0) {
+    return periodType === 'day' ? {} : {};
+  }
+
+  if (periodType === 'day') {
+    // 12 time-slot averages across all reports
+    const slotSums = Object.fromEntries(TIME_SLOTS.map(s => [s, { sum: 0, count: 0 }]));
+    for (const r of reports) {
+      if (!r || !r.grid) continue;
+      for (let w = 0; w < 7; w++) {
+        const row = r.grid[w];
+        if (!row) continue;
+        for (const s of TIME_SLOTS) {
+          const cell = row[s];
+          if (cell && cell.count > 0) {
+            slotSums[s].sum += cell.scoreSum;
+            slotSums[s].count += cell.count;
+          }
+        }
+      }
+    }
+    const result = {};
+    for (const s of TIME_SLOTS) {
+      result[s] = slotSums[s].count > 0
+        ? Math.round((slotSums[s].sum / slotSums[s].count) * 100) / 100
+        : null;
+    }
+    return result;
+  } else {
+    // Month mode: 7 weekday averages (0..6 Sun..Sat)
+    const weekdaySums = Array.from({ length: 7 }, () => ({ sum: 0, count: 0 }));
+    for (const r of reports) {
+      if (!r || !r.grid) continue;
+      for (let w = 0; w < 7; w++) {
+        const row = r.grid[w];
+        if (!row) continue;
+        for (const s of TIME_SLOTS) {
+          const cell = row[s];
+          if (cell && cell.count > 0) {
+            weekdaySums[w].sum += cell.scoreSum;
+            weekdaySums[w].count += cell.count;
+          }
+        }
+      }
+    }
+    const result = {};
+    for (let w = 0; w < 7; w++) {
+      result[w] = weekdaySums[w].count > 0
+        ? Math.round((weekdaySums[w].sum / weekdaySums[w].count) * 100) / 100
+        : null;
+    }
+    return result;
+  }
+}
+
+export function formatPeriodLabel(key, type) {
+  if (!key) return '';
+  if (type === 'month') {
+    const parts = key.split('-');
+    if (parts.length === 2) {
+      const mIdx = parseInt(parts[1], 10) - 1;
+      return `${MONTH_NAMES[mIdx] || parts[1]} ${parts[0]}`;
+    }
+  } else if (type === 'year') {
+    return key;
+  } else if (type === 'day') {
+    return key;
+  }
+  return key;
+}
+
+export function getYearMonthlyAverages(report) {
+  const monthSums = Array.from({ length: 12 }, () => ({ sum: 0, count: 0 }));
+  if (Array.isArray(report?.dailyAvgs)) {
+    for (const d of report.dailyAvgs) {
+      const parts = d.date.split('-');
+      if (parts.length >= 2) {
+        const mIdx = parseInt(parts[1], 10) - 1;
+        if (mIdx >= 0 && mIdx < 12) {
+          monthSums[mIdx].sum += d.avgScore * d.count;
+          monthSums[mIdx].count += d.count;
+        }
+      }
+    }
+  }
+  return monthSums.map(m => m.count > 0 ? Math.round((m.sum / m.count) * 100) / 100 : null);
+}
+
+export function getYearMonthsList(report) {
+  const months = new Set();
+  if (Array.isArray(report?.dailyAvgs)) {
+    for (const d of report.dailyAvgs) {
+      const parts = d.date.split('-');
+      if (parts.length >= 2) {
+        months.add(parts[1]);
+      }
+    }
+  }
+  return Array.from(months).sort();
+}
+
+/**
+ * Generates 2-3 sentence plain language explanation for PMC officers
+ * (No factor attribution names, no 'caused', clean pluralization, honest confidence notes)
+ */
+export function generatePlainExplanation(a, b, comparison, periodType = a.periodType) {
+  const delta = typeof comparison?.totalScoreChange === 'number'
+    ? comparison.totalScoreChange
+    : Math.round((b.avgScore - a.avgScore) * 100) / 100;
+  const absDelta = Math.abs(delta);
+
+  const aLabel = formatPeriodLabel(a.periodKey, periodType);
+  const bLabel = formatPeriodLabel(b.periodKey, periodType);
+
+  // 1. Direction and size
+  let directionSentence = '';
+  let headline = '';
+  if (absDelta < ABOUT_THE_SAME_THRESHOLD) {
+    headline = `Traffic was about the same in ${bLabel} as in ${aLabel}`;
+    directionSentence = `Traffic was about the same in ${bLabel} as in ${aLabel} (difference of ${absDelta.toFixed(1)} points).`;
+  } else if (delta < 0) {
+    const pct = a.avgScore > 0 ? Math.abs(Math.round((delta / a.avgScore) * 1000) / 10) : 0;
+    headline = `Traffic was lower in ${bLabel} than in ${aLabel}`;
+    directionSentence = `Traffic was lower in ${bLabel} than in ${aLabel} by ${absDelta.toFixed(1)} points (-${pct}%).`;
+  } else {
+    const pct = a.avgScore > 0 ? Math.round((delta / a.avgScore) * 1000) / 10 : 0;
+    headline = `Traffic was higher in ${bLabel} than in ${aLabel}`;
+    directionSentence = `Traffic was higher in ${bLabel} than in ${aLabel} by ${absDelta.toFixed(1)} points (+${pct}%).`;
+  }
+
+  // 2. Part of day / month with largest difference
+  let differenceSentence = '';
+  if (periodType === 'day' || periodType === 'month') {
+    let maxBucketDelta = 0;
+    let maxBucket = null;
+
+    for (const bucket of TIME_OF_DAY_BUCKETS) {
+      let sumA = 0, countA = 0;
+      let sumB = 0, countB = 0;
+      for (const slot of bucket.slots) {
+        for (let w = 0; w < 7; w++) {
+          const cellA = a.grid?.[w]?.[slot];
+          if (cellA && cellA.count > 0) {
+            sumA += cellA.scoreSum;
+            countA += cellA.count;
+          }
+          const cellB = b.grid?.[w]?.[slot];
+          if (cellB && cellB.count > 0) {
+            sumB += cellB.scoreSum;
+            countB += cellB.count;
+          }
+        }
+      }
+      if (countA > 0 && countB > 0) {
+        const avgA = sumA / countA;
+        const avgB = sumB / countB;
+        const bDelta = avgB - avgA;
+        if (Math.abs(bDelta) > Math.abs(maxBucketDelta)) {
+          maxBucketDelta = bDelta;
+          maxBucket = bucket;
+        }
+      }
+    }
+
+    if (maxBucket && Math.abs(maxBucketDelta) >= 0.5) {
+      const shiftDesc = maxBucketDelta >= 0 ? 'higher' : 'lower';
+      differenceSentence = `The largest difference occurred during the ${maxBucket.label}, when traffic was ${Math.abs(maxBucketDelta).toFixed(1)} points ${shiftDesc} in ${bLabel}.`;
+    }
+  } else if (periodType === 'year') {
+    const monthScoresA = getYearMonthlyAverages(a);
+    const monthScoresB = getYearMonthlyAverages(b);
+
+    let maxMonthDelta = 0;
+    let maxMonthIdx = null;
+
+    for (let m = 0; m < 12; m++) {
+      if (monthScoresA[m] !== null && monthScoresB[m] !== null) {
+        const mDelta = monthScoresB[m] - monthScoresA[m];
+        if (Math.abs(mDelta) > Math.abs(maxMonthDelta)) {
+          maxMonthDelta = mDelta;
+          maxMonthIdx = m;
+        }
+      }
+    }
+
+    if (maxMonthIdx !== null && Math.abs(maxMonthDelta) >= 0.5) {
+      const monthName = MONTH_NAMES[maxMonthIdx];
+      const shiftDesc = maxMonthDelta >= 0 ? 'higher' : 'lower';
+      differenceSentence = `The largest difference occurred in ${monthName}, when traffic was ${Math.abs(maxMonthDelta).toFixed(1)} points ${shiftDesc} in ${bLabel}.`;
+    }
+  }
+
+  // 3. Level change sentence
+  const levelA = getTrafficLevelName(a.avgScore);
+  const levelB = getTrafficLevelName(b.avgScore);
+  let levelSentence = '';
+  if (levelA !== levelB) {
+    levelSentence = `Overall congestion level shifted from ${levelA} to ${levelB}.`;
+  } else {
+    levelSentence = `Overall congestion remained in the ${levelA} band.`;
+  }
+
+  // 4. Confidence note
+  let confidenceNote = '';
+  const startA = new Date(a.start).getTime();
+  const endA = new Date(a.end).getTime();
+  const weeksA = (endA - startA) / (1000 * 60 * 60 * 24 * 7);
+
+  const startB = new Date(b.start).getTime();
+  const endB = new Date(b.end).getTime();
+  const weeksB = (endB - startB) / (1000 * 60 * 60 * 24 * 7);
+
+  const hasWeekdayMismatch = periodType === 'day' && (new Date(a.start).getUTCDay() !== new Date(b.start).getUTCDay());
+  const hasMonthMismatch = periodType === 'year' && (getYearMonthsList(a).join(',') !== getYearMonthsList(b).join(','));
+
+  if (periodType === 'day') {
+    confidenceNote = 'Note: Single-day comparisons have lower confidence because day-to-day factors like weather and localized incidents cause short-term variance.';
+  } else if (a.coveragePct < 80 || b.coveragePct < 80) {
+    confidenceNote = 'Note: Data coverage is below 80% for this observation period.';
+  } else if ((periodType !== 'day' && weeksA < 8) || (periodType !== 'day' && weeksB < 8)) {
+    confidenceNote = 'Note: Observation period has fewer than 8 weeks of data.';
+  } else if (hasWeekdayMismatch || hasMonthMismatch) {
+    confidenceNote = 'Note: The compared periods have differing day-of-week or calendar mix.';
+  }
+
+  const sentences = [directionSentence];
+  if (differenceSentence) sentences.push(differenceSentence);
+  if (levelSentence) sentences.push(levelSentence);
+  if (confidenceNote) sentences.push(confidenceNote);
+
+  const changeLine = `${delta >= 0 ? '+' : ''}${delta.toFixed(1)} points (${delta >= 0 ? '+' : ''}${a.avgScore > 0 ? ((delta / a.avgScore) * 100).toFixed(1) : '0.0'}%)  |  ${levelA} -> ${levelB}`;
+
+  return {
+    headline,
+    changeLine,
+    explanation: sentences.join(' '),
+    confidenceNote
+  };
+}
+
+/**
+ * Restricts Year mode comparison to shared months
+ */
+export function filterSharedMonths(reportA, reportB) {
+  const monthsA = new Set(getYearMonthsList(reportA));
+  const monthsB = new Set(getYearMonthsList(reportB));
+  const shared = new Set([...monthsA].filter(m => monthsB.has(m)));
+
+  function filterReport(rep) {
+    const filteredDaily = (rep.dailyAvgs || []).filter(d => {
+      const m = d.date.split('-')[1];
+      return shared.has(m);
+    });
+    const totalCount = filteredDaily.reduce((acc, d) => acc + d.count, 0);
+    const totalSum = filteredDaily.reduce((acc, d) => acc + d.avgScore * d.count, 0);
+    const avgScore = totalCount > 0 ? Math.round((totalSum / totalCount) * 100) / 100 : rep.avgScore;
+    return {
+      ...rep,
+      dailyAvgs: filteredDaily,
+      recordCount: totalCount,
+      avgScore,
+      isRestrictedShared: true,
+      sharedMonths: Array.from(shared).sort()
+    };
+  }
+
+  return {
+    reportA: filterReport(reportA),
+    reportB: filterReport(reportB),
+    sharedMonths: Array.from(shared).sort()
   };
 }

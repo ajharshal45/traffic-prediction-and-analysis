@@ -96,12 +96,32 @@ router.get('/compare', async (req, res) => {
       });
     }
 
-    const comparison = compareReports(reportA, reportB);
+    let activeReportA = reportA;
+    let activeReportB = reportB;
+
+    const { filterSharedMonths, typicalProfile } = await import('../services/reportMath.js');
+
+    if (req.query.sharedOnly === 'true' && type === 'year') {
+      const filtered = filterSharedMonths(reportA, reportB);
+      activeReportA = filtered.reportA;
+      activeReportB = filtered.reportB;
+    }
+
+    const comparison = compareReports(activeReportA, activeReportB);
+
+    // Compute typical profile in memory from all stored reports for this route
+    if (type === 'day' || type === 'month') {
+      const allReports = await defaultReportStore.getAllFullReports(route, type);
+      comparison.typicalProfile = typicalProfile(allReports, type);
+    } else {
+      comparison.typicalProfile = null;
+    }
+
     return res.json({
       success: true,
       comparison,
-      reportA,
-      reportB
+      reportA: activeReportA,
+      reportB: activeReportB
     });
   } catch (error) {
     return res.status(400).json({ success: false, error: error.message });
