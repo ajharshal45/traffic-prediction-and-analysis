@@ -101,6 +101,7 @@ export const readOnlyDb = {
 export function createReadOnlyWrapper(mongooseModel) {
   return new Proxy(mongooseModel, {
     get(target, prop) {
+      if (prop === 'then') return undefined;
       if (!ALLOWED_METHODS.has(prop)) {
         throw new Error(
           `SAFETY RULE D2 VIOLATION: Method "${String(prop)}" is forbidden in read-only mode. ` +
