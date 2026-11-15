@@ -120,9 +120,16 @@ router.get('/compare', async (req, res) => {
     // Attach sub-segment bottlenecks if comparing days or recent periods
     try {
       const RouteSegmentLog = (await import('../../models/routeSegmentLog.model.js')).default;
+      // Use date-range so month/year modes find a log within the period (not just on start day)
       const [segDocA, segDocB] = await Promise.all([
-        RouteSegmentLog.findOne({ pathId: route, date: new Date(activeReportA.start) }).sort({ collectedAt: -1 }).lean(),
-        RouteSegmentLog.findOne({ pathId: route, date: new Date(activeReportB.start) }).sort({ collectedAt: -1 }).lean(),
+        RouteSegmentLog.findOne({
+          pathId: route,
+          date: { $gte: new Date(activeReportA.start), $lte: new Date(activeReportA.end) }
+        }).sort({ collectedAt: -1 }).lean(),
+        RouteSegmentLog.findOne({
+          pathId: route,
+          date: { $gte: new Date(activeReportB.start), $lte: new Date(activeReportB.end) }
+        }).sort({ collectedAt: -1 }).lean(),
       ]);
 
       if (segDocA && segDocB && Array.isArray(segDocA.segments) && Array.isArray(segDocB.segments)) {
