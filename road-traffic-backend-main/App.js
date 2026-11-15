@@ -29,6 +29,12 @@ import segmentRoute from "./routes/segment.route.js";
 import { startScheduler } from "./services/scheduler.service.js";
 
 import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const reportDir = path.resolve(__dirname, "..", "report_output");
 
 
 dotenv.config({
@@ -109,3 +115,17 @@ app.use("/api/traffic-status",trafficStatusRoute);
 app.use("/api/analytics", analyticsRoute);
 app.use("/api/prediction-logs", predictionLogRoute);
 app.use("/api/segments", segmentRoute);
+// Serve executive traffic report dashboard & export artifacts
+app.use('/report-static', express.static(reportDir));
+app.get(['/report', '/executive-report', '/report.html'], (req, res) => {
+    res.sendFile(path.join(reportDir, 'report.html'));
+});
+app.get('/report/excel', (req, res) => {
+    res.download(path.join(reportDir, 'report.xlsx'), 'Pune_Traffic_Report_365Days.xlsx');
+});
+app.get('/report/daily-csv', (req, res) => {
+    res.download(path.join(reportDir, 'daily.csv'), 'Pune_Traffic_Daily_Matrix.csv');
+});
+app.get('/report/monthly-csv', (req, res) => {
+    res.download(path.join(reportDir, 'monthly.csv'), 'Pune_Traffic_Monthly_Summary.csv');
+});

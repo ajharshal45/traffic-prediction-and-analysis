@@ -23,6 +23,8 @@ import TrafficPrediction from "./routes/trafficPrediction/trafficPrediction";
 import RouteComparison from "./routes/routeComparison/routeComparison";
 import ConstructionTimeline from "./routes/constructionTimeline/constructionTimeline";
 import AdminReports from "./pages/adminReports/AdminReports";
+import ExecutiveReport from "./pages/executiveReport/ExecutiveReport";
+
 
 function App() {
   const router = createBrowserRouter([
@@ -45,6 +47,10 @@ function App() {
         {
           path: "/reports",
           element: <AdminReports />,
+        },
+        {
+          path: "/executive-report",
+          element: <ExecutiveReport />,
         },
       ],
     },
@@ -132,6 +138,10 @@ function App() {
         {
           path: "construction-timeline",
           element: <ConstructionTimeline />,
+        },
+        {
+          path: "executive-report",
+          element: <ExecutiveReport />,
         },
         ...(import.meta.env.VITE_ENABLE_REPORTS === 'true' ? [
           {

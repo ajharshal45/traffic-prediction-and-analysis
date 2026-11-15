@@ -28,6 +28,8 @@ function Navbar() {
         <a href="/redeem">Redeem</a>
         <a href="/admin">Admin</a>
         <a href="/route-history">Route-History</a>
+        <a href="/reports">Reports</a>
+        <a href="/executive-report">Executive Report</a>
       </div>
       <div className="right">
         {currentUser ? (
