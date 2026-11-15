@@ -149,13 +149,13 @@ export function buildDayReport(records, options = {}) {
         if (typeof bd.googleScore === 'number') cell.googleSum += bd.googleScore;
         if (typeof bd.historyScore === 'number') cell.historicalSum += bd.historyScore;
 
-        const cCount = bd.constructionCount || (bd.construction > 0 ? 1 : 0);
+        const cCount = typeof bd.constructionCount === 'number' ? bd.constructionCount : (bd.construction > 0 ? 1 : 0);
         if (cCount > contextData.constructionActive) contextData.constructionActive = cCount;
 
-        const dCount = bd.diversionCount || (bd.diversion > 0 ? 1 : 0);
+        const dCount = typeof bd.diversionCount === 'number' ? bd.diversionCount : (bd.diversion > 0 ? 1 : 0);
         if (dCount > contextData.diversions) contextData.diversions = dCount;
 
-        const eCount = bd.eventCount || (bd.event > 0 ? 1 : 0);
+        const eCount = typeof bd.eventCount === 'number' ? bd.eventCount : (bd.event > 0 ? 1 : 0);
         if (eCount > contextData.eventCount) contextData.eventCount = eCount;
 
         if (bd.festivalName) contextData.festivals.add(bd.festivalName);
