@@ -62,11 +62,21 @@ export class JsonFileReportStore extends ReportStoreInterface {
     }
     const files = fs.readdirSync(targetDir);
     const reports = [];
+    const KEY_PATTERNS = {
+      day: /^\d{4}-\d{2}-\d{2}$/,
+      month: /^\d{4}-\d{2}$/,
+      year: /^\d{4}$/
+    };
+    const pattern = KEY_PATTERNS[periodType];
+
     for (const file of files) {
       if (file.endsWith('.json')) {
         try {
           const raw = fs.readFileSync(path.join(targetDir, file), 'utf8');
           const data = JSON.parse(raw);
+          if (pattern && !pattern.test(data.periodKey)) {
+            continue; // Skip partial phase or non-standard test keys
+          }
           reports.push({
             pathId: data.pathId,
             periodType: data.periodType,

@@ -203,16 +203,22 @@ export default function AdminReports() {
   // Available months for a selected year in month mode
   const getAvailableMonthsForYear = (year) => {
     if (!year) return [];
-    return availableReports
-      .filter(r => r.periodKey.startsWith(year + '-'))
-      .map(r => {
+    const seen = new Set();
+    const months = [];
+    availableReports
+      .filter(r => /^\d{4}-\d{2}$/.test(r.periodKey) && r.periodKey.startsWith(year + '-'))
+      .forEach(r => {
         const m = r.periodKey.split('-')[1];
-        const idx = parseInt(m, 10) - 1;
-        return {
-          code: m,
-          label: FULL_MONTH_NAMES[idx] || m
-        };
+        if (!seen.has(m)) {
+          seen.add(m);
+          const idx = parseInt(m, 10) - 1;
+          months.push({
+            code: m,
+            label: FULL_MONTH_NAMES[idx] || m
+          });
+        }
       });
+    return months.sort((a, b) => a.code.localeCompare(b.code));
   };
 
   // Day range limits for calendar in day mode
