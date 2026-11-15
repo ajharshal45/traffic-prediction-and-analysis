@@ -134,30 +134,31 @@ if (swargateKatrajExists) {
     startDate: new Date("2026-05-01"),
     expectedEndDate: new Date("2029-12-31"),
     constructionPoints: [
-      // Swargate (Launching Shaft) – TBM assembly site
-      { lat: 18.5018, lng: 73.8636 },
-      { lat: 18.4985, lng: 73.8630 },
-      // Laxminarayan Theatre area – active shaft excavation
-      { lat: 18.4958, lng: 73.8622 },
-      { lat: 18.4935, lng: 73.8615 },
-      // Market Yard / Gultekdi Station Box
-      { lat: 18.4902, lng: 73.8605 },
-      { lat: 18.4875, lng: 73.8600 },
-      // Bibwewadi / Saibaba Nagar Zone
-      { lat: 18.4845, lng: 73.8612 },
-      { lat: 18.4818, lng: 73.8618 },
-      // Padmavati Station Box
-      { lat: 18.4790, lng: 73.8622 },
-      { lat: 18.4758, lng: 73.8628 },
-      { lat: 18.4730, lng: 73.8630 },
-      // Balajinagar / Dhankawadi Station Box
-      { lat: 18.4700, lng: 73.8635 },
-      { lat: 18.4665, lng: 73.8638 },
-      { lat: 18.4638, lng: 73.8640 },
-      // Katraj Terminal Station
-      { lat: 18.4590, lng: 73.8648 },
-      { lat: 18.4555, lng: 73.8652 },
-      { lat: 18.4521, lng: 73.8655 },
+      // Swargate Underground Metro Hub (Jedhe Chowk)
+      { lat: 18.5015, lng: 73.8585 },
+      { lat: 18.4985, lng: 73.8580 },
+      // Laxminarayan Theatre / Chowk on Satara Road
+      { lat: 18.4955, lng: 73.8575 },
+      { lat: 18.4912, lng: 73.8568 },
+      // Market Yard / Gultekadi Station Box (Satara Road side)
+      { lat: 18.4875, lng: 73.8562 },
+      { lat: 18.4835, lng: 73.8558 },
+      // Padmavati Metro Station (Padmavati Chowk)
+      { lat: 18.4802, lng: 73.8554 },
+      { lat: 18.4765, lng: 73.8552 },
+      // Pushpmangal Chowk / Bibwewadi Corner
+      { lat: 18.4735, lng: 73.8550 },
+      { lat: 18.4695, lng: 73.8547 },
+      // Balaji Nagar Metro Station (KK Market)
+      { lat: 18.4655, lng: 73.8545 },
+      { lat: 18.4610, lng: 73.8543 },
+      // Bharati Vidyapeeth University Campus Gate
+      { lat: 18.4565, lng: 73.8545 },
+      { lat: 18.4525, lng: 73.8558 },
+      // Rajiv Gandhi Zoological Park Junction
+      { lat: 18.4495, lng: 73.8572 },
+      // Katraj Metro Station (Katraj Chowk / Bus Depot)
+      { lat: 18.4480, lng: 73.8582 },
     ],
   });
   console.log("  ✅ Added: Pune Metro Line 1B – Swargate to Katraj");
