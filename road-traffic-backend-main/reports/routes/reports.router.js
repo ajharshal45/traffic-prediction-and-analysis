@@ -125,11 +125,11 @@ router.get('/compare', async (req, res) => {
         RouteSegmentLog.findOne({
           pathId: route,
           date: { $gte: new Date(activeReportA.start), $lte: new Date(activeReportA.end) }
-        }).sort({ collectedAt: -1 }).lean(),
+        }).sort({ date: -1, _id: -1 }).lean(),
         RouteSegmentLog.findOne({
           pathId: route,
           date: { $gte: new Date(activeReportB.start), $lte: new Date(activeReportB.end) }
-        }).sort({ collectedAt: -1 }).lean(),
+        }).sort({ date: -1, _id: -1 }).lean(),
       ]);
 
       if (segDocA && segDocB && Array.isArray(segDocA.segments) && Array.isArray(segDocB.segments)) {

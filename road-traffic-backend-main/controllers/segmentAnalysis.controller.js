@@ -6,7 +6,7 @@ import RouteSegmentLog from '../models/routeSegmentLog.model.js';
  */
 export const getLatestSegments = async (req, res) => {
   try {
-    const doc = await RouteSegmentLog.findOne({ pathId: req.params.pathId }).sort({ collectedAt: -1 });
+    const doc = await RouteSegmentLog.findOne({ pathId: req.params.pathId }).sort({ date: -1, _id: -1 });
     if (!doc) return res.status(404).json({ error: 'No data found' });
     res.json(doc);
   } catch (err) {
@@ -27,7 +27,7 @@ export const getSegmentHistory = async (req, res) => {
     const filter = { pathId: req.params.pathId, date: { $gte: since } };
     if (req.query.timeRange) filter.timeRange = req.query.timeRange;
 
-    const docs = await RouteSegmentLog.find(filter).sort({ date: -1, collectedAt: -1 });
+    const docs = await RouteSegmentLog.find(filter).sort({ date: -1, _id: -1 });
     res.json(docs);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -49,7 +49,7 @@ export const getAllRoutesLatest = async (req, res) => {
     ];
     const results = await Promise.all(
       routes.map(pathId =>
-        RouteSegmentLog.findOne({ pathId }).sort({ collectedAt: -1 })
+        RouteSegmentLog.findOne({ pathId }).sort({ date: -1, _id: -1 })
       )
     );
     res.json(results.filter(Boolean));
@@ -121,7 +121,7 @@ export const getTopBottlenecks = async (req, res) => {
 
     const docs = await RouteSegmentLog.find({
       date: { $gte: since },
-    }).sort({ collectedAt: -1 });
+    }).sort({ date: -1, _id: -1 });
 
     const segmentMap = {};
 

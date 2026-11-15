@@ -82,15 +82,8 @@ const pathInfoSchema = new mongoose.Schema({
     },
     required: false
   },
-  // Exact datetime when this record was collected/updated
-  // Set automatically by the collectors — tells you the precise moment
-  // the score was captured (not just the slot date which is always midnight UTC)
-  collectedAt: {
-    type: Date,
-    default: null,
-  },
-}, {
-  timestamps: true,   // adds createdAt + updatedAt automatically
+  }, {
+  timestamps: false
 });
 
 const PathInfo = mongoose.model('PathInfo', pathInfoSchema);
