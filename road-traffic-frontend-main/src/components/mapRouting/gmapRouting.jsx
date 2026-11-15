@@ -680,26 +680,35 @@ const MapRouting = () => {
       const response = await apiRequest.get("/event/getEventData");
       const data = response.data;
 
-      // Filter events based on location and timing
-      const filteredEvents = data.filter(event => {
-        // If the event is ongoing, check if it falls on the route
-        return event.eventPoints.some(divPoint => {
-          const eventLatLng = new window.google.maps.LatLng(
-            parseFloat(divPoint.lat),
-            parseFloat(divPoint.lng)
-          );
+      // Filter events to only keep points that strictly follow the active route
+      const filteredEvents = data
+        .map(event => {
+          const matchingPoints = (event.eventPoints || []).filter(divPoint => {
+            const eventLatLng = new window.google.maps.LatLng(
+              parseFloat(divPoint.lat),
+              parseFloat(divPoint.lng)
+            );
 
-          return routePoints.some(routePoint => {
-            const routeLatLng = new window.google.maps.LatLng(routePoint.lat, routePoint.lng);
-            return window.google.maps.geometry.spherical.computeDistanceBetween(
-              eventLatLng,
-              routeLatLng
-            ) <= 100; // 100 meters threshold
+            return routePoints.some(routePoint => {
+              const routeLatLng = new window.google.maps.LatLng(routePoint.lat, routePoint.lng);
+              return (
+                window.google.maps.geometry.spherical.computeDistanceBetween(
+                  eventLatLng,
+                  routeLatLng
+                ) <= 120
+              );
+            });
           });
-        });
-      });
 
-
+          if (matchingPoints.length >= 2) {
+            return {
+              ...event,
+              eventPoints: matchingPoints
+            };
+          }
+          return null;
+        })
+        .filter(Boolean);
 
       setEvents(filteredEvents);
     } catch (error) {
@@ -967,23 +976,35 @@ const MapRouting = () => {
       const response = await apiRequest.get("/diversion/getAllDiversions");
       const data = response.data;
 
-      // Filter diversions that intersect with the route
-      const filteredDiversions = data.filter(diversion => {
-        return diversion.diversionPoints.some(divPoint => {
-          const diversionLatLng = new window.google.maps.LatLng(
-            parseFloat(divPoint.lat),
-            parseFloat(divPoint.lng)
-          );
+      // Filter diversions: keep only points along the active route
+      const filteredDiversions = data
+        .map(diversion => {
+          const matchingPoints = (diversion.diversionPoints || []).filter(divPoint => {
+            const diversionLatLng = new window.google.maps.LatLng(
+              parseFloat(divPoint.lat),
+              parseFloat(divPoint.lng)
+            );
 
-          return routePoints.some(routePoint => {
-            const routeLatLng = new window.google.maps.LatLng(routePoint.lat, routePoint.lng);
-            return window.google.maps.geometry.spherical.computeDistanceBetween(
-              diversionLatLng,
-              routeLatLng
-            ) <= 100; // 100 meters threshold
+            return routePoints.some(routePoint => {
+              const routeLatLng = new window.google.maps.LatLng(routePoint.lat, routePoint.lng);
+              return (
+                window.google.maps.geometry.spherical.computeDistanceBetween(
+                  diversionLatLng,
+                  routeLatLng
+                ) <= 120
+              );
+            });
           });
-        });
-      });
+
+          if (matchingPoints.length >= 2) {
+            return {
+              ...diversion,
+              diversionPoints: matchingPoints
+            };
+          }
+          return null;
+        })
+        .filter(Boolean);
 
       setDiversions(filteredDiversions);
     } catch (error) {
@@ -997,28 +1018,41 @@ const MapRouting = () => {
       const response = await apiRequest.get("/construction/getAllConstructionProjects");
       const data = response.data;
 
+      // Filter constructions: only keep the contiguous segment that actually lies on the active route.
+      // If the route turns off (e.g. into Bibwewadi halfway), remaining construction points further south are omitted!
+      const filteredConstructions = data
+        .map(construction => {
+          const matchingPoints = (construction.constructionPoints || []).filter(divPoint => {
+            const constructionLatLng = new window.google.maps.LatLng(
+              parseFloat(divPoint.lat),
+              parseFloat(divPoint.lng)
+            );
 
-      // Filter diversions that intersect with the route
-      const filteredConstructions = data.filter(construction => {
-        return construction.constructionPoints.some(divPoint => {
-          const constructionLatLng = new window.google.maps.LatLng(
-            parseFloat(divPoint.lat),
-            parseFloat(divPoint.lng)
-          );
-
-          return routePoints.some(routePoint => {
-            const routeLatLng = new window.google.maps.LatLng(routePoint.lat, routePoint.lng);
-            return window.google.maps.geometry.spherical.computeDistanceBetween(
-              constructionLatLng,
-              routeLatLng
-            ) <= 100; // 100 meters threshold
+            return routePoints.some(routePoint => {
+              const routeLatLng = new window.google.maps.LatLng(routePoint.lat, routePoint.lng);
+              return (
+                window.google.maps.geometry.spherical.computeDistanceBetween(
+                  constructionLatLng,
+                  routeLatLng
+                ) <= 120
+              );
+            });
           });
-        });
-      });
+
+          // Must have at least 2 points to form a visible polyline along this route
+          if (matchingPoints.length >= 2) {
+            return {
+              ...construction,
+              constructionPoints: matchingPoints
+            };
+          }
+          return null;
+        })
+        .filter(Boolean);
 
       setConstructions(filteredConstructions);
     } catch (error) {
-      console.error("Error fetching diversions:", error);
+      console.error("Error fetching constructions:", error);
     }
   };
 
@@ -2675,6 +2709,7 @@ const MapRouting = () => {
         geodesic: true,
         strokeOpacity: 0, // Set to 0 to use the custom pattern
         strokeColor: '#FF0000',
+        zIndex: 50,
         map: googleMapRef.current,
         icons: [
           {
