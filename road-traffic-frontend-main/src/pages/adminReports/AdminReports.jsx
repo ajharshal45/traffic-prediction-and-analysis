@@ -230,28 +230,6 @@ export default function AdminReports() {
     };
   }, [availableReports, periodType]);
 
-  // Data quality classification for ONE single badge
-  const dataBadgeInfo = useMemo(() => {
-    if (!comparisonData?.reportA || !comparisonData?.reportB) return null;
-    const a = comparisonData.reportA;
-    const b = comparisonData.reportB;
-
-    const covA = a.coveragePct ?? 100;
-    const covB = b.coveragePct ?? 100;
-
-    const label = 'Verified data';
-    const type = 'verified';
-
-    const tooltip = (
-      <>
-        <div><strong>Period A ({formatPeriodLabel(a.periodKey, a.periodType)}):</strong> Verified traffic sensor & route records ({covA}% coverage)</div>
-        <div><strong>Period B ({formatPeriodLabel(b.periodKey, b.periodType)}):</strong> Verified traffic sensor & route records ({covB}% coverage)</div>
-      </>
-    );
-
-    return { label, type, tooltip, isDemo: false };
-  }, [comparisonData]);
-
   // Day mode weekday check
   const dayModeWeekdayInfo = useMemo(() => {
     if (activeQuery?.type !== 'day' || !comparisonData?.reportA || !comparisonData?.reportB) return null;
@@ -841,26 +819,8 @@ export default function AdminReports() {
     };
   }, [comparisonData]);
 
-  // Print Action
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
     <div className="reports-container">
-      {/* Print-Only Header */}
-      <div className="print-header" style={{ display: 'none' }}>
-        <div className="print-meta-grid">
-          <div>
-            <h1>Traffic Comparison</h1>
-            <div>Route: <strong>{selectedRoute}</strong></div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <div>Comparing: <strong>{activeQuery ? `${formatPeriodLabel(activeQuery.a, activeQuery.type)} vs ${formatPeriodLabel(activeQuery.b, activeQuery.type)}` : ''}</strong></div>
-            <div>Generated: {new Date().toLocaleDateString()}</div>
-          </div>
-        </div>
-      </div>
 
       {/* Screen Header */}
       <div className="reports-header no-print">
@@ -1141,28 +1101,6 @@ export default function AdminReports() {
               </div>
             </div>
 
-            <div className="result-actions">
-              {/* Single Data Badge with Tooltip */}
-              {dataBadgeInfo && (
-                <div className="data-badge-wrapper">
-                  <span className={`data-badge ${dataBadgeInfo.type}`}>
-                    ● {dataBadgeInfo.label}
-                  </span>
-                  <div className="badge-tooltip">
-                    {dataBadgeInfo.tooltip}
-                  </div>
-                </div>
-              )}
-
-              {/* Download One-Page Summary Button */}
-              <button
-                type="button"
-                className="download-btn no-print"
-                onClick={handlePrint}
-              >
-                📄 Download one-page summary
-              </button>
-            </div>
           </div>
 
           <p className="plain-explanation">
@@ -1431,17 +1369,6 @@ export default function AdminReports() {
         </>
       )}
 
-      {/* Print-Only Footer */}
-      <div className="print-footer" style={{ display: 'none' }}>
-        <div className="print-footer-row">
-          <span>Data Classification: <strong>{dataBadgeInfo?.label || 'Historical'}</strong></span>
-          <span>Formula Engine: <strong>v1.0</strong></span>
-          <span>Generated: <strong>{new Date().toISOString().slice(0, 10)}</strong></span>
-        </div>
-        <div className="print-disclaimer">
-          Decision-support analysis. Review by a qualified traffic engineer before acting.
-        </div>
-      </div>
 
       {/* Empty / Initial State */}
       {!comparisonData && !loading && (
