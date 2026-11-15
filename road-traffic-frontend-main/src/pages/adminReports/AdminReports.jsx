@@ -708,19 +708,9 @@ export default function AdminReports() {
         valB: b?.context?.diversions ?? 0
       },
       {
-        label: 'Public events',
-        valA: a?.context?.eventCount ?? 0,
-        valB: b?.context?.eventCount ?? 0
-      },
-      {
         label: 'Festivals / Holidays',
         valA: a?.context?.festivals?.length ? a.context.festivals.join(', ') : 'None',
         valB: b?.context?.festivals?.length ? b.context.festivals.join(', ') : 'None'
-      },
-      {
-        label: 'Rainy days',
-        valA: a?.context?.rainyDays ?? 0,
-        valB: b?.context?.rainyDays ?? 0
       }
     ];
 

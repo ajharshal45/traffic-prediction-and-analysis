@@ -250,8 +250,8 @@ export function mergeReports(reports, targetPeriodType, targetPeriodKey, options
   const sourceCountAccum = { simulated: 0, computed: 0, reconstructed: 0 };
 
   const festivalsSet = new Set();
-  let totalConstruction = 0;
-  let totalDiversions = 0;
+  let maxConstruction = 0;
+  let maxDiversions = 0;
   let totalEvents = 0;
   let totalRainyDays = 0;
 
@@ -277,10 +277,14 @@ export function mergeReports(reports, targetPeriodType, targetPeriodKey, options
     sourceCountAccum.computed += (r.sourceMix.computed / 100) * r.recordCount;
     sourceCountAccum.reconstructed += (r.sourceMix.reconstructed / 100) * r.recordCount;
 
-    // Context facts
+    // Context facts (concurrent active sites / diversions across period)
     if (r.context) {
-      totalConstruction += (r.context.constructionActive || 0);
-      totalDiversions += (r.context.diversions || 0);
+      if ((r.context.constructionActive || 0) > maxConstruction) {
+        maxConstruction = r.context.constructionActive || 0;
+      }
+      if ((r.context.diversions || 0) > maxDiversions) {
+        maxDiversions = r.context.diversions || 0;
+      }
       totalEvents += (r.context.eventCount || 0);
       totalRainyDays += (r.context.rainyDays || 0);
       if (Array.isArray(r.context.festivals)) {
@@ -399,8 +403,8 @@ export function mergeReports(reports, targetPeriodType, targetPeriodKey, options
     grid,
     dailyAvgs,
     context: {
-      constructionActive: totalConstruction,
-      diversions: totalDiversions,
+      constructionActive: maxConstruction,
+      diversions: maxDiversions,
       festivals: Array.from(festivalsSet),
       eventCount: totalEvents,
       rainyDays: totalRainyDays
