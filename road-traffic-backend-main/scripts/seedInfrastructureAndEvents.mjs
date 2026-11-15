@@ -134,31 +134,29 @@ if (swargateKatrajExists) {
     startDate: new Date("2026-05-01"),
     expectedEndDate: new Date("2029-12-31"),
     constructionPoints: [
-      // Swargate Underground Metro Hub (Jedhe Chowk)
-      { lat: 18.5015, lng: 73.8585 },
-      { lat: 18.4985, lng: 73.8580 },
-      // Laxminarayan Theatre / Chowk on Satara Road
-      { lat: 18.4955, lng: 73.8575 },
-      { lat: 18.4912, lng: 73.8568 },
-      // Market Yard / Gultekadi Station Box (Satara Road side)
-      { lat: 18.4875, lng: 73.8562 },
-      { lat: 18.4835, lng: 73.8558 },
-      // Padmavati Metro Station (Padmavati Chowk)
-      { lat: 18.4802, lng: 73.8554 },
-      { lat: 18.4765, lng: 73.8552 },
-      // Pushpmangal Chowk / Bibwewadi Corner
-      { lat: 18.4735, lng: 73.8550 },
-      { lat: 18.4695, lng: 73.8547 },
-      // Balaji Nagar Metro Station (KK Market)
-      { lat: 18.4655, lng: 73.8545 },
-      { lat: 18.4610, lng: 73.8543 },
-      // Bharati Vidyapeeth University Campus Gate
-      { lat: 18.4565, lng: 73.8545 },
-      { lat: 18.4525, lng: 73.8558 },
-      // Rajiv Gandhi Zoological Park Junction
-      { lat: 18.4495, lng: 73.8572 },
-      // Katraj Metro Station (Katraj Chowk / Bus Depot)
-      { lat: 18.4480, lng: 73.8582 },
+      { lat: 18.50047, lng: 73.85857 }, // Swargate Metro Hub (Jedhe Chowk)
+      { lat: 18.49861, lng: 73.85835 },
+      { lat: 18.49664, lng: 73.85809 }, // Laxminarayan Chowk
+      { lat: 18.49457, lng: 73.85802 }, // Vega Center
+      { lat: 18.49244, lng: 73.85786 }, // City Pride Satara Road
+      { lat: 18.49041, lng: 73.85770 }, // Market Yard Chowk Flyover
+      { lat: 18.48710, lng: 73.85764 }, // Walvekar Nagar
+      { lat: 18.48420, lng: 73.85767 }, // Parvati Paytha
+      { lat: 18.48241, lng: 73.85736 }, // Padmavati Chowk North
+      { lat: 18.47955, lng: 73.85733 }, // Padmavati Metro Station
+      { lat: 18.47728, lng: 73.85722 },
+      { lat: 18.47613, lng: 73.85646 },
+      { lat: 18.47345, lng: 73.85649 }, // Pushpmangal Chowk / Bibwewadi Rd
+      { lat: 18.47066, lng: 73.85719 }, // Sambhaji Maharaj Chowk
+      { lat: 18.46698, lng: 73.85796 }, // Balaji Nagar / KK Market
+      { lat: 18.46270, lng: 73.85828 }, // Dhankawadi Ahilyabai Holkar Chowk
+      { lat: 18.46033, lng: 73.85812 },
+      { lat: 18.45793, lng: 73.85831 }, // Bharati Vidyapeeth Main Gate
+      { lat: 18.45540, lng: 73.85878 }, // Wonder City Road
+      { lat: 18.45297, lng: 73.85846 }, // Katraj Dairy
+      { lat: 18.44984, lng: 73.85834 }, // Zoological Park Junction
+      { lat: 18.44812, lng: 73.85861 }, // Katraj Chowk
+      { lat: 18.44811, lng: 73.85848 }, // Katraj Terminal
     ],
   });
   console.log("  ✅ Added: Pune Metro Line 1B – Swargate to Katraj");
@@ -257,12 +255,12 @@ const diversionsToAdd = [
     endDate: new Date("2029-06-30"),
     diversionPoints: [
       // Swargate launching shaft area → traffic diverted via side lanes
-      { lat: 18.5018, lng: 73.8636 },
-      { lat: 18.4985, lng: 73.8625 },
-      { lat: 18.4958, lng: 73.8615 },
-      { lat: 18.4935, lng: 73.8608 },
-      // Market Yard Station Box zone
-      { lat: 18.4902, lng: 73.8600 },
+      { lat: 18.50047, lng: 73.85857 },
+      { lat: 18.49861, lng: 73.85835 },
+      { lat: 18.49664, lng: 73.85809 },
+      { lat: 18.49457, lng: 73.85802 },
+      { lat: 18.49244, lng: 73.85786 },
+      { lat: 18.49041, lng: 73.85770 },
     ],
   },
   {
@@ -272,12 +270,13 @@ const diversionsToAdd = [
     startDate: new Date("2026-08-01"),
     endDate: new Date("2029-12-31"),
     diversionPoints: [
-      { lat: 18.4875, lng: 73.8600 },
-      { lat: 18.4845, lng: 73.8610 },
-      { lat: 18.4790, lng: 73.8620 },
-      { lat: 18.4700, lng: 73.8635 },
-      // Katraj end
-      { lat: 18.4521, lng: 73.8655 },
+      { lat: 18.48710, lng: 73.85764 },
+      { lat: 18.48420, lng: 73.85767 },
+      { lat: 18.47955, lng: 73.85733 },
+      { lat: 18.47345, lng: 73.85649 },
+      { lat: 18.46698, lng: 73.85796 },
+      { lat: 18.45793, lng: 73.85831 },
+      { lat: 18.44811, lng: 73.85848 },
     ],
   },
   {
