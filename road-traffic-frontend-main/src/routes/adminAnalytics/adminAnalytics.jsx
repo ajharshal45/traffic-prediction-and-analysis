@@ -73,6 +73,11 @@ const AdminAnalytics = () => {
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [insightsDays, setInsightsDays] = useState(30);
   const [selectedFactorRoute, setSelectedFactorRoute] = useState(null);
+  
+  // Segment Bottleneck State
+  const [segmentStats, setSegmentStats] = useState([]);
+  const [topBottlenecks, setTopBottlenecks] = useState([]);
+  const [loadingSegments, setLoadingSegments] = useState(false);
 
   // Fetch available routes on mount
   useEffect(() => {
@@ -128,6 +133,27 @@ const AdminAnalytics = () => {
     }
     setLoadingInsights(false);
   };
+
+  const fetchSegmentData = async () => {
+    setLoadingSegments(true);
+    try {
+      const [statsRes, topRes] = await Promise.all([
+        apiRequest.get(`/segments/stats/${selectedRoute}`),
+        apiRequest.get('/segments/top-bottlenecks?days=14')
+      ]);
+      setSegmentStats(statsRes.data || []);
+      setTopBottlenecks(topRes.data?.topBottlenecks || []);
+    } catch (err) {
+      console.error('Error fetching segment analytics:', err);
+    }
+    setLoadingSegments(false);
+  };
+
+  useEffect(() => {
+    if (activeTab === 'segments' && selectedRoute) {
+      fetchSegmentData();
+    }
+  }, [activeTab, selectedRoute]);
 
   const fetchTrendData = async () => {
     setLoading(true);

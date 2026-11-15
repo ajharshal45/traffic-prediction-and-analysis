@@ -107,3 +107,76 @@ export const getSegmentStats = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+/**
+ * GET /api/segments/top-bottlenecks
+ * Returns citywide top congested sub-segments across all monitored corridors
+ */
+export const getTopBottlenecks = async (req, res) => {
+  try {
+    const days = parseInt(req.query.days) || 14;
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const docs = await RouteSegmentLog.find({
+      date: { $gte: since },
+    }).sort({ collectedAt: -1 });
+
+    const segmentMap = {};
+
+    for (const doc of docs) {
+      for (const seg of doc.segments) {
+        const key = `${doc.pathId}:::${seg.fromLabel}:::${seg.toLabel}`;
+        if (!segmentMap[key]) {
+          segmentMap[key] = {
+            pathId: doc.pathId,
+            fromLabel: seg.fromLabel,
+            toLabel: seg.toLabel,
+            cause: seg.cause || 'High density urban traffic flow',
+            causeCategory: seg.causeCategory || 'regular',
+            scores: [],
+            delays: [],
+          };
+        }
+        segmentMap[key].scores.push(seg.congestionScore);
+        if (typeof seg.delaySeconds === 'number') {
+          segmentMap[key].delays.push(seg.delaySeconds);
+        }
+      }
+    }
+
+    const ranked = Object.values(segmentMap)
+      .map(item => {
+        const avgScore = item.scores.reduce((a, b) => a + b, 0) / item.scores.length;
+        const avgDelay = item.delays.length > 0
+          ? item.delays.reduce((a, b) => a + b, 0) / item.delays.length
+          : 0;
+        return {
+          pathId: item.pathId,
+          fromLabel: item.fromLabel,
+          toLabel: item.toLabel,
+          cause: item.cause,
+          causeCategory: item.causeCategory,
+          avgCongestionScore: Math.round(avgScore * 10) / 10,
+          avgDelaySeconds: Math.round(avgDelay),
+          sampleCount: item.scores.length,
+          level:
+            avgScore <= 10 ? 'low'
+            : avgScore <= 25 ? 'medium'
+            : avgScore <= 50 ? 'high'
+            : 'very high'
+        };
+      })
+      .sort((a, b) => b.avgCongestionScore - a.avgCongestionScore)
+      .slice(0, 10);
+
+    res.json({
+      days,
+      totalAnalyzed: Object.keys(segmentMap).length,
+      topBottlenecks: ranked
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

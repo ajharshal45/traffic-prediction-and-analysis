@@ -1366,6 +1366,55 @@ export default function AdminReports() {
               )}
             </div>
           )}
+            {/* Sub-Segment Bottleneck Shifts Panel */}
+            {comparisonData?.comparison?.segmentShifts && comparisonData.comparison.segmentShifts.length > 0 && (
+              <div className="segment-shifts-card">
+                <h3 className="segment-shifts-heading">Sub-Segment Bottleneck Localization</h3>
+                <p className="segment-shifts-sub">
+                  Point-to-point segment delay shifts along {selectedRoute} between Period A and Period B.
+                </p>
+                <div className="table-responsive">
+                  <table className="segment-shifts-table">
+                    <thead>
+                      <tr>
+                        <th>Checkpoint Link</th>
+                        <th>Period A Delay</th>
+                        <th>Period B Delay</th>
+                        <th>Net Shift</th>
+                        <th>Primary Cause</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {comparisonData.comparison.segmentShifts.map((seg, idx) => (
+                        <tr key={idx}>
+                          <td>
+                            <strong>{seg.fromLabel} ➔ {seg.toLabel}</strong>
+                            <span className="segment-cause-pill">{seg.cause}</span>
+                          </td>
+                          <td>{seg.delayA}s</td>
+                          <td>{seg.delayB}s</td>
+                          <td>
+                            <span className={`shift-delta-tag ${
+                              seg.delayDelta > 15 ? "shift-worse" : seg.delayDelta < -15 ? "shift-better" : "shift-stable"
+                            }`}>
+                              {seg.delayDelta > 0 ? `+${seg.delayDelta}s` : `${seg.delayDelta}s`}
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`traffic-badge ${
+                              seg.causeCategory === "construction" ? "very-high" :
+                              seg.causeCategory === "bottleneck" ? "high" : "medium"
+                            }`}>
+                              {seg.causeCategory}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
         </>
       )}
 

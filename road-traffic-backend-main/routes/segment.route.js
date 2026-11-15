@@ -4,6 +4,7 @@ import {
   getSegmentHistory,
   getAllRoutesLatest,
   getSegmentStats,
+  getTopBottlenecks,
 } from '../controllers/segmentAnalysis.controller.js';
 
 const router = express.Router();
@@ -11,6 +12,9 @@ const router = express.Router();
 // GET /api/segments/all-latest — Latest snapshot for all pilot routes
 // MUST be before /:pathId routes to avoid param conflict
 router.get('/all-latest', getAllRoutesLatest);
+
+// GET /api/segments/top-bottlenecks — Citywide top congested segments
+router.get('/top-bottlenecks', getTopBottlenecks);
 
 // GET /api/segments/latest/:pathId — Most recent segment data for a route
 router.get('/latest/:pathId', getLatestSegments);

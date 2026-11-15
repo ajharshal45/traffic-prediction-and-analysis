@@ -1325,3 +1325,163 @@
   .ds-trend-grid { grid-template-columns: 1fr; }
   .ds-period-selector { flex-direction: column; align-items: flex-start; }
 }
+
+
+/* -------------------------------------------------------------
+   SEGMENT BOTTLENECK TAB STYLES
+   ------------------------------------------------------------- */
+.segment-analytics-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.segment-ladder-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.segment-ladder-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.segment-ladder-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+}
+
+.segment-path-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.segment-index-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+}
+
+.segment-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.segment-labels .arrow {
+  color: #94a3b8;
+  font-weight: 600;
+  margin: 0 6px;
+}
+
+.segment-cause-text {
+  font-size: 0.82rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.segment-metrics-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.segment-score-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.segment-score-num {
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-family: "Lato", sans-serif;
+}
+
+.segment-score-unit {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.segment-delay-pill {
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.top-bottlenecks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.bottleneck-summary-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.bottleneck-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.bottleneck-route-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.bottleneck-name {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+}
+
+.bottleneck-cause {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.bottleneck-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 10px;
+}
