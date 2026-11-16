@@ -11,6 +11,16 @@ import reportsRouter from './routes/reports.router.js';
 
 dotenv.config();
 
+import dns from 'dns';
+dns.setServers(['8.8.8.8', '1.1.1.1']);
+import mongoose from 'mongoose';
+
+if (process.env.MONGODB_URI) {
+  mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('[Reports Server] Connected to MongoDB Atlas for sub-segment shifts'))
+    .catch(err => console.warn('[Reports Server] MongoDB connection deferred:', err.message));
+}
+
 const app = express();
 const PORT = process.env.REPORTS_PORT || 8090;
 
