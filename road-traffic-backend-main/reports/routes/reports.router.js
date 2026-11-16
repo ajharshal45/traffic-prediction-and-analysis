@@ -119,38 +119,41 @@ router.get('/compare', async (req, res) => {
 
     // Attach sub-segment bottlenecks if comparing days or recent periods
     try {
-      const RouteSegmentLog = (await import('../../models/routeSegmentLog.model.js')).default;
-      // Use date-range so month/year modes find a log within the period (not just on start day)
-      const [segDocA, segDocB] = await Promise.all([
-        RouteSegmentLog.findOne({
-          pathId: route,
-          date: { $gte: new Date(activeReportA.start), $lte: new Date(activeReportA.end) }
-        }).sort({ date: -1, _id: -1 }).lean(),
-        RouteSegmentLog.findOne({
-          pathId: route,
-          date: { $gte: new Date(activeReportB.start), $lte: new Date(activeReportB.end) }
-        }).sort({ date: -1, _id: -1 }).lean(),
-      ]);
+      const mongoose = (await import('mongoose')).default;
+      if (mongoose?.connection?.readyState === 1) {
+        const RouteSegmentLog = (await import('../../models/routeSegmentLog.model.js')).default;
+        // Use date-range so month/year modes find a log within the period (not just on start day)
+        const [segDocA, segDocB] = await Promise.all([
+          RouteSegmentLog.findOne({
+            pathId: route,
+            date: { $gte: new Date(activeReportA.start), $lte: new Date(activeReportA.end) }
+          }).sort({ date: -1, _id: -1 }).lean(),
+          RouteSegmentLog.findOne({
+            pathId: route,
+            date: { $gte: new Date(activeReportB.start), $lte: new Date(activeReportB.end) }
+          }).sort({ date: -1, _id: -1 }).lean(),
+        ]);
 
-      if (segDocA && segDocB && Array.isArray(segDocA.segments) && Array.isArray(segDocB.segments)) {
-        comparison.segmentShifts = segDocA.segments.map((segA, idx) => {
-          const segB = segDocB.segments[idx] || {};
-          const scoreDelta = Math.round(((segB.congestionScore || 0) - (segA.congestionScore || 0)) * 10) / 10;
-          const delayDelta = (segB.delaySeconds || 0) - (segA.delaySeconds || 0);
-          return {
-            segmentIndex: idx,
-            fromLabel: segA.fromLabel,
-            toLabel: segA.toLabel,
-            scoreA: segA.congestionScore || 0,
-            scoreB: segB.congestionScore || 0,
-            scoreDelta,
-            delayA: segA.delaySeconds || 0,
-            delayB: segB.delaySeconds || 0,
-            delayDelta,
-            cause: segB.cause || segA.cause || 'Urban traffic flow',
-            causeCategory: segB.causeCategory || segA.causeCategory || 'regular',
-          };
-        });
+        if (segDocA && segDocB && Array.isArray(segDocA.segments) && Array.isArray(segDocB.segments)) {
+          comparison.segmentShifts = segDocA.segments.map((segA, idx) => {
+            const segB = segDocB.segments[idx] || {};
+            const scoreDelta = Math.round(((segB.congestionScore || 0) - (segA.congestionScore || 0)) * 10) / 10;
+            const delayDelta = (segB.delaySeconds || 0) - (segA.delaySeconds || 0);
+            return {
+              segmentIndex: idx,
+              fromLabel: segA.fromLabel,
+              toLabel: segA.toLabel,
+              scoreA: segA.congestionScore || 0,
+              scoreB: segB.congestionScore || 0,
+              scoreDelta,
+              delayA: segA.delaySeconds || 0,
+              delayB: segB.delaySeconds || 0,
+              delayDelta,
+              cause: segB.cause || segA.cause || 'Urban traffic flow',
+              causeCategory: segB.causeCategory || segA.causeCategory || 'regular',
+            };
+          });
+        }
       }
     } catch {
       comparison.segmentShifts = null;
